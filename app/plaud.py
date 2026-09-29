@@ -9,6 +9,8 @@ class PlaudError(Exception):
 def parse_transcript(raw: str) -> str:
     parts = []
     for line in raw.splitlines():
+        if re.match(r"^\s*(- |Transcript:|Summary:)", line):
+            continue
         line = re.sub(r"^\s*\[\d{1,2}:\d{2}(:\d{2})?\s*-\s*\d{1,2}:\d{2}(:\d{2})?\]\s*", "", line)
         line = re.sub(r"^[^:]{1,30}:\s+", "", line)
         if line.strip():
@@ -17,7 +19,7 @@ def parse_transcript(raw: str) -> str:
 
 
 def parse_ids(raw: str) -> list[str]:
-    return re.findall(r"\b[0-9a-f]{24,40}\b", raw)
+    return re.findall(r"\b(?:of_)?[0-9a-f]{24,40}\b", raw)
 
 
 def _run(args: list[str]) -> str:
@@ -35,17 +37,23 @@ def _run(args: list[str]) -> str:
 
 
 def parse_recordings(raw: str) -> list[dict]:
-    """Best-effort parse of `plaud recent` table output into {id, title, created_at}."""
+    """Parse `plaud recent` rows: `<id>  [title]  <YYYY-MM-DD HH:MM:SS>  <YYYY-MM-DD>  <duration>`."""
     out = []
     for line in raw.splitlines():
         ids = parse_ids(line)
         if not ids:
             continue
-        rest = line.replace(ids[0], " ").strip(" |\t")
-        when = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{1,2}:\d{2}(:\d{2})?|\d{1,2}:\d{2}(:\d{2})?", rest)
-        created = when.group(0) if when else None
-        title = re.sub(r"\s{2,}", "  ", (rest.replace(created, " ") if created else rest)).strip(" |\t") or None
-        out.append({"id": ids[0], "title": title, "created_at": created})
+        rest = line.replace(ids[0], " ")
+        when = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{1,2}:\d{2}(:\d{2})?", rest)
+        dur = re.search(r"\b(\d+h)?\s*(\d+m)?\s*(\d+s)?\s*$", rest.strip())
+        duration = dur.group(0).strip() if dur and dur.group(0).strip() else None
+        title = rest
+        for piece in (when.group(0) if when else None, duration):
+            if piece:
+                title = title.replace(piece, " ")
+        title = re.sub(r"\d{4}-\d{2}-\d{2}", " ", title)
+        title = re.sub(r"\s{2,}", " ", title).strip(" |\t") or None
+        out.append({"id": ids[0], "title": title, "created_at": when.group(0) if when else None, "duration": duration})
     return out
 
 
