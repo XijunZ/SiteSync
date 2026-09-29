@@ -61,6 +61,8 @@ def parse_speakers(raw: str) -> list[str]:
     seen = []
     for m in re.finditer(r"^\s*(?:\[[^\]]*\]\s*)?([^:\[\]]{1,30}):\s+\S", raw, re.M):
         name = m.group(1).strip()
+        if name in ("Transcript", "Summary"):
+            continue
         if name and name not in seen:
             seen.append(name)
     return seen
