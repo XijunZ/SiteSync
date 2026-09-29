@@ -2,13 +2,50 @@
 
 | | |
 |---|---|
-| Status | Working draft v2. Critical-path context for the pitch and for scoping. |
+| Status | **v5 is current (section "CURRENT MODEL" below).** Sections B, A, 0 onward are the reasoning history that led to it. |
 | Date | 2026-09-29 |
 | Feeds | `01-product-requirements.md` (personas, MVP), the demo narrative |
 | Scope | **Global**: any city with enough concurrent private projects (London, Paris, New York, Dubai, Hong Kong, ...). Nothing here is jurisdiction-specific. |
 | Note | Competitor and market sizing are being researched separately; add findings in §11. |
 
-## B. Audience and who pays (v4, current; supersedes A.3 revenue layers)
+## CURRENT MODEL (v5, agreed in brainstorm 2026-09-29)
+
+**One line:** SiteSync buys GCs time on trade gaps. It warns early, and each extra week of warning unlocks more ways to fill the gap. We list the feasible options per GC with deadlines, run the one the PM approves, and guarantee the crew turns up.
+
+**Founder choice:** design the real business first, then shape the pitch from it. Operating model: a service run with software, plus transactions, growing toward whichever wins (possibly employing workers ourselves). Not pure SaaS. Go-to-market by cold outreach; the founder can reach developers, GCs and subs, lenders and consultants, agencies and plant hire.
+
+**Customer:** the **GC**. The PM is the daily user; the GC signs. Developers and lenders come later as a reporting layer.
+
+**Positioning:** amplify PMs, don't replace them. SiteSync is the PM's capacity desk. It sees what a PM can't (across sites and companies, weeks ahead) and does the chasing they don't have time for. The PM approves; we execute. Analogy: a **freight broker for construction trade capacity** (see both sides of the market, match, guarantee delivery, earn per fill), not an ERP.
+
+**Product loop:**
+1. **Early warning** from GC plans (programme, lookahead and labour plan, site manager notes) plus external signals (weather, long-lead items, utilities, inspections). The graph turns one slip into downstream gaps weeks ahead.
+2. **Next-best-action engine**: options depend on **lead time**:
+
+| Warning | Feasible options |
+|---|---|
+| 4+ weeks | Everything, including a **new sub for this GC** (start prequalification now), so cross-company crew moves are viable |
+| 1–3 weeks | Sub-tier under an approved sub; pre-agreed framework loans; temporary permits (UAE); slot swaps |
+| Under 1 week | Agency labour via the GC's approved list; slot swaps |
+| Under 48h | Agency only (where PMs are stuck today) |
+
+   Options are listed **per GC** (its approved subs and agencies, its consent rules, its city's regulations), each with a **start-by deadline** ("start prequalifying Sparks with Riverside by day 205 or this option expires"). Blocked routes are never proposed (licensed-trade payroll rules, unions, for-profit lending, imported labour).
+3. **Execute** the approved option via approved channels: slot swap, sub-tier, partner agency, eventually our own workers. Prequalification is paid **once per GC**, then fills are fast.
+4. **Guarantee and prove**: turn-up guarantee on critical trades; monthly "days protected × the GC's own day value" report.
+
+**Moat:** each early warning that leads to a prequalification leaves a permanent approved relationship. The network of approved routes compounds, and competitors must redo the paperwork.
+
+**Data from GCs (they are the customer, so they supply it):** programme export (once), weekly labour plan (photo), a 30-second site manager voice summary (Plaud), GC-approved before use. Replaces their site diary and reporting work.
+
+**Pricing (to be finalised later; viable options exist):**
+- Day value anchor = the GC's own **daily preliminaries + liquidated-damages exposure**
+- Candidate structure: base fee per project per month (as a preliminaries line, so it passes through in tenders; anchored to "less than one day of your prelims per month") + fill margin on labour and equipment routed through us or partners + optional turn-up guarantee premium with service credits
+- Success fee used as **proof** (days protected report), not as the main billing
+- Avoid: per-alert pricing (rewards noise); per-placement agency referral fees (bias the ranking)
+
+**Honest limits:** cross-company crew moves only work with enough lead time or an existing relationship; peer-to-peer marketplaces failed historically, so we coordinate and fulfil through approved channels; GCs won't share raw recordings (30-second summaries, GC-approved).
+
+## B. Audience and who pays (v4; superseded by the CURRENT MODEL above)
 
 **Problem with v1 to v3:** selling prediction and planning to GCs and subs is a nice-to-have. They already hedge: subs overbook across GCs, and GCs pad their programmes. They won't pay to replace a hedge that works for them.
 
