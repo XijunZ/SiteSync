@@ -42,3 +42,15 @@ def test_cypher_swap_search_matches_memory(mirror):
     memory = swap_candidates_memory(w, gap)
     assert [(s, c) for s, c, _ in cypher] == [(s, c) for s, c, _ in memory]
     assert cypher[0][0] == "C-K3" and round(cypher[0][2], 1) == 1.7
+
+
+def test_cypher_ripple_matches_memory(mirror):
+    from app.graph_explain import _ripple_memory
+    w = build_world()
+    w.steps["A-J1"].delay_days = 5
+    mirror.sync(w)
+    r = mirror.ripple("A-J1", "A-L7")
+    codes = [n["code"] for n in r["path"]]
+    assert codes[0] == "J1" and codes[-1] == "L7" and "J6" in codes and "K3" in codes
+    assert codes == [n["code"] for n in _ripple_memory(w, "A-J1", "A-L7")["path"]]
+    assert r["affected_count"] == 18

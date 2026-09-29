@@ -11,6 +11,29 @@ from neo4j import GraphDatabase
 from app import config
 from app.domain import World
 
+
+SWAP_CYPHER = """MATCH (home:Site {id:$home}), (sub:Org {id:$sub})-[:EMPLOYS]->(c:Crew)-[:HAS_BOOKING]->(b:Booking)
+                     -[:FOR_STEP]->(st:Step {trade:$trade})<-[:HAS_STEP]-(t:Site)<-[:RUNS]-(gc:Org)
+               WHERE t.id <> home.id AND EXISTS { (sub)-[:APPROVED_AT]->(gc) }
+               WITH t, st, c, gc, b, point.distance(home.loc, t.loc) / 1000.0 AS km
+               WHERE km <= $max_km
+               RETURN t.id AS site_id, st.id AS step_id, c.id AS crew_id, gc.id AS gc_id, km,
+                      b.start AS start, b.end AS end
+               ORDER BY km, step_id"""
+
+# Driving chain: each hop is a dependency that actually sets the next step's start (confirmed dates on the nodes).
+RIPPLE_CYPHER = """MATCH p = (done:Step {id:$end})-[:DEPENDS_ON*]->(s:Step {id:$start})
+WHERE all(r IN relationships(p) WHERE startNode(r).conf_start = endNode(r).conf_end)
+RETURN [n IN reverse(nodes(p)) | n {.code, .name, .conf_start, .conf_end}] AS path, length(p) AS hops
+ORDER BY hops DESC LIMIT 1"""
+
+RIPPLE_FALLBACK_CYPHER = """MATCH p = (done:Step {id:$end})-[:DEPENDS_ON*]->(s:Step {id:$start})
+RETURN [n IN reverse(nodes(p)) | n {.code, .name, .conf_start, .conf_end}] AS path, length(p) AS hops
+ORDER BY hops DESC LIMIT 1"""
+
+AFFECTED_CYPHER = """MATCH (s:Step {id:$start})<-[:DEPENDS_ON*]-(d:Step)
+RETURN count(DISTINCT d) AS n"""
+
 _MIRROR = None
 _MIRROR_FAILED = False
 
@@ -27,8 +50,11 @@ class Neo4jMirror:
         orgs = [{"id": o.id, "name": o.name, "type": o.type} for o in world.orgs.values()]
         sites = [{"id": s.id, "name": s.name, "org_id": s.org_id, "lat": s.lat, "lon": s.lon, "offset": s.offset}
                  for s in world.sites.values()]
-        steps = [{"id": s.id, "site_id": s.site_id, "code": s.code, "trade": s.trade, "days": s.days,
-                  "delay": s.delay_days, "risk": s.risk_days, "lag": s.lag_days, "deps": s.deps} for s in world.steps.values()]
+        from app.schedule import all_dates
+        conf = all_dates(world, "confirmed")
+        steps = [{"id": s.id, "site_id": s.site_id, "code": s.code, "name": s.name, "trade": s.trade, "days": s.days,
+                  "delay": s.delay_days, "risk": s.risk_days, "lag": s.lag_days, "deps": s.deps,
+                  "cs": conf[s.site_id][s.id][0], "ce": conf[s.site_id][s.id][1]} for s in world.steps.values()]
         crews = [{"id": c.id, "org_id": c.org_id, "trade": c.trade} for c in world.crews.values()]
         bookings = [{"id": b.id, "crew_id": b.crew_id, "step_id": b.step_id, "start": b.start, "end": b.end}
                     for b in world.bookings.values()]
@@ -41,8 +67,9 @@ class Neo4jMirror:
                       CREATE (o)-[:RUNS]->(:Site {id:r.id, name:r.name, offset:r.offset,
                               loc: point({latitude:r.lat, longitude:r.lon})})""", rows=sites)
             tx.run("""UNWIND $rows AS r MATCH (si:Site {id:r.site_id})
-                      CREATE (si)-[:HAS_STEP]->(:Step {id:r.id, site_id:r.site_id, code:r.code, trade:r.trade,
-                              days:r.days, delay:r.delay, risk:r.risk, lag:r.lag})""", rows=steps)
+                      CREATE (si)-[:HAS_STEP]->(:Step {id:r.id, site_id:r.site_id, code:r.code, name:r.name, trade:r.trade,
+                              days:r.days, delay:r.delay, risk:r.risk, lag:r.lag,
+                              conf_start:r.cs, conf_end:r.ce})""", rows=steps)
             tx.run("""UNWIND $rows AS r UNWIND r.deps AS d MATCH (a:Step {id:r.id}), (b:Step {id:d})
                       CREATE (a)-[:DEPENDS_ON]->(b)""", rows=steps)
             tx.run("""UNWIND $rows AS r MATCH (o:Org {id:r.org_id})
@@ -78,16 +105,23 @@ class Neo4jMirror:
             return s.execute_write(work)
 
     def swap_candidates(self, sub_org_id: str, home_site_id: str, trade: str, max_km: float) -> list[dict]:
-        q = """MATCH (home:Site {id:$home}), (sub:Org {id:$sub})-[:EMPLOYS]->(c:Crew)-[:HAS_BOOKING]->(b:Booking)
-                     -[:FOR_STEP]->(st:Step {trade:$trade})<-[:HAS_STEP]-(t:Site)<-[:RUNS]-(gc:Org)
-               WHERE t.id <> home.id AND EXISTS { (sub)-[:APPROVED_AT]->(gc) }
-               WITH t, st, c, gc, b, point.distance(home.loc, t.loc) / 1000.0 AS km
-               WHERE km <= $max_km
-               RETURN t.id AS site_id, st.id AS step_id, c.id AS crew_id, gc.id AS gc_id, km,
-                      b.start AS start, b.end AS end
-               ORDER BY km, step_id"""
         with self.driver.session() as s:
-            return [dict(r) for r in s.run(q, home=home_site_id, sub=sub_org_id, trade=trade, max_km=max_km)]
+            return [dict(r) for r in s.run(SWAP_CYPHER, home=home_site_id, sub=sub_org_id, trade=trade, max_km=max_km)]
+
+    def ripple(self, start_id: str, end_id: str) -> dict:
+        """Driving chain from a step to handover, plus everything downstream of it."""
+        with self.driver.session() as s:
+            row = s.run(RIPPLE_CYPHER, start=start_id, end=end_id).single()
+            if row is None:
+                row = s.run(RIPPLE_FALLBACK_CYPHER, start=start_id, end=end_id).single()
+            affected = s.run(AFFECTED_CYPHER, start=start_id).single()["n"]
+        return {"path": row["path"] if row else [], "hops": row["hops"] if row else 0, "affected_count": affected}
+
+    def stats(self) -> dict:
+        with self.driver.session() as s:
+            n = s.run("MATCH (n) RETURN count(n) AS n").single()["n"]
+            r = s.run("MATCH ()-[r]->() RETURN count(r) AS n").single()["n"]
+        return {"nodes": n, "relationships": r}
 
 
 def get_mirror() -> "Neo4jMirror | None":

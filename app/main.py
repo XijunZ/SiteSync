@@ -4,7 +4,7 @@ from fastapi import FastAPI, Header, Request
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
-from app import ingest, llm, plaud, signals, views
+from app import graph_explain, ingest, llm, plaud, signals, views
 from app.graph_neo4j import mirror_sync
 from app.network import (decide_cross_proposal, decide_link, decide_view, publish_offer, request_link, request_view,
                          withdraw_offer)
@@ -369,6 +369,28 @@ def report(x_user_id: str | None = Header(None)):
 @app.get("/api/events")
 def events(x_user_id: str | None = Header(None)):
     return views.events_view(W(), user_of(x_user_id))
+
+
+@app.get("/api/graph/ripple")
+def graph_ripple(site_id: str, step_code: str, x_user_id: str | None = Header(None)):
+    views.check_site(W(), user_of(x_user_id), site_id)
+    return graph_explain.ripple(W(), site_id, step_code)
+
+
+@app.get("/api/graph/swap-explain")
+def graph_swap_explain(gap_id: str, x_user_id: str | None = Header(None)):
+    u = user_of(x_user_id)
+    try:
+        graph_explain.check_swap_viewer(W(), u, gap_id)
+        return graph_explain.swap_explain(W(), u, gap_id)
+    except KeyError:
+        raise ApiError(404, "not_found", "no open gap with that id")
+
+
+@app.get("/api/graph/stats")
+def graph_stats(x_user_id: str | None = Header(None)):
+    user_of(x_user_id)
+    return graph_explain.stats(W())
 
 
 @app.get("/api/llm/log")

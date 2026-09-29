@@ -303,6 +303,51 @@ async function api(path, opts = {}, as){
 }
 const tryApi = async (path, opts, as) => { try { return await api(path, opts, as); } catch(e) { return null; } };
 const MISSING = new Set();
+/* ---------------- Neo4j explain panels ---------------- */
+const G = {stats:null, ripple:null, swap:null, open:{ripple:false, swap:false}};
+const esc = x => String(x ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function graphBadge(r){ return r.source === 'neo4j' ? `<span class="chip good">${r.ms} ms · Neo4j Aura</span>` : `<span class="chip">${r.ms} ms · in-memory fallback</span>`; }
+function cypherBlock(q){ return `<details style="margin-top:8px"><summary class="muted" style="cursor:pointer;font-size:.8rem">Cypher</summary><pre class="mono" style="white-space:pre-wrap;font-size:.74rem;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:8px;margin:6px 0 0">${esc(q)}</pre></details>`; }
+function rippleSVG(r){
+  const n = r.path.length, W = 1060, gap = Math.min(82, (W - 40) / Math.max(n - 1, 1)), H = 92, y = 30;
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Dependency ripple from ${esc(r.path[0]?.code)} to handover">`;
+  g += `<defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8z" fill="var(--muted)"/></marker></defs>`;
+  r.path.forEach((nd, i) => { const x = 22 + i*gap;
+    if (i < n - 1) g += `<line x1="${x+13}" y1="${y}" x2="${x+gap-15}" y2="${y}" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arr)"/>`;
+    const fill = i === 0 ? 'var(--accent)' : i === n - 1 ? 'var(--fg)' : 'var(--steel)';
+    g += `<circle cx="${x}" cy="${y}" r="13" fill="${fill}"/><text x="${x}" y="${y+4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" font-weight="600" fill="#fff">${esc(nd.code)}</text>`;
+    const nm = String(nd.name || '').split(/[,(:]/)[0].trim(); const short = nm.length > 13 ? nm.slice(0, 12) + '…' : nm;
+    g += `<text x="${x}" y="${y+30}" text-anchor="middle" font-family="Public Sans" font-size="9.5" fill="var(--fg)">${esc(short)}</text>`;
+    g += `<text x="${x}" y="${y+43}" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--muted)">${nd.conf_start ?? ''}–${nd.conf_end ?? ''}</text>`; });
+  return g + '</svg>';
+}
+function ripplePanel(){
+  const r = G.ripple; if (!G.open.ripple || !r) return '';
+  return `<div class="card fade" style="margin-top:10px;border-color:var(--steel)"><div class="row"><div class="eyebrow">Ripple traced in the graph</div><span class="sp"></span>${graphBadge(r)}</div>
+    <p style="margin:6px 0 4px;font-size:.88rem"><b>${esc(r.path[0]?.code)} → handover in ${r.hops} hops</b> along <span class="mono">DEPENDS_ON</span>, following the dependencies that actually set each start date. <b>${r.affected_count}</b> downstream steps are reachable from ${esc(r.path[0]?.code)}.</p>
+    <div class="tl" style="padding:6px 4px">${rippleSVG(r)}</div>${cypherBlock(r.cypher)}</div>`;
+}
+function swapSVG(x){
+  const row = x.rows[0] || {}, W = 760, H = 190;
+  const box = (cx, cy, label, sub, fill) => `<rect x="${cx-78}" y="${cy-20}" width="156" height="40" rx="20" fill="${fill}" opacity=".95"/><text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="Public Sans" font-size="11.5" font-weight="700" fill="#fff">${esc(label)}</text><text x="${cx}" y="${cy+12}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#fff">${esc(sub)}</text>`;
+  const edge = (x1, y1, x2, y2, lab) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arr2)"/><text x="${(x1+x2)/2}" y="${(y1+y2)/2-6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--muted)">${lab}</text>`;
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Graph pattern used to find the slot-swap partner"><defs><marker id="arr2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8z" fill="var(--muted)"/></marker></defs>`;
+  g += edge(170, 50, 300, 50, ':EMPLOYS') + edge(460, 50, 590, 50, ':HAS_BOOKING→:FOR_STEP');
+  g += edge(95, 72, 95, 128, '') + `<text x="104" y="104" font-family="IBM Plex Mono" font-size="9.5" fill="var(--muted)">:APPROVED_AT</text>`;
+  g += box(95, 50, x.sub || 'Subcontractor', ':Org (SUB)', 'var(--steel)') + box(380, 50, row.crew || 'crew', ':Crew', 'var(--steel)');
+  g += box(670, 50, row.step_code ? `${row.step_code} · ${row.target_site}` : `${tradeLabel(row.trade || 'mep')} need · ${row.target_site}`, ':Step @ :Site', 'var(--good)');
+  g += box(95, 150, row.approved_at_gc || 'GC', ':Org (GC)', 'var(--fg)');
+  g += `<line x1="520" y1="150" x2="670" y2="72" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="4 3"/><text x="610" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" font-weight="600" fill="var(--accent)">${row.km ?? '—'} km · point.distance</text>`;
+  g += box(440, 150, x.home_site || 'your site', 'idle: ' + (x.idle_crew || ''), 'var(--accent)');
+  return g + '</svg>';
+}
+function swapPanel(){
+  const x = G.swap; if (!G.open.swap || !x) return '';
+  const n = x.rows.length;
+  return `<div class="card fade" style="margin-top:10px;border-color:var(--steel)"><div class="row"><div class="eyebrow">How we found this: one graph pattern across companies</div><span class="sp"></span>${graphBadge(x)}</div>
+    <p style="margin:6px 0 4px;font-size:.88rem">${esc(x.sub)} is approved at the other GC, already has a crew booked on an M&amp;E step there, and that site is within ${x.max_km} km of yours. The pattern matched ${x.pattern_matches ?? n} booking${(x.pattern_matches ?? n)===1?'':'s'}; ${n} overlap${n===1?'s':''} your idle window (days ${x.window ? x.window.join('–') : ''}).</p>
+    <div class="tl" style="padding:6px 4px">${swapSVG(x)}</div>${cypherBlock(x.cypher)}</div>`;
+}
 async function act(fn, okMsg){
   try { const r = await fn(); await refresh(); if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg); return r; }
   catch(e){ await refresh(); toast(e.status === 404 ? 'That action is not available on the server yet.' : `Couldn’t do that: ${e.message}`); }
@@ -364,6 +409,7 @@ async function sync(){
     tryApi('/api/cross-proposals', {}, 'sam'), tryApi('/api/offers', {}, 'marcus'),
     tryApi('/api/notifications', {}, S.user), tryApi('/api/events', {}, S.user), tryApi('/api/llm/log', {}, S.user),
     tryApi('/api/report', {}, 'priya'), tryApi('/api/sites/A/labour', {}, 'priya'), tryApi('/api/sites/C/labour', {}, 'marcus')]);
+  G.stats = await tryApi('/api/graph/stats', {}, S.user);
   const srv = {tl:{A:tA,B:tB,C:tC,D:tD}, pA, pC, board, reqP, reqM, cross, offersM, report, labA, labC};
   [['A',tA],['B',tB],['C',tC],['D',tD]].forEach(([k,tl]) => { const r = confFromTimeline(tl); S.conf[k] = r.conf; S.riskD[k] = r.risk; });
   const j1 = tA && tA.steps.find(s => s.code === 'J1');
@@ -572,7 +618,7 @@ function renderScript(){
 async function go(user, view){ S.user = user; S.view = view || NAV[user][0][0]; closePop(); saveUI(); await refresh(); }
 function footer(){
   const last = S.llm && S.llm.length ? S.llm[S.llm.length - 1] : null;
-  return `<div class="footer"><span>AI calls ${S.aiCalls}</span>${last ? `<span>${last.model || 'gpt-oss-120b'} on ${last.provider === 'crusoe' ? 'Crusoe' : (last.provider || 'Crusoe')}</span><span>last ${last.latency_ms ?? '—'} ms${last.ok === false ? ' (failed, fallback used)' : ''}</span>` : '<span>gpt-oss-120b on Crusoe</span>'}<span>Graph: Neo4j Aura</span><span>Viewing as ${U().full} · ${ORGS[U().org]}</span></div>`;
+  return `<div class="footer"><span>AI calls ${S.aiCalls}</span>${last ? `<span>${last.model || 'gpt-oss-120b'} on ${last.provider === 'crusoe' ? 'Crusoe' : (last.provider || 'Crusoe')}</span><span>last ${last.latency_ms ?? '—'} ms${last.ok === false ? ' (failed, fallback used)' : ''}</span>` : '<span>gpt-oss-120b on Crusoe</span>'}<span>${G.stats ? (G.stats.source === 'neo4j' ? `Graph: Neo4j Aura · ${G.stats.nodes} nodes · ${G.stats.relationships} relationships` : `Graph: in-memory · ${G.stats.nodes} nodes`) : 'Graph: Neo4j Aura'}</span><span>Viewing as ${U().full} · ${ORGS[U().org]}</span></div>`;
 }
 function render(){
   if (!NAV[S.user].some(([id]) => id===S.view)) S.view = NAV[S.user][0][0];
@@ -603,6 +649,7 @@ function knockBlock(k){
     <div class="stat"><b>${k.from} → ${k.to}</b><span>handover (L7 end)</span></div>
     <div class="stat"><b style="color:${k.created.some(g=>g.inLook&&g.type!=='EXTEND')?'var(--risk)':'var(--good)'}">${k.created.filter(g=>g.inLook&&g.type!=='EXTEND').length}</b><span>new gaps in the 20-day lookahead</span></div>
   </div>
+  <div class="row" style="margin-top:8px"><button class="btn" data-act="showRipple">${G.open.ripple ? 'Hide the ripple' : 'Show the ripple · Neo4j'}</button></div>${ripplePanel()}
   ${rows.length?`<div class="sep"></div><div class="eyebrow" style="margin-bottom:6px">Labour impact</div><div class="scroll"><table><tbody>${rows.map(([g,w]) => `<tr><td><span class="chip ${w==='RESOLVED'?'good':g.type==='EXTEND'?'info':g.inLook?'surplus':''}">${w==='RESOLVED'?'RESOLVED':g.type==='EXTEND'?'ASSUMED':g.inLook?'CREATED · '+g.type:'LATER · '+g.type}</span></td><td>${g.type==='EXTEND'?`${g.b.crew} booking extended to match (confirm with sub)`:gapLabel(g)}</td><td class="r mono">days ${g.s}–${g.e}</td></tr>`).join('')}</tbody></table></div>`:''}`;
 }
 function reviewCard(){
@@ -851,7 +898,7 @@ V.board = () => {
     desc: S.offer==='offered' ? `Offered anonymised to nearby projects: M&E, ${sg.workers} workers, days ${sg.start}–${sg.end}, ~1 km area. A project that needs M&E can ask for it; you set the terms, including S1’s return to A-K3 on day ${sg.end}.`
       : `Share S1’s idle window anonymised (trade, crew size, days ${sg.start}–${sg.end}, ~1 km area) with nearby projects. Projects that need M&E can request it. Nothing is shared about your programme.`,
     facts:[['Start by','day '+(m8s.start_by ?? sg.start-1)],['Setup',(m8s.setup_days ?? 1)+' day'],['Protects',prot+' days'],['Value',gbp(m8s.value_gbp ?? prot*DAY_VALUE + (sg.end-sg.start)*CREW_DAY)],['Reliability','medium']],
-    track: S.offer==='offered' ? TRK.offer(true) : '',
+    track: (S.offer==='offered' ? TRK.offer(true) : '') + `<div class="row"><button class="btn ghost" style="padding-left:0" data-act="showSwap">${G.open.swap ? 'Hide' : 'How we found this · Neo4j'}</button></div>${swapPanel()}`,
     actions: S.m3 ? '' : S.offer==='none' ? `<span class="muted" style="font-size:.82rem">Nearby projects that need M&amp;E in that window will see it.</span><span class="sp"></span><button class="btn accent" data-act="offerCapacity">Offer to nearby projects</button>`
       : S.link==='none' ? `<span class="muted" style="font-size:.82rem">Waiting for a nearby project to ask.</span>`
       : S.link==='requested' ? `<span class="sp"></span><button class="btn accent" data-view-go="requests">Review Riverside’s request</button>`
@@ -1093,6 +1140,12 @@ function poolTerms(){
 }
 const ACT = {
   closePop, closeModal: () => closeModal(),
+  async showRipple(){ if (G.open.ripple){ G.open.ripple = false; return render(); }
+    const P = S.pending; const site = P ? P.site : 'A', code = P ? P.code : 'J1';
+    try { G.ripple = await api(`/api/graph/ripple?site_id=${site}&step_code=${code}`); G.open.ripple = true; render(); } catch(e){ toast(`Couldn’t trace the ripple: ${e.message}`); } },
+  async showSwap(){ if (G.open.swap){ G.open.swap = false; return render(); }
+    const sg = S.srv.board && S.srv.board.gaps && S.srv.board.gaps[0]; if (!sg) return toast('No open gap.');
+    try { G.swap = await api(`/api/graph/swap-explain?gap_id=${encodeURIComponent(sg.id)}`); G.open.swap = true; render(); } catch(e){ toast(`Couldn’t explain the match: ${e.message}`); } },
   markRead(){ act(() => api('/api/notifications/read', {method:'POST', body:{}})); },
   noImpact(){ act(() => api('/api/signals/clear', {body:{site_id:'A', step_code:'J1'}}), 'Risk flag cleared.'); },
   openUpdate(){ openUpdate(); },
