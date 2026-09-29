@@ -100,6 +100,42 @@ How M&E is paid (for completed work) decides who bears the **labour** cost of a 
 
 Developers themselves rarely want to operate software; they get the benefit through their consultants. **Research test:** would developer-side PM or monitoring-surveyor firms pay per project? Fallback buyer: GCs (avoid delay damages).
 
+### B.4 The offer and pricing (current summary)
+
+**Offer:** a tech-enabled **managed service**, a "delay response desk". The developer requires its GCs to share data (programme, weekly labour plans, daily voice notes). SiteSync runs early warning plus a next-best-action engine, with a person on our side confirming actions, chasing GCs and reporting weekly. Over time the engine does more, so each person covers more projects and margin grows.
+
+**Pricing: hybrid shared savings** (the pattern is borrowed from energy-efficiency contracts: fees tied to measured savings against an agreed baseline):
+
+| Element | Rule agreed at onboarding |
+|---|---|
+| Base fee | Per project per month; from the monitoring or project management budget; covers cost and cash flow |
+| Success fee | % of **verified days protected × agreed daily delay cost** |
+| Baseline | Engine's "no action" forecast **locked and timestamped** when the warning is issued |
+| Attribution | Counts only when a recommended action was taken by the parties (logged) |
+| Measurement | Per event: locked no-action forecast minus the post-action forecast, confirmed by actual progress; **settled monthly**, not at completion |
+| Cap | Success fee capped per project |
+
+Why not pure %-of-savings: the counterfactual is disputable, attribution is unclear, cash arrives at completion (18–24 months), and there's an incentive to inflate baselines. The hybrid fixes all four.
+
+**Example:** warning on day 220, locked no-action forecast A = +8 days; the action (crew back by 235) is taken; post-action forecast = +5, so 3 days protected × £8k = £24k. At a placeholder 10–20%, the fee is £2.4k–£4.8k, invoiced that month.
+
+**Demo:** show the locked no-action forecast next to the with-action forecast, plus "3 days protected · £24k · fee £X". Needs two propagation runs and one stored snapshot.
+
+### B.5 Stress tests (hypotheses to verify in market research)
+
+**1. Multi-site developers in one city.** By number of developers, most are small (1 to 2 projects); by share of activity, repeat multi-site players are often significant. Varies by city: Dubai and Hong Kong are dominated by large groups with many concurrent projects; London and Paris are mixed (housebuilders, BTR operators, housing associations, plus a long tail); in New York projects sit in separate companies but sponsors repeat. **Stress point:** even a 4 to 6-site developer rarely has two sites needing the same trade in the same window nearby, so within-developer matching is thin. **Conclusions:** (a) the core service (early warning, prevent, resequence, notify, protect crew returns) must work on a single project, and that's where the base fee is earned; (b) matching density comes from the **channel**: a monitoring surveyor firm or lender covers many projects across many developers in a city, so it's the natural aggregator and the preferred first buyer.
+
+**2. Will GCs share start-of-shift recordings?** Raw recordings: probably not (dispute exposure, privacy and consent law such as GDPR and all-party consent states, culture). Design for compliance:
+- The site manager records a **30-second summary**, not the meeting (no workers recorded)
+- **GC reviews and approves** the extracted update before sharing; audio stays with the GC or is deleted after transcription
+- It **replaces the GC's own reporting** (auto site diary and monthly report)
+- **Shared neutral record:** weather and developer-caused delays documented as they happen support the GC's own extension claims
+- **Contractual reporting clause** from the developer
+
+**Pitch correction:** replace "evidence of GC fault" (§B.3) with "one neutral record that protects everyone". **Fallback:** the forecast degrades gracefully without voice notes, using weather, access-control headcounts, deliveries, photos, public inspection and permit records, and monitoring visits.
+
+**Validate:** share of active sites held by multi-site developers per city, and projects per monitoring surveyor firm per city; interview 3 to 5 GC managers ("30-second daily summary if it replaced your diary and you approved what's shared?"); do contracts already require daily records or diary access?
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
