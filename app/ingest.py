@@ -1,8 +1,12 @@
 from pydantic import BaseModel
 
 from app import llm
+from app.config import TODAY
 from app.domain import World
+from app.schedule import forward_pass
 from app.vocab import match_steps, words_to_days
+
+CATALOGUE_HORIZON_DAYS = 30
 
 
 class ExtractedUpdate(BaseModel):
@@ -21,8 +25,15 @@ class ExtractedList(BaseModel):
 REASONS = ["rain", "weather", "wind", "delivery", "material", "inspection", "labour", "access", "design"]
 
 
-def _catalogue(world: World, site_id: str) -> str:
-    return "\n".join(f"{s.code}: {s.name} ({s.trade})" for s in world.steps.values() if s.site_id == site_id)
+def _catalogue(world: World, site_id: str, text: str = "") -> str:
+    """Only steps a site manager could be talking about: active or starting within the horizon, plus any
+    step the note names. Keeps the prompt small, which is what makes extraction fast."""
+    dates = forward_pass(world, site_id, "confirmed")
+    named = set(match_steps(world, site_id, text)) if text else set()
+    keep = [st for st in world.steps.values() if st.site_id == site_id and (
+        st.code in named or (dates[st.id][1] > TODAY and dates[st.id][0] < TODAY + CATALOGUE_HORIZON_DAYS))]
+    keep.sort(key=lambda st: dates[st.id][0])
+    return "\n".join(f"{st.code}: {st.name} ({st.trade})" for st in keep)
 
 
 def _llm_extract(world: World, site_id: str, text: str) -> list[ExtractedUpdate] | None:
@@ -30,7 +41,7 @@ def _llm_extract(world: World, site_id: str, text: str) -> list[ExtractedUpdate]
               "catalogue. If unsure which step, set step_code null and list candidate codes. Only report work that "
               "is delayed; ignore anything on track. If the note reports no delay, return an empty list. "
               "delay_days is working days (a week = 5). excerpt is the exact phrase from the note.")
-    user = f"Catalogue:\n{_catalogue(world, site_id)}\n\nVoice note:\n{text}\n\nReturn {{\"updates\": [...]}}"
+    user = f"Catalogue:\n{_catalogue(world, site_id, text)}\n\nVoice note:\n{text}\n\nReturn {{\"updates\": [...]}}"
     try:
         return llm.extract_json(system, user, ExtractedList).updates
     except llm.LLMUnavailable:
