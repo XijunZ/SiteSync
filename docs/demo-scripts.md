@@ -1,6 +1,6 @@
 # Plaud Demo Recordings (v2: supplier disruption)
 
-**Event (site-specific, not weather):** Apex Roofing's membrane batch for Hackney Wick Yard failed their quality check. The replacement arrives in five working days, so the roof (J1) is **blocked days 225–230**: roof work 220–225, blocked 225–230, resumes 230–235. M&E first fix (K3) can't start until the roof is done (day 235), so Sparks crew S1 has **nothing to do days 230–235**. Those days are lent to Riverside's Bow Wharf; S1 is back on day 235 when K3 can start.
+**Event (site-specific, not weather):** the roof membrane is delivered in batches. Batch 1 is on site and fine, so roofing continues today (Tue, day 220) through Monday (day 224). **Batch 2, due next Tuesday (day 225), failed Apex's factory quality check this morning**; the replacement takes five working days. So the roof (J1) is **blocked days 225–230**: work 220–225, blocked 225–230, resumes 230–235. Known today, five working days before it bites (early warning). M&E first fix (K3) can't start until the roof is done (day 235), so Sparks crew S1 has **nothing to do days 230–235**. Those days are lent to Riverside's Bow Wharf; S1 is back on day 235 when K3 can start.
 
 **Constraints (tested):** only the replacement lead time is stated in days ("five working days"); every other time is a weekday. Nobody mentions M&E being affected: SiteSync finds that itself. Press the Plaud **highlight** button at *[highlight]*. Tap **Generate** in the Plaud app if no transcript appears.
 
@@ -12,7 +12,7 @@ Plaud Note clipped to the phone (call recording), or two people reading. Sarah (
 >
 > **Dan:** Hi Sarah, go on.
 >
-> **Sarah:** Bad news on the membrane. The batch we delivered for your roof failed our quality check this morning, the seams won't bond. We've pulled it. The replacement batch is being made now and it'll be with you in five working days. *[highlight]* So Kev's crew will have to stop on the roof from Thursday until it lands, then they'll finish off. Sorry about this.
+> **Sarah:** The first membrane batch on your roof is fine, so Kev's crew can keep going through Monday. But the second batch, the one due to you next Tuesday, failed our quality check at the factory this morning, the seams won't bond. We've scrapped it. The replacement batch will take five working days. *[highlight]* So the crew will have to stand down from Tuesday until it lands, then they'll finish off. Sorry about this.
 >
 > **Dan:** Right, understood. Will you keep the same crew?
 >
@@ -20,15 +20,15 @@ Plaud Note clipped to the phone (call recording), or two people reading. Sarah (
 >
 > **Dan:** Yes, I'll sort that on our side. Thanks for letting us know early.
 
-Tested live on Crusoe: 119 words, 1.0 s → J1 +5, reason "membrane batch failed quality check".
+Tested live on Crusoe: 128 words, 2.3 s → J1 +5, reason "supplier: membrane failed QA".
 
 ## Recording B: On-camera clip (~14 s)
 
 Dan in hi-vis, Plaud clipped on: show device → record → speak → highlight → stop. Cut to laptop.
 
-> *"Morning briefing, Hackney Wick Yard. Apex rang: the roof membrane batch failed their quality check, replacement's due in five working days, so roof waterproofing is on hold until then. Windows and cladding are on track."*
+> *"Morning briefing, Hackney Wick Yard. Apex rang: the second membrane batch, due next Tuesday, failed their factory quality check. Replacement's five working days, so the roof waterproofing pauses from Tuesday until it lands. Windows and cladding are on track."*
 
-Tested live: 35 words, 1.5 s → J1 +5. Record it once for real beforehand (tap Generate) so its transcript exists; the on-camera take is a re-enactment.
+Tested live: 39 words, 1.2 s → J1 +5. Record it once for real beforehand (tap Generate) so its transcript exists; the on-camera take is a re-enactment.
 
 ## How it shows up in the demo
 
