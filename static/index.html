@@ -644,15 +644,17 @@ function renderRail(){
 let GACT_OPEN = true; try { GACT_OPEN = localStorage.getItem('sitesync-gact') !== '0'; } catch(e) {}
 let GSEEN = 0;
 function crusoeActivity(){
-  const calls = (S.llm || []).slice(-4).reverse();
-  return `<div class="cru"><div class="hd">AI · Crusoe Cloud</div>
+  const calls = (S.llm || []).filter(c => c.ok !== undefined).slice(-4).reverse();
+  if (!calls.length) return '';
+  return `<div class="cru fade"><div class="hd">AI · Crusoe Cloud</div>
     <div class="op"><b>Reads Plaud notes</b><div class="meta"><span>gpt-oss-120b</span><span>open-weight</span><span>${calls.length} call${calls.length===1?'':'s'}</span></div></div>
     ${calls.map(c => `<div class="op"><b>${esc(c.purpose || 'Extraction')}</b>${c.result ? `<div style="margin-top:2px">→ <b style="color:var(--accent)">${esc(c.result)}</b></div>` : ''}
       <div class="meta"><span>${c.provider === 'crusoe' ? 'Crusoe' : esc(c.provider || '')}</span><span>${c.latency_ms ?? '—'} ms</span>${c.prompt_tokens ? `<span>${c.prompt_tokens + (c.completion_tokens||0)} tok</span>` : ''}${c.ok === false ? '<span>failed → fallback</span>' : ''}</div></div>`).join('')}
   </div>`;
 }
 function graphActivity(){
-  const ops = (G.log || []).slice(0, 6), maxSeq = Math.max(0, ...ops.map(o => o.seq || 0)), prev = GSEEN; GSEEN = Math.max(GSEEN, maxSeq);
+  const real = (G.log || []).filter(o => o.op !== 'graph stats'); if (!real.some(o => o.op !== 'mirror sync')) return '';
+  const ops = real.slice(0, 6), maxSeq = Math.max(0, ...ops.map(o => o.seq || 0)), prev = GSEEN; GSEEN = Math.max(GSEEN, maxSeq);
   return `<details class="gact" id="gact" ${GACT_OPEN?'open':''}><summary>Graph activity · Neo4j ${G.stats && G.stats.source==='neo4j' ? `<span class="muted" style="text-transform:none;font-weight:400">· ${G.stats.nodes} nodes</span>` : ''}</summary>
     ${ops.length ? ops.map(o => `<div class="gop ${prev && (o.seq||0) > prev ? 'new' : ''}"><b>${esc(o.op)}</b>${o.count>1?` <span class="muted">×${o.count}</span>`:''}
       <div class="cq" title="Click to expand the Cypher">${esc(o.cypher)}</div>
