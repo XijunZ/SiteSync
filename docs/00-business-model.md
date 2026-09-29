@@ -171,6 +171,13 @@ Full findings: `04-labour-mobility-research.md`. Summary:
 3. The next-best-action engine chooses a **fulfilment route per market**: slot swap → sub-tier under the approved sub → approved sub adds agency labour → temporary permit or at-cost framework loan → equipment via rental partner. It checks a per-market compliance list and never proposes a blocked route.
 4. Stage 2 "pre-cleared pools": credentials verified ahead, frameworks and consents pre-signed.
 
+**Who contracts agencies:** almost always the **GC** (its own direct labour, often via preferred-agency frameworks or a managed service provider) or the **subcontractor** (topping up its trade crews). Developers rarely do, because it would take on site-safety and employment liabilities handed to the GC. Exceptions: construction-management procurement, small developers acting as their own contractor, post-handover work.
+
+**Implications:**
+- The forecast goes to the developer side; the recommended action (e.g. "add agency labour") is addressed to the GC's or sub's planner. The developer sees the recommendation and whether it was taken.
+- Route to the **GC's existing agency frameworks** first. This limits per-placement referral revenue.
+- **Conflict of interest:** the developer pays for neutral recommendations; agency per-placement fees would bias the ranking. Keep the ranking transparent, and prefer agencies paying for **demand-signal data access** (subscription) over per-placement referral fees.
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
