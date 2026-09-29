@@ -8,6 +8,30 @@
 | Scope | **Global**: any city with enough concurrent private projects (London, Paris, New York, Dubai, Hong Kong, ...). Nothing here is jurisdiction-specific. |
 | Note | Competitor and market sizing are being researched separately; add findings in §11. |
 
+## B. Audience and who pays (v4, current; supersedes A.3 revenue layers)
+
+**Problem with v1 to v3:** selling prediction and planning to GCs and subs is a nice-to-have. They already hedge: subs overbook across GCs, and GCs pad their programmes. They won't pay to replace a hedge that works for them.
+
+**Insight: the hedge pushes cost onto the client.** Overbooked subs spread crews thin, which causes under-manned sites, no-shows and slow progress. Padded programmes cause later completion. The **developer** pays every day of delay (construction loan interest, later sales or rent, extended team fees), and has the **worst information**: a monthly GC progress report (optimistic) plus a monthly monitoring surveyor visit.
+
+| | |
+|---|---|
+| **Customer** | **Property developers**, and the **construction lenders** financing them |
+| **Product** | Independent, continuous completion forecast per project: real progress, real finish date, delay cost in money terms, root cause (e.g. "M&E sub overbooked across two GCs"), and the recommended lever |
+| **Why they pay** | They bear the delay cost directly, and they're blind between monthly reports |
+| **Existing budget** | Lenders already pay monitoring surveyors per project for monthly visits and drawdown sign-off. SiteSync turns that monthly snapshot into continuous verified data, taking an existing budget line. |
+| **Pricing** | Per active project per month, or a share of the monitoring budget. High price per customer. |
+| **Adoption** | The developer requires it as a contractual reporting obligation in the building contract. Voice notes replace the site manager's written daily report. Subs join free. |
+| **Second revenue line** | Early payment to subs on verified progress (fee on financed volume via a finance partner). Subs pay for cash flow, which is their acute pain. |
+| **Cross-GC coordination** | A developer contracts all its GCs, so it can see across them and act (e.g. have one GC release the M&E sub for 5 days to another of its sites). The developer is the neutral party with rights to the data. Cross-developer matching comes later, with density. |
+| **Stop** | Selling prediction to GCs or subs as a planning tool; leading with idle-crew savings. |
+
+**Pitch:** "Developers lose £X a day on every late site and find out a month later. SiteSync gives them the truth daily, from the voice notes their site managers already send, and tells them which lever to pull."
+
+**Validate in market research (make or break):** do developers and lenders pay for project monitoring today, how much per project, and would they pay for continuous monitoring?
+
+**Hack day demo change (pending approval):** add a **developer view** (all 4 sites, predicted vs contract completion, delay cost at a demo assumption such as £8k per site per day, shown on screen); the root cause and recommended lever are shown there. Keep GC views for neutrality.
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
