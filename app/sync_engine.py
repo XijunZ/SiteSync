@@ -116,7 +116,7 @@ def _overlap_ok(world: World, dates, gap: Gap, step_id: str) -> bool:
     return min(e, gap.end) - max(s, gap.start) >= min(3, gap_days(gap))
 
 
-def swap_candidates_memory(world: World, gap: Gap) -> list[tuple]:
+def _swap_candidates_memory(world: World, gap: Gap) -> list[tuple]:
     """(target_step_id, target_crew_id, km) for the same sub's bookings on other sites active in the gap."""
     crew = world.crews[gap.crew_id]
     home = world.sites[gap.site_id]
@@ -256,3 +256,12 @@ def approve_option(world: World, user: User, gap_id_: str, mechanism: str,
         world.option_states[opt.id] = "IN_PROGRESS"
         return {"status": "IN_PROGRESS", "cross_proposal_id": cp["id"], "option": opt.to_dict()}
     return {"status": "APPROVED", "option": opt.to_dict()}
+
+
+def swap_candidates_memory(world: World, gap: Gap) -> list[tuple]:
+    import time
+    from app.graph_neo4j import SWAP_CYPHER, record
+    t0 = time.perf_counter()
+    out = _swap_candidates_memory(world, gap)
+    record("swap candidates", SWAP_CYPHER, (time.perf_counter() - t0) * 1000, len(out), "memory")
+    return out

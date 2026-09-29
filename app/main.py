@@ -400,7 +400,8 @@ def graph_stats(x_user_id: str | None = Header(None)):
 
 @app.get("/api/graph/log")
 def graph_log():
-    return {"calls": graph_explain.GRAPH_LOG[-10:][::-1]}
+    from app import graph_neo4j
+    return {"calls": [{k: v for k, v in c.items() if k != "_t"} for c in graph_neo4j.GRAPH_LOG[-12:][::-1]]}
 
 
 @app.get("/api/llm/log")

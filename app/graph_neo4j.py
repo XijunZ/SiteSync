@@ -5,6 +5,7 @@ answers the graph questions in Cypher. Parity with the Python engine is asserted
 """
 import logging
 import os
+import time
 
 from neo4j import GraphDatabase
 
@@ -34,6 +35,22 @@ ORDER BY hops DESC LIMIT 1"""
 AFFECTED_CYPHER = """MATCH (s:Step {id:$start})<-[:DEPENDS_ON*]-(d:Step)
 RETURN count(DISTINCT d) AS n"""
 
+GRAPH_LOG: list[dict] = []
+
+
+def record(op: str, cypher: str, ms: float, rows, source: str) -> None:
+    """Observability for the UI's 'Graph activity' panel. Consecutive identical ops within 3 s are collapsed."""
+    now = time.time()
+    last = GRAPH_LOG[-1] if GRAPH_LOG else None
+    if last and last["op"] == op and last["source"] == source and now - last["_t"] < 3:
+        last.update(ms=round(ms, 1), rows=rows, at=time.strftime("%H:%M:%S"), _t=now, count=last.get("count", 1) + 1)
+        return
+    GRAPH_LOG.append({"op": op, "cypher": " ".join(cypher.split()), "ms": round(ms, 1), "rows": rows,
+                      "source": source, "at": time.strftime("%H:%M:%S"), "_t": now, "count": 1,
+                      "seq": (last["seq"] + 1) if last else 1})
+    del GRAPH_LOG[:-40]
+
+
 _MIRROR = None
 _MIRROR_FAILED = False
 
@@ -47,6 +64,8 @@ class Neo4jMirror:
         self.driver.close()
 
     def sync(self, world: World) -> None:
+        self._last_nodes = (len(world.orgs) + len(world.sites) + len(world.steps) + len(world.crews)
+                            + len(world.bookings))
         orgs = [{"id": o.id, "name": o.name, "type": o.type} for o in world.orgs.values()]
         sites = [{"id": s.id, "name": s.name, "org_id": s.org_id, "lat": s.lat, "lon": s.lon, "offset": s.offset}
                  for s in world.sites.values()]
@@ -122,6 +141,33 @@ class Neo4jMirror:
             n = s.run("MATCH (n) RETURN count(n) AS n").single()["n"]
             r = s.run("MATCH ()-[r]->() RETURN count(r) AS n").single()["n"]
         return {"nodes": n, "relationships": r}
+
+
+SYNC_CYPHER = """MATCH (n) DETACH DELETE n;
+UNWIND $orgs AS r CREATE (:Org {id:r.id, name:r.name, type:r.type});
+UNWIND $sites AS r MATCH (o:Org {id:r.org_id}) CREATE (o)-[:RUNS]->(:Site {id:r.id, loc:point({latitude:r.lat, longitude:r.lon})});
+UNWIND $steps AS r ... CREATE (:Step {...conf_start, conf_end, pause_start}); DEPENDS_ON, EMPLOYS, HAS_BOOKING, FOR_STEP, APPROVED_AT"""
+
+
+def _wrap(meth, op, cypher, rows):
+    def f(self, *a, **k):
+        t0 = time.perf_counter()
+        out = meth(self, *a, **k)
+        record(op, cypher, (time.perf_counter() - t0) * 1000, rows(out, self), "neo4j")
+        return out
+    f.__name__ = meth.__name__
+    return f
+
+
+Neo4jMirror.sync = _wrap(Neo4jMirror.sync, "mirror sync", SYNC_CYPHER, lambda o, m: getattr(m, "_last_nodes", None))
+Neo4jMirror.propagate = _wrap(Neo4jMirror.propagate, "propagate (DEPENDS_ON, iterative)",
+                              "MATCH (s:Step {site_id:$site})-[:DEPENDS_ON]->(d:Step) WITH s, max(d.p_end) AS ready "
+                              "WHERE ready > s.p_start SET s.p_start = ready, s.p_end = ready + s.days + extra",
+                              lambda o, m: len(o))
+Neo4jMirror.swap_candidates = _wrap(Neo4jMirror.swap_candidates, "swap candidates", SWAP_CYPHER, lambda o, m: len(o))
+Neo4jMirror.ripple = _wrap(Neo4jMirror.ripple, "ripple trace", RIPPLE_CYPHER, lambda o, m: len(o.get("path", [])))
+Neo4jMirror.stats = _wrap(Neo4jMirror.stats, "graph stats", "MATCH (n) RETURN count(n); MATCH ()-[r]->() RETURN count(r)",
+                          lambda o, m: 2)
 
 
 def get_mirror() -> "Neo4jMirror | None":
