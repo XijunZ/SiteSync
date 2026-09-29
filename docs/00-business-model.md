@@ -55,6 +55,32 @@ A forecast alone saves nothing. Money is saved by **actions taken early enough t
 
 **Demo money line:** "Weather: roof +5 days. No action: M&E return clash, A finishes +8 days (£64k). With action: +5 days (£40k), so £24k protected. Site C gains up to 5 days."
 
+### B.2 Why the developer cares when subs are paid for work done
+
+How M&E is paid (for completed work) decides who bears the **labour** cost of a delay. The developer bears the **time** cost regardless:
+
+| Cost to developer | Why it runs per day |
+|---|---|
+| Loan interest | Accrues on nearly the full drawn loan (mostly drawn by fit-out) until sales or refinance |
+| Loan deadlines | Completion dates in the facility; extension fees or default |
+| Revenue delay | Build-to-rent: rent starts later. Off-plan: completions move later, and buyers can walk away after longstop dates. |
+| Pre-let penalties | Tenants can claim compensation or terminate |
+| Extended team and site costs | Professional fees, insurance, security run longer |
+
+**Why liquidated damages don't solve it:** (1) weather is typically an excusable event, so the GC gets extra time with no damages and the developer bears the weather delay in full; (2) cascade delays (crew return clash) are the GC's risk, but damages are usually set below the real loss, often capped, and frequently disputed; (3) delay risk is priced into tenders anyway.
+
+| Slice (our example) | Who really pays |
+|---|---|
+| 5 days of weather | Developer (time cost; GC gets extra time) |
+| +3 days of cascade | GC (damages exposure) and developer (loss above damages, plus the dispute) |
+| Idle crew | Sub |
+
+**Pitches:** to developers and lenders: "Contractors get paid for work done, but the finance clock runs on the building. Delay damages don't cover your real loss, and weather isn't covered at all." To GCs (secondary buyer): "Avoid the damages you'd pay for cascading clashes."
+
+**Segment:** leveraged projects with revenue deadlines (build-to-rent, off-plan residential, pre-let commercial, lender-financed). Cash-funded developers with no sale dates care much less.
+
+**Research:** developers' daily delay cost at different project sizes; how often liquidated damages are actually recovered.
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
