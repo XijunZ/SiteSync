@@ -48,6 +48,29 @@ Two real-world captures for the Plaud integration. Record each 2–3 times on th
 >
 > **Dan:** Yes, I'll extend it on our side. Thanks for the heads-up.
 
+## Version B: on-camera clip (~12 s)
+
+Dan in hi-vis, Plaud clipped on: show device → record → speak → press highlight → stop. Cut to laptop: "Sync from Plaud" → transcript → J1 +5.
+
+> *"Morning briefing, Hackney Wick Yard. Kev says heavy rain from Thursday, so the roof waterproofing is delayed about five working days. Windows and cladding are on track."*
+
+Tested: 27 words (~11 s spoken); live Crusoe 0.9–1.4 s → J1 +5; offline fallback → J1 +5.
+
+**Before filming:** record Version B once for real (tap Generate) so the transcript already exists; the on-camera take is a re-enactment and the app pulls the pre-recorded one. Also record Recordings 1 and 2 above to show as the full multi-speaker briefing and the supplier call.
+
+## Video structure (7 min)
+
+| Time | Beat | Sponsors shown |
+|---|---|---|
+| 0:00–0:40 | Problem: one site slips, crews across sites/companies fall out of sync | — |
+| 0:40–0:55 | Plaud clip (Version B) | Plaud |
+| 0:55–2:00 | Sync from Plaud → J1 +5 → knock-on (18 steps, 397 → 402, Sparks idle 230–235 found by itself) → Dan confirms, Priya approves | Plaud, Crusoe, Neo4j |
+| 2:00–3:15 | Sync Board: no action +8 vs with action +5; ranked options with deadlines; M1 infeasible with reason | Neo4j |
+| 3:15–4:30 | City view → request view → trades overlay → request link → Marcus accepts pool | Neo4j (geo) |
+| 4:30–5:30 | Slot swap: Sparks accepts → each GC confirms → 3 days protected, £24k | — |
+| 5:30–6:15 | Evidence trail (Plaud note, supplier call, snapshots); Brave company check | Plaud, Brave |
+| 6:15–7:00 | Business model + stack: "Plaud captures, Crusoe understands, Neo4j keeps sites in sync" | All |
+
 ## Expected result in SiteSync
 
 - **Briefing →** exactly one proposed change: A-J1 roof waterproofing +5 working days, reason weather, source = highlighted excerpt with speaker. Headcount, safety, glazing, cladding, hoist and scaffold items produce no change.
