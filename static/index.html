@@ -183,7 +183,9 @@ textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:6
 .pop{position:fixed;z-index:50;max-height:calc(100vh - 24px);overflow:auto;width:min(360px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.18);padding:14px}
 .pop h4{margin:0;font:600 1.05rem/1.25 var(--f-body)}
 .pop .x{position:absolute;top:8px;right:8px}
-.pop .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pop .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.pop input,.pop select{width:100%;min-width:0}
+.pop .pop-actions{position:sticky;bottom:-14px;background:var(--surface);padding:10px 0 2px;margin-bottom:-2px;border-top:1px solid var(--line)}
 .preview{border-radius:6px;padding:8px 10px;background:var(--sunk);font-size:.84rem;margin-top:8px}
 .preview.err{background:var(--bad-soft);color:var(--bad)}
 .modal-bg{position:fixed;inset:0;background:rgba(10,12,16,.45);z-index:45;display:grid;place-items:center;padding:16px}
@@ -1093,7 +1095,7 @@ function openStep(site, code, at, editing){
     <div class="row2" style="margin-top:8px"><div class="field"><label for="f-ps">Blocked from day</label><input id="f-ps" type="number" value="${code==='J1'&&!((S.conf.A.J1||{}).delay)?Math.min(conf[1], TODAY+5):''}" placeholder="optional"></div><div class="field"><label for="f-pd">for (working days)</label><input id="f-pd" type="number" min="0" value="${code==='J1'&&!((S.conf.A.J1||{}).delay)?5:''}" placeholder="0"></div></div>
     <div class="field" style="margin-top:8px"><label for="f-r">Reason</label><select id="f-r"><option>Batch 2 failed QA</option><option>Supplier / materials late</option><option>Weather</option><option>Late predecessor</option><option>Labour shortage</option><option>Materials late</option><option>Design change</option><option>Progress faster</option><option>Other</option></select></div>
     <div id="f-prev" class="preview" aria-live="polite"></div>
-    <div class="row" style="margin-top:10px"><button class="btn ghost" data-act="closePop">Cancel</button><span class="sp"></span><button class="btn primary" id="f-go" data-act="submitEdit">Propose update</button></div>`}`;
+    <div class="row pop-actions" style="margin-top:10px"><button class="btn ghost" data-act="closePop">Cancel</button><span class="sp"></span><button class="btn primary" id="f-go" data-act="submitEdit">Propose update</button></div>`}`;
   placePop();
   if (editing) { previewEdit(); p.querySelector('#f-e').focus(); }
   applyGuide();
@@ -1122,6 +1124,7 @@ function previewEdit(){
   const ng = k.created.filter(g => g.inLook && g.type!=='EXTEND').length;
   box.className = 'preview'; btn.disabled = false;
   box.innerHTML = `${v.pauseDays ? `<b>Blocked days ${v.pauseStart}–${v.pauseStart + v.pauseDays}</b> · ` : ''}<b>${v.code} + ${k.moved.filter(c=>c!==v.code).length} downstream steps move</b> · handover <span class="mono">${k.from} → ${k.to}</span>${ng?` · <span style="color:var(--risk)">${ng} new crew gap${ng>1?'s':''}</span>`:''}`;
+  placePop();
 }
 
 /* ---------------- update modal ---------------- */
