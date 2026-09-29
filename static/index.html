@@ -680,13 +680,16 @@ function stepsSVG(site){
   const X = d => x0 + (d - d0) * px;
   const bk = S.bookings.filter(b => b.site===site);
   const g0 = demoGap();
+  const newIdle = prop ? knock(site).created.filter(x => x.type==='SURPLUS' && x.inLook) : [];
   let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Site ${site} timeline. Click a bar to see details and update it.">`;
   for (let d = Math.ceil(d0/10)*10; d <= d1; d += 10){ g += `<line x1="${X(d)}" y1="${top-6}" x2="${X(d)}" y2="${H-6}" stroke="var(--line)"/>`; if (d % 20 === 0) g += `<text x="${X(d)}" y="${top-14}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)" text-anchor="middle">${d}</text>`; }
   g += `<rect x="${X(TODAY)}" y="${top-6}" width="${LOOK*px}" height="${H-top}" fill="var(--steel-soft)" opacity=".35"/>`;
   g += `<line x1="${X(TODAY)}" y1="${top-24}" x2="${X(TODAY)}" y2="${H-6}" stroke="var(--accent)" stroke-width="1.5"/><text x="${X(TODAY)+4}" y="10" font-family="IBM Plex Mono" font-size="10" fill="var(--accent)">TODAY</text>`;
   rows.forEach((c,i) => {
     const t = T[c], y = top + i*rh, [bs,be] = base[c], [cs,ce,,crit] = conf[c];
-    if (i % 2) g += `<rect x="0" y="${y}" width="${W}" height="${rh}" fill="var(--sunk)" opacity=".7"/>`;
+    const moved = prop && (prop[c][0]!==cs || prop[c][1]!==ce);
+    if (moved) g += `<rect x="0" y="${y}" width="${W}" height="${rh}" fill="var(--accent-soft)" opacity=".55"/>`;
+    else if (i % 2) g += `<rect x="0" y="${y}" width="${W}" height="${rh}" fill="var(--sunk)" opacity=".7"/>`;
     const nb = bk.filter(b => b.step===c);
     g += `<text x="8" y="${y+15}" font-family="IBM Plex Mono" font-size="10.5" fill="${crit?'var(--bad)':'var(--muted)'}">${c}</text>`;
     g += `<text x="46" y="${y+15}" font-family="Public Sans" font-size="11.5" fill="var(--fg)">${t.n.length>31?t.n.slice(0,30)+'…':t.n}</text>`;
@@ -699,9 +702,17 @@ function stepsSVG(site){
       if (prop && prop[c][1]!==ce) g += `<path d="M${X(prop[c][1])} ${y+6} l5 6 -5 6 -5 -6z" fill="none" stroke="var(--accent)" stroke-width="1.5"/>`;
     } else {
       g += `<rect x="${X(bs)}" y="${y+4}" width="${Math.max(2,(be-bs)*px)}" height="4" rx="1" fill="var(--plan)"/>`;
-      g += `<rect x="${X(cs)}" y="${y+10}" width="${Math.max(2,(ce-cs)*px)}" height="8" rx="2" fill="${crit?'var(--fg)':'var(--steel)'}"/>`;
-      if (prop && (prop[c][0]!==cs || prop[c][1]!==ce)) g += `<rect x="${X(prop[c][0])}" y="${y+9}" width="${(prop[c][1]-prop[c][0])*px}" height="10" rx="2" fill="var(--accent)" fill-opacity=".25" stroke="var(--accent)" stroke-dasharray="3 2"/>`;
-      if (risk && !prop && (risk[c][1]!==ce)) g += `<rect x="${X(risk[c][0])}" y="${y+9}" width="${(risk[c][1]-risk[c][0])*px}" height="10" rx="2" fill="none" stroke="var(--risk)" stroke-width="1.4" stroke-dasharray="2 2"/>`;
+      g += `<rect x="${X(cs)}" y="${y+10}" width="${Math.max(2,(ce-cs)*px)}" height="8" rx="2" fill="${crit?'var(--fg)':'var(--steel)'}" ${moved?'opacity=".25"':''}/>`;
+      if (moved){
+        const shift = prop[c][1] - ce;
+        g += `<rect x="${X(prop[c][0])}" y="${y+8}" width="${(prop[c][1]-prop[c][0])*px}" height="12" rx="2" fill="var(--accent)" fill-opacity=".9" stroke="var(--accent)"/>`;
+        g += `<text x="${X(prop[c][1])+5}" y="${y+17}" font-family="IBM Plex Mono" font-size="10" font-weight="600" fill="var(--accent)">${shift>0?'+':''}${shift}d</text>`;
+      }
+      if (risk && !prop && (risk[c][1]!==ce)) {
+        g += `<rect x="${X(risk[c][0])}" y="${y+9}" width="${(risk[c][1]-risk[c][0])*px}" height="10" rx="2" fill="none" stroke="var(--risk)" stroke-width="1.4" stroke-dasharray="2 2"/>`;
+        if (c==='J1') g += `<text x="${X(risk[c][1])+5}" y="${y+17}" font-family="IBM Plex Mono" font-size="9.5" fill="var(--risk)">rain risk, unconfirmed</text>`;
+      }
+      newIdle.filter(x => x.b.step===c).forEach(x => { g += `<rect x="${X(x.s)}" y="${y+8}" width="${(x.e-x.s)*px}" height="12" fill="var(--risk)" stroke="var(--risk)"/><text x="${X(x.s)-4}" y="${y+17}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" font-weight="600" fill="var(--risk)">NEW: ${x.b.crew} idle ${x.s}–${x.e}</text>`; });
       if (nb.length) g += `<circle cx="${X(cs)-7}" cy="${y+14}" r="3.2" fill="var(--muted)"><title>${nb.map(b=>b.crew).join(', ')}</title></circle>`;
       if (g0 && g0.b.site===site && g0.b.step===c && S.m8!=='done' && !S.m3) g += `<rect x="${X(g0.s)}" y="${y+9}" width="${(g0.e-g0.s)*px}" height="10" fill="var(--risk)" opacity=".55"/><text x="${X(g0.s)-4}" y="${y+17}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--risk)">S1 idle ${g0.s}–${g0.e}</text>`;
     }
@@ -709,7 +720,7 @@ function stepsSVG(site){
   });
   return g + '</svg>';
 }
-function stepsLegend(){ return `<div class="legend"><span><i style="background:var(--plan);height:4px"></i>Baseline</span><span><i style="background:var(--steel)"></i>Confirmed</span><span><i style="background:var(--fg)"></i>Critical path</span><span><i style="background:var(--accent);opacity:.35;outline:1px dashed var(--accent)"></i>Proposed</span><span><i style="border:1.4px dashed var(--risk);height:6px"></i>Risk-adjusted</span><span><i style="background:var(--steel-soft)"></i>20-day lookahead</span><span><svg width="10" height="10" viewBox="0 0 10 10" style="vertical-align:-1px;margin-right:6px">${drop(5,5,9)}</svg>Weather-sensitive</span><span>● crew booked</span></div>`; }
+function stepsLegend(){ return `<div class="legend"><span><i style="background:var(--plan);height:4px"></i>Baseline</span><span><i style="background:var(--steel)"></i>Confirmed</span><span><i style="background:var(--fg)"></i>Critical path</span><span><i style="background:var(--accent)"></i>Proposed (+Nd)</span><span><i style="border:1.4px dashed var(--risk);height:6px"></i>Risk-adjusted</span><span><i style="background:var(--steel-soft)"></i>20-day lookahead</span><span><svg width="10" height="10" viewBox="0 0 10 10" style="vertical-align:-1px;margin-right:6px">${drop(5,5,9)}</svg>Weather-sensitive</span><span>● crew booked</span></div>`; }
 
 /* ---------------- timeline: trades overlay ---------------- */
 function tradeWindows(site, sc){
