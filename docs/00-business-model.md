@@ -149,6 +149,8 @@ Why not pure %-of-savings: the counterfactual is disputable, attribution is uncl
 | 7 | Framework call-offs | Developer sets up frameworks with preferred subs across all its sites | Turns new-relationship matches into existing-relationship matches (the "pre-qualified bench") |
 | 8 | Pooled flex crew | Retained crew shared across sites | Hardest: someone funds the retainer and manages utilisation |
 
+**Correction on #1:** slot swaps don't bypass qualification. They apply **only where the sub is already contracted on both sites** (L2), so qualification already exists. New sub-to-GC relationships (L3) still take 1 to 4 weeks and stay out of scope. This narrows labour sharing to a subset of delays (same sub, both sites, overlapping windows, within reach). It may not be tiny: common-trade subs hold contracts with several GCs at once, and multi-site developers reuse subs across sites. SiteSync only suggests swaps where labour plans show the relationship exists. Frameworks (#7) create relationships ahead of need. Non-labour sharing (#2 to #6) needs no sub qualification, so it's more dependable. **Labour sharing is a bonus lever, not the core**; the core (warn, prevent, resequence, protect returns, notify) works on a single project. **Validate:** how many GCs does a typical M&E or drylining sub serve at once per city, and how often do nearby active sites share a sub?
+
 **Rules for any sharing:** return guarantee; critical path wins ties; recharge at rates agreed at onboarding; liability follows the existing contract or hire agreement; savings shared or logged.
 
 **Order for SiteSync:** slot swaps → equipment, plant, temporary works → specialists and inspections → framework call-offs → flex crew.
