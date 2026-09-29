@@ -136,6 +136,25 @@ Why not pure %-of-savings: the counterfactual is disputable, attribution is uncl
 
 **Validate:** share of active sites held by multi-site developers per city, and projects per monitoring surveyor firm per city; interview 3 to 5 GC managers ("30-second daily summary if it replaced your diary and you approved what's shared?"); do contracts already require daily records or diary access?
 
+### B.6 Practical resource sharing between sites (easiest first)
+
+| # | Mechanism | How | Why it's practical |
+|---|---|---|---|
+| 1 | **Slot swap** with a shared subcontractor | Same sub works both sites; A slips, C is ready, so the sub does C first and returns to A on a fixed date | No new contracts, just date changes under existing subcontracts. **This is the demo scenario.** |
+| 2 | Equipment and plant (hoists, telehandlers, lifts, generators, cabins) | Off-hire at A / on-hire at C via the same hire company, or a direct internal move | Transfer business already exists; no employment or qualification issues |
+| 3 | Temporary works and surplus materials (props, formwork, scaffold, blocks, board, cable) | Transfer at cost with a recharge | Cuts urgent lead times and waste; ESG and carbon angle |
+| 4 | Shared specialists (commissioning, fire-stopping, building safety manager, clerk of works) | One specialist scheduled across nearby sites | Already employed or appointed; a scheduling problem, not a contract one |
+| 5 | Batched inspections and approvals | Several nearby sites on one inspector visit; pre-booked from the forecast | Attacks a known delay cause ("late inspector stalls drylining") |
+| 6 | Shared logistics | Consolidated deliveries, waste haulage, staging yard | Consolidation centres already exist in dense cities |
+| 7 | Framework call-offs | Developer sets up frameworks with preferred subs across all its sites | Turns new-relationship matches into existing-relationship matches (the "pre-qualified bench") |
+| 8 | Pooled flex crew | Retained crew shared across sites | Hardest: someone funds the retainer and manages utilisation |
+
+**Rules for any sharing:** return guarantee; critical path wins ties; recharge at rates agreed at onboarding; liability follows the existing contract or hire agreement; savings shared or logged.
+
+**Order for SiteSync:** slot swaps → equipment, plant, temporary works → specialists and inspections → framework call-offs → flex crew.
+
+**Demo:** rename the offer card to "Slot swap: Sparks M&E does Site C first (days 230–235), back on Site A on day 235". Equipment and inspections go on the roadmap slide. In the data model, equipment is just another resource node with a booking window.
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
