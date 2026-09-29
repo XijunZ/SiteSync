@@ -237,23 +237,36 @@ li.wait .dotm{border-color:var(--steel);animation:blink 1.1s ease-in-out infinit
 .drawer[open] .chev{transform:rotate(180deg)}
 main{padding-bottom:160px}
 .drawer[open] ol{max-height:min(60vh,520px)}
+.gact{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;font-size:.72rem}
+.gact summary{cursor:pointer;list-style:none;font:600 .72rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--steel);padding:0 6px 6px}
+.gact summary::-webkit-details-marker{display:none}
+.gop{padding:6px;border-radius:6px;margin:2px 0;background:var(--surface);border:1px solid var(--line)}
+.gop.new{animation:gnew 2.4s ease-out}
+@keyframes gnew{0%{background:var(--good-soft);border-color:var(--good)}100%{background:var(--surface)}}
+.gop b{font-weight:600;font-size:.74rem}
+.gop .cq{font-family:var(--f-mono);font-size:.64rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;margin-top:2px}
+.gop .cq.open{white-space:pre-wrap;overflow:visible;word-break:break-word}
+.gop .meta{display:flex;gap:6px;align-items:center;margin-top:3px;color:var(--muted);font-family:var(--f-mono);font-size:.64rem;flex-wrap:wrap}
+.gsrc{padding:1px 5px;border-radius:3px;background:var(--good-soft);color:var(--good)}
+.gsrc.mem{background:var(--sunk);color:var(--muted)}
 [hidden]{display:none!important}
 </style>
 <header class="appbar">
   <div class="brand"><i aria-hidden="true"></i>SiteSync</div>
-  <span class="today" title="Integer working days on a common axis">TODAY · DAY 220</span>
+  <span class="today" title="Integer working days on a common axis">Today · Tue 29 Sep 2026 · Day 220</span>
   <div class="roles" id="roles" role="group" aria-label="View as"></div>
   <button class="bell" id="bell" aria-label="Notifications"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v4.5L4 16v1h16v-1l-2-2.5V9a6 6 0 0 0-6-6zm-2.2 15a2.2 2.2 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.7"/></svg><span class="badge" id="bellN" hidden></span></button>
+  <button class="btn ghost" id="guideBtn" aria-pressed="false" title="Show the demo guide (g)">Guide</button><button class="btn ghost" id="resetTop" title="Reset the demo to the seed state">Reset demo</button>
   <div id="notes" class="notes" hidden></div>
 </header>
 <div class="shell">
   <nav class="rail" id="rail" aria-label="Sections"></nav>
   <main id="main" tabindex="-1"></main>
 </div>
-<details class="drawer" id="drawer">
+<details class="drawer" id="drawer" hidden>
   <summary><span class="badge" id="stepBadge">1/11</span><span id="curStep" class="cur">Demo script</span><span class="chev" aria-hidden="true">▴</span></summary>
   <ol id="script"></ol>
-  <div class="foot"><button class="btn primary" id="showMe">Show me where</button><button class="btn ghost" id="reset">Reset</button></div><p class="hint">Click any step to jump there. The pulsing button is what to click next.</p>
+  <div class="foot"><button class="btn primary" id="showMe">Show me where</button><button class="btn ghost" id="reset">Reset</button></div><p class="hint">Guide is on (press g to hide). The pulsing button is what to click next.</p>
 </details>
 <div id="pop" class="pop" hidden role="dialog" aria-modal="false"></div>
 <div id="modal" hidden></div>
@@ -290,7 +303,8 @@ const HEAD = {'M&E':6,'Roofing':4,'Glazing':4,'Drylining':5,'Carpentry':4,'Brick
 const T = {}; TEMPLATE.forEach(([c,n,t,k,w,d,deps,ph]) => T[c] = {c,n,trade:TRADE[t]||null,raw:t,k,w:!!w,d,deps,ph});
 const SUCC = {}; TEMPLATE.forEach(([c]) => SUCC[c] = []); TEMPLATE.forEach(([c,,,,,,deps]) => deps.forEach(p => SUCC[p].push(c)));
 const TOPO = (() => { const seen = new Set(), out = []; const v = c => { if (seen.has(c)) return; seen.add(c); T[c].deps.forEach(v); out.push(c); }; Object.keys(T).forEach(v); return out; })();
-const DEMO_TRANSCRIPT = 'Morning briefing, Hackney Wick Yard. Kev says heavy rain from Thursday, so the roof waterproofing is delayed about five working days. Windows and cladding are on track.';
+const DEMO_TRANSCRIPT = 'Morning briefing, Hackney Wick Yard. Apex rang: the second membrane batch, due next Tuesday, failed their factory quality check. Replacement\'s five working days, so the roof waterproofing pauses from Tuesday until it lands. Windows and cladding are on track.';
+let GUIDE = false; try { GUIDE = localStorage.getItem('sitesync-guide') === '1'; } catch(e) {}
 
 /* ---------------- API ---------------- */
 async function api(path, opts = {}, as){
@@ -304,7 +318,7 @@ async function api(path, opts = {}, as){
 const tryApi = async (path, opts, as) => { try { return await api(path, opts, as); } catch(e) { return null; } };
 const MISSING = new Set();
 /* ---------------- Neo4j explain panels ---------------- */
-const G = {stats:null, ripple:null, swap:null, open:{ripple:false, swap:false}};
+const G = {stats:null, ripple:null, swap:null, log:[], rippleKey:null, swapKey:null, open:{ripple:true, swap:true}};
 const esc = x => String(x ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function graphBadge(r){ return r.source === 'neo4j' ? `<span class="chip good">${r.ms} ms · Neo4j Aura</span>` : `<span class="chip">${r.ms} ms · in-memory fallback</span>`; }
 function cypherBlock(q){ return `<details style="margin-top:8px"><summary class="muted" style="cursor:pointer;font-size:.8rem">Cypher</summary><pre class="mono" style="white-space:pre-wrap;font-size:.74rem;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:8px;margin:6px 0 0">${esc(q)}</pre></details>`; }
@@ -323,7 +337,7 @@ function rippleSVG(r){
 }
 function ripplePanel(){
   const r = G.ripple; if (!G.open.ripple || !r) return '';
-  return `<div class="card fade" style="margin-top:10px;border-color:var(--steel)"><div class="row"><div class="eyebrow">Ripple traced in the graph</div><span class="sp"></span>${graphBadge(r)}</div>
+  return `<div class="card fade" style="margin-top:10px;border-color:var(--steel)"><div class="row"><b style="font:700 1.05rem var(--f-display);color:var(--steel)">Powered by Neo4j graph · ripple traced</b><span class="sp"></span>${graphBadge(r)}</div>
     <p style="margin:6px 0 4px;font-size:.88rem"><b>${esc(r.path[0]?.code)} → handover in ${r.hops} hops</b> along <span class="mono">DEPENDS_ON</span>, following the dependencies that actually set each start date. <b>${r.affected_count}</b> downstream steps are reachable from ${esc(r.path[0]?.code)}.</p>
     <div class="tl" style="padding:6px 4px">${rippleSVG(r)}</div>${cypherBlock(r.cypher)}</div>`;
 }
@@ -344,7 +358,7 @@ function swapSVG(x){
 function swapPanel(){
   const x = G.swap; if (!G.open.swap || !x) return '';
   const n = x.rows.length;
-  return `<div class="card fade" style="margin-top:10px;border-color:var(--steel)"><div class="row"><div class="eyebrow">How we found this: one graph pattern across companies</div><span class="sp"></span>${graphBadge(x)}</div>
+  return `<div class="card fade" style="margin-top:10px;border-color:var(--steel)"><div class="row"><b style="font:700 1.05rem var(--f-display);color:var(--steel)">Powered by Neo4j graph · how we found this match</b><span class="sp"></span>${graphBadge(x)}</div>
     <p style="margin:6px 0 4px;font-size:.88rem">${esc(x.sub)} is approved at the other GC, already has a crew booked on an M&amp;E step there, and that site is within ${x.max_km} km of yours. The pattern matched ${x.pattern_matches ?? n} booking${(x.pattern_matches ?? n)===1?'':'s'}; ${n} overlap${n===1?'s':''} your idle window (days ${x.window ? x.window.join('–') : ''}).</p>
     <div class="tl" style="padding:6px 4px">${swapSVG(x)}</div>${cypherBlock(x.cypher)}</div>`;
 }
@@ -357,9 +371,11 @@ const arr = x => Array.isArray(x) ? x : (x && (x.items || x.results || x.recordi
 /* ---------------- state ---------------- */
 let UI = {user:'dan', view:'timeline'};
 try { UI = Object.assign(UI, JSON.parse(localStorage.getItem('sitesync-ui')) || {}); } catch(e) {}
+const MODE = () => (S.mode && S.mode[S.user]) || 'steps';
+function setMode(m){ if (!S.mode || typeof S.mode !== 'object') S.mode = {}; S.mode[S.user] = m; }
 function saveUI(){ try { localStorage.setItem('sitesync-ui', JSON.stringify({user:S.user, view:S.view, site:S.site, mode:S.mode, overlay:S.overlay})); } catch(e) {} }
 function fresh(){ return {
-  user: UI.user || 'dan', view: UI.view || 'timeline', site: UI.site || {dan:'A',priya:'A',marcus:'C'}, mode: UI.mode || 'steps', overlay: UI.overlay || {priya:null, marcus:null},
+  user: UI.user || 'dan', view: UI.view || 'timeline', site: UI.site || {dan:'A',priya:'A',marcus:'C'}, mode: (UI.mode && typeof UI.mode === 'object') ? UI.mode : {dan:'steps', priya:'steps', marcus:'steps', sam:'steps'}, overlay: UI.overlay || {priya:null, marcus:null},
   conf:{A:{},B:{},C:{},D:{}}, riskD:{A:{},B:{},C:{},D:{}}, pending:null, risk:false, viewReq:{}, offer:'none', link:'none', m8:'none', m3:false, ts:{}, notes:[],
   bookings: seedBookings(), aiCalls:0, events:[], srv:{}
 };}
@@ -414,11 +430,15 @@ async function sync(){
   [['A',tA],['B',tB],['C',tC],['D',tD]].forEach(([k,tl]) => { const r = confFromTimeline(tl); S.conf[k] = r.conf; S.riskD[k] = r.risk; });
   const j1 = tA && tA.steps.find(s => s.code === 'J1');
   S.risk = !!(j1 && j1.risk_flag);
+  const rs = tA && arr(tA.risk_signals).find(r => r.step_code === 'J1'); S.riskDetail = rs ? rs.detail : null;
+  S.pause = {}; [['A',tA],['C',tC]].forEach(([k,tl]) => { S.pause[k] = {}; if (tl && tl.steps) tl.steps.forEach(st => { if (st.pause) S.pause[k][st.code] = st.pause; }); });
   // pending timeline change (Site A)
   const pend = arr(pA).find(p => (p.changes || []).length && ['PENDING','SITE_CONFIRMED'].includes(p.status));
   if (pend){ const ch = pend.changes[0], code = ch.step_id.split('-').pop(), src = pend.source || {};
     const cur = S.conf.A[code] || {}; const lagCh = pend.changes.find(c => c.field === 'lag_days'), delCh = pend.changes.find(c => c.field === 'delay_days');
+    const psCh = pend.changes.find(c => c.field === 'pause_start');
     S.pending = {id: pend.id, site: pend.site_id, code, lag: lagCh ? lagCh.to : (cur.lag || 0), delay: delCh ? delCh.to : (cur.delay || 0),
+      pause: psCh ? {start: psCh.to, end: psCh.to + ((delCh ? delCh.to : 0) - (cur.delay || 0))} : null, plaudFile: src.plaud_file_id, plaudTitle: src.plaud_title,
       reason: src.reason || '—', status: pend.status === 'PENDING' ? 'site' : 'pm', needsPm: pend.needs_pm, knock: pend.knock_on,
       source: {kind: src.kind === 'voice' ? 'voice' : src.kind === 'csv' ? 'csv' : src.kind === 'timeline' ? 'typed' : (src.excerpt ? 'text' : 'typed'), excerpt: src.excerpt || '', conf: src.confidence}};
   } else S.pending = null;
@@ -472,6 +492,10 @@ async function sync(){
   S.notes = arr(notes).map(n => ({text: n.text, t: n.at || n.t || '', read: !!n.read}));
   S.events = arr(events).map((e, i) => ({t: e.at || '', who: (e.user_id && USERS[e.user_id] ? USERS[e.user_id].name : (e.user_id || 'System')), what: describe(e), src: (e.source && e.source.kind) || 'system'})).reverse();
   const calls = llm ? arr(llm.calls) : []; S.aiCalls = calls.length; S.llm = calls;
+  // Neo4j panels load automatically (open by default)
+  if (S.pending && G.rippleKey !== S.pending.id){ G.rippleKey = S.pending.id; G.ripple = await tryApi(`/api/graph/ripple?site_id=${S.pending.site}&step_code=${S.pending.code}`, {}, 'priya'); }
+  if (gap && S.offer === 'offered' && G.swapKey !== gap.id){ G.swapKey = gap.id; G.swap = await tryApi(`/api/graph/swap-explain?gap_id=${encodeURIComponent(gap.id)}`, {}, 'priya'); }
+  const gl2 = await tryApi('/api/graph/log', {}, S.user); if (gl2) G.log = arr(gl2.calls);
 }
 function describe(e){
   const p = e.payload || {};
@@ -539,13 +563,11 @@ function knock(site){
 
 /* ---------------- script (progress derived from server state) ---------------- */
 const SCRIPT = [
-  ['dan','timeline','Dan updates J1: click the bar (or Update timeline → Plaud note)', () => !!S.pending || isDemoConfirmed()],
+  ['dan','timeline','Dan updates J1: Sync from Plaud (or click the J1 bar)', () => !!S.pending || isDemoConfirmed()],
   ['dan','timeline','Dan checks the knock-on and confirms the fact', () => (S.pending && S.pending.status==='pm') || isDemoConfirmed()],
   ['priya','approvals','Priya approves. Sparks S1 is now idle days 230–235', () => isDemoConfirmed()],
   ['priya','board','Priya offers S1’s idle days to nearby projects (anonymised)', () => S.offer==='offered'],
-  ['marcus','timeline','Marcus sees M&E available near him and requests an anonymised view', () => !!S.viewReq.A],
-  ['priya','requests','Priya shares an anonymised view with Riverside', () => S.viewReq.A==='granted'],
-  ['marcus','timeline','Marcus overlays the view, sees the match and requests the crew', () => S.link!=='none'],
+  ['marcus','timeline','Marcus overlays the offer on his timeline and requests the crew', () => S.link!=='none'],
   ['priya','requests','Priya accepts and sets terms: S1 back by day 235', () => S.link==='active'],
   ['sam','proposals','Sam (Sparks) accepts the move for crew S1', () => ['sam','marcus','done'].includes(S.m8)],
   ['marcus','reviews','Marcus confirms the booking on his site', () => ['marcus','done'].includes(S.m8)],
@@ -561,21 +583,20 @@ function guideTarget(){
   switch (p){
     case 0: if (modal) return S.tab==='plaud' ? '[data-act="plaudPropose"]' : '[data-utab="plaud"]';
             if (pop) return el('f-go') ? '#f-go' : '[data-act="editStep"]';
-            return nav('timeline') || '.bar[data-code="J1"]';
+            return nav('timeline') || '[data-act="syncPlaud"]';
     case 1: return nav('timeline') || '.review [data-act="confirmPending"]';
     case 2: return nav('approvals') || '.review [data-act="approvePending"]';
     case 3: return nav('board') || '[data-act="offerCapacity"]';
-    case 4: return nav('timeline') || '.banner [data-act="requestView"]';
-    case 5: return nav('requests') || '[data-act="grantView"]';
-    case 6: return nav('timeline') || (S.overlay.marcus==='A' ? '.banner [data-act="requestLink"]' : '.banner [data-overlay="A"]');
-    case 7: return nav('requests') || '[data-act="acceptLink"]';
-    case 8: return nav('proposals') || '[data-act="samAccept"]';
-    case 9: return nav('reviews') || '[data-act="marcusConfirm"]';
-    case 10: return nav('approvals') || '[data-act="confirmBooking"]';
+    case 4: return nav('timeline') || (S.overlay.marcus==='A' ? '.banner [data-act="requestLink"]' : '.banner [data-act="overlayOffer"]');
+    case 5: return nav('requests') || '[data-act="acceptLink"]';
+    case 6: return nav('proposals') || '[data-act="samAccept"]';
+    case 7: return nav('reviews') || '[data-act="marcusConfirm"]';
+    case 8: return nav('approvals') || '[data-act="confirmBooking"]';
   }
 }
 function applyGuide(){
   document.querySelectorAll('.demo-target').forEach(x => x.classList.remove('demo-target'));
+  if (!GUIDE) return;
   const p = progress();
   if (p < SCRIPT.length && S.user !== SCRIPT[p][0]) { const r = document.querySelector(`.role[data-user="${SCRIPT[p][0]}"]`); if (r) r.classList.add('demo-target'); return; }
   const sel = guideTarget(); const t = sel && document.querySelector(sel); if (!t) return;
@@ -594,7 +615,7 @@ function jumpTo(i){
 }
 
 /* ---------------- chrome ---------------- */
-function attention(u){ const p = progress(); return p < SCRIPT.length && SCRIPT[p][0] === u; }
+function attention(u){ const p = progress(); return GUIDE && p < SCRIPT.length && SCRIPT[p][0] === u; }
 function renderBell(){ const c = unread(S.user).length; el('bellN').textContent = c; el('bellN').hidden = !c; }
 function renderRoles(){
   el('roles').innerHTML = Object.entries(USERS).map(([k,u]) => `
@@ -604,9 +625,19 @@ function renderRoles(){
     </button>`).join('');
 }
 function renderRail(){
-  const p = progress(), here = p < SCRIPT.length && SCRIPT[p][0]===S.user ? SCRIPT[p][1] : null;
+  const p = progress(), here = GUIDE && p < SCRIPT.length && SCRIPT[p][0]===S.user ? SCRIPT[p][1] : null;
   el('rail').innerHTML = `<div class="org">${ORGS[U().org]}</div>` + NAV[S.user].map(([id,label]) =>
-    `<button class="nav" data-view="${id}" ${S.view===id?'aria-current="page"':''}><span>${label}</span>${here===id?'<span class="badge">1</span>':''}</button>`).join('');
+    `<button class="nav" data-view="${id}" ${S.view===id?'aria-current="page"':''}><span>${label}</span>${here===id?'<span class="badge">1</span>':''}</button>`).join('') + graphActivity();
+}
+let GACT_OPEN = true; try { GACT_OPEN = localStorage.getItem('sitesync-gact') !== '0'; } catch(e) {}
+let GSEEN = 0;
+function graphActivity(){
+  const ops = (G.log || []).slice(0, 6), maxSeq = Math.max(0, ...ops.map(o => o.seq || 0)), prev = GSEEN; GSEEN = Math.max(GSEEN, maxSeq);
+  return `<details class="gact" id="gact" ${GACT_OPEN?'open':''}><summary>Graph activity · Neo4j ${G.stats && G.stats.source==='neo4j' ? `<span class="muted" style="text-transform:none;font-weight:400">· ${G.stats.nodes} nodes</span>` : ''}</summary>
+    ${ops.length ? ops.map(o => `<div class="gop ${prev && (o.seq||0) > prev ? 'new' : ''}"><b>${esc(o.op)}</b>${o.count>1?` <span class="muted">×${o.count}</span>`:''}
+      <div class="cq" title="Click to expand the Cypher">${esc(o.cypher)}</div>
+      <div class="meta"><span>${o.ms} ms</span><span>${o.rows ?? '—'} rows</span><span class="gsrc ${o.source==='neo4j'?'':'mem'}">${o.source==='neo4j'?'Neo4j Aura':'in-memory'}</span><span>${esc(o.at||'')}</span></div></div>`).join('')
+      : '<div class="muted" style="padding:0 6px">No graph calls yet.</div>'}</details>`;
 }
 function renderScript(){
   const p = progress();
@@ -636,8 +667,8 @@ function weatherBanner(site){
   const canAct = S.user==='dan' || S.user==='priya';
   return `<div class="banner" role="status">
     <svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="var(--risk)" opacity=".18"/>${drop(14,14,12)}</svg>
-    <div class="txt"><b>Rain forecast over J1 Roof waterproofing</b>
-    <span class="muted">Weather-sensitive step on the critical path. Risk-adjusted handover ${sched('A','conf')._end} → ${sched('A','risk')._end}. The confirmed timeline moves only when someone on site confirms the impact.</span></div>
+    <div class="txt"><b>Supplier notice on J1 Roof waterproofing: ${esc(S.riskDetail || 'Apex Roofing: membrane batch 2 (due Tue, day 225) failed factory QA; replacement in 5 working days')}</b>
+    <span class="muted">Site-specific signal on a critical-path step. Risk-adjusted handover ${sched('A','conf')._end} → ${sched('A','risk')._end}. The confirmed timeline moves only when someone on site confirms the impact.</span></div>
     ${canAct ? `<div class="row"><button class="btn" data-act="noImpact">No impact</button><button class="btn primary" data-act="openStep" data-site="A" data-code="J1">Update J1</button></div>` : ''}
   </div>`;
 }
@@ -649,7 +680,7 @@ function knockBlock(k){
     <div class="stat"><b>${k.from} → ${k.to}</b><span>handover (L7 end)</span></div>
     <div class="stat"><b style="color:${k.created.some(g=>g.inLook&&g.type!=='EXTEND')?'var(--risk)':'var(--good)'}">${k.created.filter(g=>g.inLook&&g.type!=='EXTEND').length}</b><span>new gaps in the 20-day lookahead</span></div>
   </div>
-  <div class="row" style="margin-top:8px"><button class="btn" data-act="showRipple">${G.open.ripple ? 'Hide the ripple' : 'Show the ripple · Neo4j'}</button></div>${ripplePanel()}
+  <div class="row" style="margin-top:8px"><button class="btn ghost" style="padding-left:0" data-act="showRipple">${G.open.ripple && G.ripple ? 'Hide graph' : 'Show the ripple · Neo4j'}</button></div>${ripplePanel()}
   ${rows.length?`<div class="sep"></div><div class="eyebrow" style="margin-bottom:6px">Labour impact</div><div class="scroll"><table><tbody>${rows.map(([g,w]) => `<tr><td><span class="chip ${w==='RESOLVED'?'good':g.type==='EXTEND'?'info':g.inLook?'surplus':''}">${w==='RESOLVED'?'RESOLVED':g.type==='EXTEND'?'ASSUMED':g.inLook?'CREATED · '+g.type:'LATER · '+g.type}</span></td><td>${g.type==='EXTEND'?`${g.b.crew} booking extended to match (confirm with sub)`:gapLabel(g)}</td><td class="r mono">days ${g.s}–${g.e}</td></tr>`).join('')}</tbody></table></div>`:''}`;
 }
 function reviewCard(){
@@ -663,7 +694,7 @@ function reviewCard(){
     actions = isPM ? `<button class="btn ghost" data-act="discardPending">Send back</button><span class="sp"></span><button class="btn primary" data-act="approvePending">Approve change</button>` : `<span class="muted" style="font-size:.85rem">Waiting for the PM because the handover date moves.</span>`; }
   return `<div class="card review fade">
     <div class="row"><h3 style="margin:0">${site}-${P.code} ${t.n}</h3><span class="sp"></span>${chip}</div>
-    <dl class="kv" style="margin-top:8px"><dt>Change</dt><dd>Start <span class="mono">${c[0]} → ${p[0]}</span> · Finish <span class="mono">${c[1]} → ${p[1]}</span></dd><dt>Reason</dt><dd>${P.reason||'—'}</dd><dt>Source</dt><dd>${P.source.kind==='voice'?`Plaud note: “<mark style="background:var(--accent-soft);color:inherit">${P.source.excerpt}</mark>”`:P.source.kind==='text'?`Transcript: “<mark style="background:var(--accent-soft);color:inherit">${P.source.excerpt}</mark>”`:P.source.kind==='csv'?'CSV upload':'Edited on the timeline'} ${P.source.conf?`<span class="chip">confidence ${P.source.conf}</span>`:''}</dd></dl>
+    <dl class="kv" style="margin-top:8px"><dt>Change</dt><dd>${P.pause ? `${P.code} ${esc(T[P.code].n.split('(')[0].trim().toLowerCase())} <b>paused days ${P.pause.start}–${P.pause.end}</b> (${esc(P.reason)}) · finish <span class="mono">${c[1]} → ${p[1]}</span>` : `Start <span class="mono">${c[0]} → ${p[0]}</span> · Finish <span class="mono">${c[1]} → ${p[1]}</span>`}</dd><dt>Reason</dt><dd>${P.reason||'—'}</dd><dt>Source</dt><dd>${P.source.kind==='voice'?`<span class="chip hot">Plaud</span> ${esc(P.plaudTitle || plaudTitle(P.plaudFile) || 'recording')} · “<mark style="background:var(--accent-soft);color:inherit">${P.source.excerpt}</mark>”`:P.source.kind==='text'?`Transcript: “<mark style="background:var(--accent-soft);color:inherit">${P.source.excerpt}</mark>”`:P.source.kind==='csv'?'CSV upload':'Edited on the timeline'} ${P.source.conf?`<span class="chip">confidence ${P.source.conf}</span>`:''}</dd></dl>
     ${knockBlock(k)}
     ${S.user==='dan' && P.status==='pm' ? `<div style="margin-top:10px">${TRK.update()}</div>` : ''}
     ${actions?`<div class="row" style="margin-top:12px">${actions}</div>`:''}
@@ -681,7 +712,9 @@ function stepsSVG(site){
   const bk = S.bookings.filter(b => b.site===site);
   const g0 = demoGap();
   const newIdle = prop ? knock(site).created.filter(x => x.type==='SURPLUS' && x.inLook) : [];
-  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Site ${site} timeline. Click a bar to see details and update it.">`;
+  const pauses = (S.pause && S.pause[site]) || {};
+  const blk = (y, a, b, why) => `<rect x="${X(a)}" y="${y+8}" width="${(b-a)*px}" height="12" fill="url(#blk)" stroke="var(--bad)" stroke-width="1"/><text x="${X(a)+((b-a)*px)/2}" y="${y+5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" font-weight="600" fill="var(--bad)">blocked: ${esc(String(why || 'on hold').replace(/^supplier:\s*/i,'').replace(/second membrane batch/i,'batch 2'))}</text>`;
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Site ${site} timeline. Click a bar to see details and update it."><defs><pattern id="blk" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="var(--surface)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--bad)" stroke-width="2.2"/></pattern></defs>`;
   for (let d = Math.ceil(d0/10)*10; d <= d1; d += 10){ g += `<line x1="${X(d)}" y1="${top-6}" x2="${X(d)}" y2="${H-6}" stroke="var(--line)"/>`; if (d % 20 === 0) g += `<text x="${X(d)}" y="${top-14}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)" text-anchor="middle">${d}</text>`; }
   g += `<rect x="${X(TODAY)}" y="${top-6}" width="${LOOK*px}" height="${H-top}" fill="var(--steel-soft)" opacity=".35"/>`;
   g += `<line x1="${X(TODAY)}" y1="${top-24}" x2="${X(TODAY)}" y2="${H-6}" stroke="var(--accent)" stroke-width="1.5"/><text x="${X(TODAY)+4}" y="10" font-family="IBM Plex Mono" font-size="10" fill="var(--accent)">TODAY</text>`;
@@ -708,9 +741,11 @@ function stepsSVG(site){
         g += `<rect x="${X(prop[c][0])}" y="${y+8}" width="${(prop[c][1]-prop[c][0])*px}" height="12" rx="2" fill="var(--accent)" fill-opacity=".9" stroke="var(--accent)"/>`;
         g += `<text x="${X(prop[c][1])+5}" y="${y+17}" font-family="IBM Plex Mono" font-size="10" font-weight="600" fill="var(--accent)">${shift>0?'+':''}${shift}d</text>`;
       }
+      const pz = (prop && S.pending && S.pending.code===c && S.pending.pause) ? S.pending.pause : (!moved ? pauses[c] : null);
+      if (pz) g += blk(y, pz.start, pz.end, pz.reason || (S.pending && S.pending.reason) || 'batch 2 failed QA');
       if (risk && !prop && (risk[c][1]!==ce)) {
         g += `<rect x="${X(risk[c][0])}" y="${y+9}" width="${(risk[c][1]-risk[c][0])*px}" height="10" rx="2" fill="none" stroke="var(--risk)" stroke-width="1.4" stroke-dasharray="2 2"/>`;
-        if (c==='J1') g += `<text x="${X(risk[c][1])+5}" y="${y+17}" font-family="IBM Plex Mono" font-size="9.5" fill="var(--risk)">rain risk, unconfirmed</text>`;
+        if (c==='J1') g += `<text x="${X(risk[c][1])+5}" y="${y+17}" font-family="IBM Plex Mono" font-size="9.5" fill="var(--risk)">supplier risk, unconfirmed</text>`;
       }
       newIdle.filter(x => x.b.step===c).forEach(x => { g += `<rect x="${X(x.s)}" y="${y+8}" width="${(x.e-x.s)*px}" height="12" fill="var(--risk)" stroke="var(--risk)"/><text x="${X(x.s)-4}" y="${y+17}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" font-weight="600" fill="var(--risk)">NEW: ${x.b.crew} idle ${x.s}–${x.e}</text>`; });
       if (nb.length) g += `<circle cx="${X(cs)-7}" cy="${y+14}" r="3.2" fill="var(--muted)"><title>${nb.map(b=>b.crew).join(', ')}</title></circle>`;
@@ -732,6 +767,7 @@ function tradeWindows(site, sc){
 function overlayWindows(ov){
   // own site: computed; other company: only what the server shares (week level)
   if (SITES[ov].org === U().org) return {B: tradeWindows(ov, sched(ov,'conf')), offered: [], anon:false};
+  const off = S.srv.offerM; if (off && off.start !== undefined) return {B:{}, offered:[[off.start, off.end]], anon:true};
   const o = S.srv.overlay; if (!o) return {B:{}, offered:[], anon:true};
   const B = {}; Object.entries(o.trades || o.windows || {}).forEach(([t, ws]) => { B[tradeLabel(t)] = ws.map(w => Array.isArray(w) ? w : [w.start ?? w.week_from*5, w.end ?? (w.week_to+1)*5]); });
   const offered = (o.offered || []).map(w => Array.isArray(w) ? w : [w.start, w.end]);
@@ -778,18 +814,18 @@ V.timeline = () => {
   const others = Object.keys(SITES).filter(x => x!==site && (SITES[x].org===u.org || (S.user==='marcus' && x==='A' && S.offer!=='none')));
   const ovBtn = x => { const own = SITES[x].org===u.org, st = S.viewReq[x];
     if (own) return `<button data-overlay="${x}" aria-pressed="${ov===x}">Site ${x}</button>`;
-    return `<button data-overlay="${x}" aria-pressed="${ov===x}" ${st!=='granted'?'disabled':''} title="${st==='granted'?'Anonymised view shared':'Request an anonymised view first'}">${SITES[x].anon}${st==='granted'?'':' 🔒'}</button>`; };
+    return `<button data-overlay="${x}" aria-pressed="${ov===x}" title="The anonymised offer only">${SITES[x].anon} offer</button>`; };
   return `${weatherBanner(site)}
   <div class="ph"><div><div class="eyebrow">${ORGS[SITES[site].org]} · ${SITES[site].name}</div><h1>Site ${site} timeline</h1><p>${canEdit?'Click any bar to see it and update it. Everything downstream moves automatically.':'Read-only for your role.'}</p></div>
-    <div class="row">${canEdit?`<button class="btn primary" data-act="openUpdate">Update timeline ▾</button>`:''}</div></div>
+    <div class="row">${canEdit?`${S.user==='dan'?'<button class="btn accent" data-act="syncPlaud">🎙 Sync from Plaud</button>':''}<button class="btn ${S.user==='dan'?'':'primary'}" data-act="openUpdate">Update timeline ▾</button>`:''}</div></div>
   ${S.pending && S.pending.site===site ? reviewCard() : ''}${availBanner()}${sentStrip()}
   <div class="toolbar">
     ${u.sites.length>1?`<div class="seg" role="group" aria-label="Site">${u.sites.map(x=>`<button data-site-pick="${x}" aria-pressed="${site===x}">${x} · ${SITES[x].name}</button>`).join('')}</div>`:''}
-    <div class="seg" role="group" aria-label="View"><button data-mode="steps" aria-pressed="${S.mode==='steps'}">Steps</button><button data-mode="trades" aria-pressed="${S.mode==='trades'}">Trades</button></div>
+    <div class="seg" role="group" aria-label="View"><button data-mode="steps" aria-pressed="${MODE()==='steps'}">Steps</button><button data-mode="trades" aria-pressed="${MODE()==='trades'}">Trades</button></div>
     ${S.user!=='dan'?`<span class="muted" style="font-size:.82rem;margin-left:6px">Overlay</span><div class="seg" role="group" aria-label="Overlay"><button data-overlay="" aria-pressed="${!ov}">None</button>${others.map(ovBtn).join('')}</div>`:''}
   </div>
-  ${S.mode==='steps' ? stepsLegend() + `<div class="tl">${stepsSVG(site)}</div>` :
-   `<div class="overlay-key"><span><i style="background:var(--steel)"></i>Site ${site} (confirmed)</span>${ov?`<span><i style="${SITES[ov].org!==u.org?'background:var(--accent-soft);outline:1px solid var(--accent)':'background:var(--accent)'}"></i>${SITES[ov].org!==u.org?SITES[ov].anon+' · anonymised, week level':'Site '+ov}</span>`:'<span>Pick an overlay to compare trade windows</span>'}<span><i style="background:var(--risk)"></i>Idle crew</span>${S.offer==='offered'?'<span><i style="background:var(--good)"></i>Offered capacity</span>':''}</div>
+  ${MODE()==='steps' ? stepsLegend() + `<div class="tl">${stepsSVG(site)}</div>` :
+   `<div class="overlay-key"><span><i style="background:var(--steel)"></i>Site ${site} (confirmed)</span>${ov?`<span><i style="${SITES[ov].org!==u.org?'background:var(--accent-soft);outline:1px solid var(--accent)':'background:var(--accent)'}"></i>${SITES[ov].org!==u.org?SITES[ov].anon+' · offered crew window only':'Site '+ov}</span>`:'<span>Pick an overlay to compare trade windows</span>'}<span><i style="background:var(--risk)"></i>Idle crew</span>${S.offer==='offered'?'<span><i style="background:var(--good)"></i>Offered capacity</span>':''}</div>
     <div class="tl">${tradesSVG(site, ov)}</div>`}
   `;
 };
@@ -848,23 +884,23 @@ function sentStrip(){
   const list = [];
   if (S.user==='dan' && S.ts['upd.sent']) list.push(TRK.update());
   if (S.user==='priya' && S.ts['offer.sent']) list.push(TRK.offer());
-  if (S.user==='marcus'){ if (S.ts['view.sent']) list.push(TRK.view()); if (S.ts['link.sent']) list.push(TRK.crew()); }
+  if (S.user==='marcus'){ if (S.ts['link.sent']) list.push(TRK.crew()); }
   if (!list.length) return '';
   return `<div class="card" style="margin-bottom:12px"><div class="eyebrow" style="margin-bottom:8px">Your requests</div><div class="grid g2">${list.join('')}</div></div>`;
 }
 function availBanner(){
   if (S.user!=='marcus' || S.offer!=='offered' || S.m8==='done' || (S.site.marcus||'C')!=='C') return '';
   const o = S.srv.offerM || {}, g = {s: o.start ?? 230, e: o.end ?? 235};
-  const st = S.viewReq.A, ov = S.overlay.marcus==='A';
+  const ov = S.overlay.marcus==='A';
   const fits = o.fits ? `Fits your ${o.fits.step_code ? 'C-' + o.fits.step_code : ''} ${o.fits.step_name || 'first fix'}${o.fits.start !== undefined ? ` (${o.fits.start}–${o.fits.end})` : ''}.` : 'Fits your C-K3 first fix (225–245).';
-  const action = !st ? `<button class="btn accent" data-act="requestView" data-site="A">Request view of ${SITES.A.anon}</button>`
-    : st==='requested' ? `<span class="chip info">View requested · waiting</span>`
-    : !ov ? `<button class="btn primary" data-overlay="A">Overlay ${SITES.A.anon}</button>`
-    : S.link==='none' ? `<button class="btn accent" data-act="requestLink">Request this crew</button>`
+  const action = S.link==='none' ? `<div class="row">${ov ? '' : '<button class="btn" data-act="overlayOffer">Overlay on my timeline</button>'}<button class="btn accent" data-act="requestLink">Request this crew</button></div>`
     : `<span class="chip ${S.link==='active'?'good':'info'}">${S.link==='active'?'Agreed with Northgate':'Crew requested · waiting'}</span>`;
+  const fitCode = (o.fits && o.fits.step_code) || 'K3';
+  const existing = S.bookings.some(b => b.site === 'C' && b.step === fitCode && /sparks/i.test(b.crew));
+  const feas = existing ? `<div style="font-size:.86rem;margin-top:4px;color:var(--good)"><b>Feasible:</b> Sparks already works on your C-${fitCode} package (existing subcontract, no onboarding) · ${(o.start ?? 230) - TODAY} working days’ notice</div>` : '';
   return `<div class="banner good fade" role="status">
     <svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="var(--good)" opacity=".18"/><path d="M8 14.5l4 4 8-9" stroke="var(--good)" stroke-width="2.4" fill="none"/></svg>
-    <div class="txt"><b>${tradeLabel(o.trade || 'mep')} crew available near you: ${o.workers || 6} workers, days ${g.s}–${g.e}</b><span class="muted">Offered by anonymised project ${S.link==='active'?`${SITES.A.anon} (Northgate Build)`:SITES.A.anon}, ${o.distance_band || '~2 km'} away. ${fits} ${ov?'The green window on the overlay is the offer.':''}</span></div>${action}</div>`;
+    <div class="txt"><b>${tradeLabel(o.trade || 'mep')} crew available near you: ${o.workers || 6} workers, days ${g.s}–${g.e}</b><span class="muted">Offered by anonymised project ${S.link==='active'?`${SITES.A.anon} (Northgate Build)`:SITES.A.anon}, ${o.distance_band || '~2 km'} away. ${fits} ${ov?'The green window on the overlay is the offer.':''}</span>${feas}</div>${action}</div>`;
 }
 function decided(title, who, at, body){ return `<div class="card decided fade"><div class="row"><span class="chip good">✓ ${who}</span><h3 style="margin:0">${title}</h3><span class="sp"></span><span class="mono muted" style="font-size:.78rem">${at||''}</span></div>${body?`<p class="muted" style="margin:6px 0 0;font-size:.86rem">${body}</p>`:''}</div>`; }
 V.approvals = () => {
@@ -888,7 +924,7 @@ V.approvals = () => {
 function optionCard(o){
   return `<div class="opt ${o.best?'best':''} ${o.off?'off':''}">
     <div class="hd"><span class="code">${o.code}</span><h4>${o.title}</h4>${o.chip||''}</div>
-    <div style="font-size:.88rem">${o.desc}</div>
+    <div style="font-size:.88rem">${o.desc}</div>${o.feas||''}
     <div class="facts">${o.facts.map(([k,v])=>`<span>${k} <b>${v}</b></span>`).join('')}</div>
     ${o.track||''}${o.actions?`<div class="row">${o.actions}</div>`:''}
   </div>`;
@@ -906,10 +942,13 @@ V.board = () => {
   const m8s = opt('M8'), m3s = opt('M3'), m1s = opt('M1'), prot = m8s.days_protected ?? m3s.days_protected ?? (noAct._end - conf._end);
   const m8 = {code:'M8', best:true, title:'Slot swap: offer S1’s idle days to a nearby project',
     chip: S.link==='active' ? '<span class="chip good">Agreed with Riverside</span>' : S.link==='requested' ? '<span class="chip hot">Riverside asked for it</span>' : S.offer==='offered' ? '<span class="chip info">Offered</span>' : '<span class="chip">Not offered yet</span>',
+    feas: (() => { const sub = (G.swap && G.swap.sub) || 'Sparks Electrical', subShort = sub.split(' ')[0];
+      const existing = (G.swap && G.swap.rows && G.swap.rows.length) || S.bookings.some(b => b.site !== sg.site_id && new RegExp(subShort, 'i').test(b.crew) && T[b.step] && T[b.step].trade === tradeLabel(sg.trade));
+      return existing ? `<div class="preview" style="margin-top:6px;background:var(--good-soft);color:var(--good)"><b>Feasible:</b> ${esc(subShort)} already holds an ${tradeLabel(sg.trade)} package at the nearby project (existing subcontract, approved at both companies, no onboarding) · ${sg.start - TODAY} working days’ notice (gap starts day ${sg.start})</div>` : ''; })(),
     desc: S.offer==='offered' ? `Offered anonymised to nearby projects: M&E, ${sg.workers} workers, days ${sg.start}–${sg.end}, ~1 km area. A project that needs M&E can ask for it; you set the terms, including S1’s return to A-K3 on day ${sg.end}.`
       : `Share S1’s idle window anonymised (trade, crew size, days ${sg.start}–${sg.end}, ~1 km area) with nearby projects. Projects that need M&E can request it. Nothing is shared about your programme.`,
     facts:[['Start by','day '+(m8s.start_by ?? sg.start-1)],['Setup',(m8s.setup_days ?? 1)+' day'],['Protects',prot+' days'],['Value',gbp(m8s.value_gbp ?? prot*DAY_VALUE + (sg.end-sg.start)*CREW_DAY)],['Reliability','medium']],
-    track: (S.offer==='offered' ? TRK.offer(true) : '') + `<div class="row"><button class="btn ghost" style="padding-left:0" data-act="showSwap">${G.open.swap ? 'Hide' : 'How we found this · Neo4j'}</button></div>${swapPanel()}`,
+    track: (S.offer==='offered' ? TRK.offer(true) : '') + `<div class="row"><button class="btn ghost" style="padding-left:0" data-act="showSwap">${G.open.swap && G.swap ? 'Hide graph' : 'How we found this · Neo4j'}</button></div>${swapPanel()}`,
     actions: S.m3 ? '' : S.offer==='none' ? `<span class="muted" style="font-size:.82rem">Nearby projects that need M&amp;E in that window will see it.</span><span class="sp"></span><button class="btn accent" data-act="offerCapacity">Offer to nearby projects</button>`
       : S.link==='none' ? `<span class="muted" style="font-size:.82rem">Waiting for a nearby project to ask.</span>`
       : S.link==='requested' ? `<span class="sp"></span><button class="btn accent" data-view-go="requests">Review Riverside’s request</button>`
@@ -922,9 +961,9 @@ V.board = () => {
   const m10 = {code:'M10', off:true, title:'Agency top-up via your framework', chip:'<span class="chip">For shortages</span>', desc:'Applies when you’re short of a trade. CrewNow is approved at Northgate.', facts:[['Setup','1 day']]};
   return head + `<div class="card fade">
     <div class="row"><span class="chip surplus">${sg.type}</span><h3 style="margin:0">${tradeLabel(sg.trade)} · ${sg.crew} · ${sg.workers} workers · Site ${sg.site_id}</h3><span class="sp"></span><span class="chip">days ${sg.start}–${sg.end}</span><span class="chip hot">${sg.warning_days} days' warning</span></div>
-    <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Created by J1 Roof waterproofing +5 days (confirmed by Dan, approved by you). A-K3 now starts day ${conf.K3[0]}; S1 is booked from ${sg.start}.</p>
+    <p class="muted" style="margin:6px 0 12px;font-size:.88rem">S1 idle ${sg.start}–${sg.end} because the roof now finishes day ${conf.J1[1]} (membrane batch 2 failed QA); back on A-K3 day ${sg.end} when first fix can start.</p>
     <div class="cmp"><div><div class="eyebrow">No action</div><b class="num">+${noAct._end-base} days</b><div class="muted" style="font-size:.85rem">S1 redeploys and returns ${RETURN_LAG} days late. Handover ${noAct._end}.</div></div>
-    <div><div class="eyebrow">With best action</div><b class="num">+${conf._end-base} days</b><div class="muted" style="font-size:.85rem">Crew back for day ${sg.end}. Handover ${conf._end} (weather only).</div></div></div>
+    <div><div class="eyebrow">With best action</div><b class="num">+${conf._end-base} days</b><div class="muted" style="font-size:.85rem">Crew back for day ${sg.end}. Handover ${conf._end} (supplier delay only).</div></div></div>
     <div class="protect"><b>${prot} days</b><span>protected × ${gbp(DAY_VALUE)} day value = <strong>${gbp(prot*DAY_VALUE)}</strong>. No-action snapshot locked when the gap opened.</span></div>
     <div class="sep"></div><div class="eyebrow" style="margin-bottom:8px">Options, ranked by value then reliability</div>
     <div class="grid">${[m8,m3,m1,m10].map(optionCard).join('')}</div></div>`;
@@ -1050,8 +1089,9 @@ function openStep(site, code, at, editing){
     <dl class="kv" style="margin-top:8px"><dt>Baseline</dt><dd class="mono">${base[0]}–${base[1]}</dd><dt>Confirmed</dt><dd class="mono">${conf[0]}–${conf[1]} (${t.d} days)</dd><dt>Crew</dt><dd>${bk.length?bk.map(b=>`${b.crew} (${b.size}) booked ${b.s}–${b.e}`).join('<br>'):'None booked'}</dd></dl>
     ${!editing ? `<div class="row" style="margin-top:10px">${can?`<button class="btn primary" data-act="editStep">Update</button>`:'<span class="muted" style="font-size:.82rem">Read-only for your role</span>'}</div>` : `
     <div class="sep"></div>
-    <div class="row2"><div class="field"><label for="f-s">Start</label><input id="f-s" type="number" value="${conf[0]}"></div><div class="field"><label for="f-e">Finish</label><input id="f-e" type="number" value="${code==='J1'&&!(S.conf.A.J1||{}).delay?conf[1]+5:conf[1]}"></div></div>
-    <div class="field" style="margin-top:8px"><label for="f-r">Reason</label><select id="f-r"><option>Weather</option><option>Late predecessor</option><option>Labour shortage</option><option>Materials late</option><option>Design change</option><option>Progress faster</option><option>Other</option></select></div>
+    <div class="row2"><div class="field"><label for="f-s">Start</label><input id="f-s" type="number" value="${conf[0]}"></div><div class="field"><label for="f-e">Finish</label><input id="f-e" type="number" value="${conf[1]}"></div></div>
+    <div class="row2" style="margin-top:8px"><div class="field"><label for="f-ps">Blocked from day</label><input id="f-ps" type="number" value="${code==='J1'&&!((S.conf.A.J1||{}).delay)?Math.min(conf[1], TODAY+5):''}" placeholder="optional"></div><div class="field"><label for="f-pd">for (working days)</label><input id="f-pd" type="number" min="0" value="${code==='J1'&&!((S.conf.A.J1||{}).delay)?5:''}" placeholder="0"></div></div>
+    <div class="field" style="margin-top:8px"><label for="f-r">Reason</label><select id="f-r"><option>Batch 2 failed QA</option><option>Supplier / materials late</option><option>Weather</option><option>Late predecessor</option><option>Labour shortage</option><option>Materials late</option><option>Design change</option><option>Progress faster</option><option>Other</option></select></div>
     <div id="f-prev" class="preview" aria-live="polite"></div>
     <div class="row" style="margin-top:10px"><button class="btn ghost" data-act="closePop">Cancel</button><span class="sp"></span><button class="btn primary" id="f-go" data-act="submitEdit">Propose update</button></div>`}`;
   placePop();
@@ -1066,7 +1106,12 @@ function editValues(){
   if (ns < c[2]) return {err:`Start can’t be before its predecessors finish (day ${c[2]}).`};
   const lag = ns - c[2], delay = (ne - ns) - t.d;
   if (delay < -t.d) return {err:'Duration can’t be negative.'};
-  if (lag === (cur.lag||0) && delay === (cur.delay||0)) return {err:'No change yet. Edit the dates to see the knock-on.'};
+  const ps = el('f-ps') && el('f-ps').value !== '' ? +el('f-ps').value : null, pd = el('f-pd') && el('f-pd').value !== '' ? +el('f-pd').value : 0;
+  if (pd > 0){
+    if (ps === null || ps < c[0] || ps > c[1]) return {err:`Blocked window must start within the step (days ${c[0]}–${c[1]}).`};
+    return {site, code, lag: cur.lag || 0, delay: (cur.delay || 0) + pd, pauseStart: ps, pauseDays: pd, reason: el('f-r').value};
+  }
+  if (lag === (cur.lag||0) && delay === (cur.delay||0)) return {err:'No change yet. Edit the dates or add a blocked window to see the knock-on.'};
   return {site, code, lag, delay, start: ns, finish: ne, reason: el('f-r').value};
 }
 function previewEdit(){
@@ -1076,7 +1121,7 @@ function previewEdit(){
   const k = knock(v.site); S.pending = keep;
   const ng = k.created.filter(g => g.inLook && g.type!=='EXTEND').length;
   box.className = 'preview'; btn.disabled = false;
-  box.innerHTML = `<b>${v.code} + ${k.moved.filter(c=>c!==v.code).length} downstream steps move</b> · handover <span class="mono">${k.from} → ${k.to}</span>${ng?` · <span style="color:var(--risk)">${ng} new crew gap${ng>1?'s':''}</span>`:''}`;
+  box.innerHTML = `${v.pauseDays ? `<b>Blocked days ${v.pauseStart}–${v.pauseStart + v.pauseDays}</b> · ` : ''}<b>${v.code} + ${k.moved.filter(c=>c!==v.code).length} downstream steps move</b> · handover <span class="mono">${k.from} → ${k.to}</span>${ng?` · <span style="color:var(--risk)">${ng} new crew gap${ng>1?'s':''}</span>`:''}`;
 }
 
 /* ---------------- update modal ---------------- */
@@ -1092,17 +1137,18 @@ async function pickRecording(id){
   const r = await tryApi(`/api/plaud/recordings/${encodeURIComponent(id)}/transcript`);
   PLAUD.text = r ? (r.text || '') : '(Transcript preview isn’t available; propose to pull it directly.)'; openUpdate('plaud');
 }
+function plaudTitle(id){ const r = (PLAUD.list || []).find(x => x.id === id); return r ? `${r.title || 'Recording'}${r.created_at ? ' · ' + r.created_at : ''}` : null; }
 function openUpdate(tab){
   S.tab = tab || S.tab || 'plaud';
   const m = el('modal'); m.hidden = false; m.className = 'modal-bg';
-  const tabs = [['plaud','Plaud note'],['csv','CSV upload'],['photo','Labour plan photo'],['manual','Edit on timeline']];
+  const tabs = [['plaud','Plaud (voice)'],['csv','CSV upload'],['photo','Labour plan photo'],['manual','Edit on timeline']];
   let body = '';
   if (S.tab==='plaud'){
     if (PLAUD.list === null) { loadPlaud(); }
     const recs = PLAUD.list || [];
     body = `<div class="grid" style="gap:8px">
     <div class="eyebrow">Recordings from your Plaud account</div>
-    ${PLAUD.list === null ? '<div class="muted">Loading recordings…</div>' : PLAUD.error ? `<div class="preview err">Plaud: ${PLAUD.error}. Paste the transcript below instead.</div>` : !recs.length ? '<div class="muted">No recordings today.</div>' :
+    ${PLAUD.list === null ? '<div class="muted">Loading recordings…</div>' : PLAUD.error ? `<div class="preview err">Plaud isn’t connected on this machine (${esc(PLAUD.error)}). Run <span class="mono">plaud login</span>, or paste the transcript below.</div>` : !recs.length ? '<div class="muted">No recordings today.</div>' :
       recs.slice(0,5).map(r => `<button class="rec" aria-pressed="${PLAUD.sel===r.id}" data-act="pickRec" data-id="${r.id}"><svg class="wave" viewBox="0 0 44 28" aria-hidden="true">${[6,14,20,10,24,16,8,18,12,6].map((h,i)=>`<rect x="${i*4.4+1}" y="${14-h/2}" width="2.4" height="${h}" rx="1" fill="var(--muted)"/>`).join('')}</svg><span style="flex:1"><b style="font-weight:600">${r.title || r.name || 'Recording'}</b><br><span class="muted mono" style="font-size:.75rem">${r.created_at || r.id}</span></span><span class="chip">Plaud</span></button>`).join('')}
     ${PLAUD.sel ? `<div class="quote" style="max-height:180px;overflow:auto">${PLAUD.text || ''}</div><div class="row"><span class="muted" style="font-size:.8rem">Audio stays with Northgate. Only the approved update is shared.</span><span class="sp"></span><button class="btn accent" data-act="plaudPropose" ${PLAUD.busy?'disabled':''}>${PLAUD.busy?'Reading note on Crusoe…':'Propose update'}</button></div>` : ''}
     <div class="sep"></div>
@@ -1139,7 +1185,7 @@ async function proposeFromText(text, via){
   PLAUD.busy = true; openUpdate(S.tab);
   try {
     const r = via === 'plaud' ? await api('/api/ingest/plaud', {body:{site_id:'A', file_id: PLAUD.sel}}) : await api('/api/ingest/text', {body:{site_id:'A', text}});
-    PLAUD.busy = false; closeModal(); S.view = 'timeline'; S.mode = 'steps'; await refresh();
+    PLAUD.busy = false; closeModal(); S.view = 'timeline'; S.mode = {dan:'steps', priya:'steps', marcus:'steps', sam:'steps'}; await refresh();
     const p = arr(r.proposals)[0];
     toast(p ? `Update proposed from the ${via==='plaud'?'Plaud note':'transcript'}: ${p.changes[0].step_id} +${p.changes[0].to - (p.changes[0].from||0)} days.` : (r.message || 'No schedule change found in this note.'));
   } catch(e){ PLAUD.busy = false; openUpdate(S.tab); toast(`Couldn’t read the note: ${e.message}`); }
@@ -1151,20 +1197,23 @@ function poolTerms(){
 }
 const ACT = {
   closePop, closeModal: () => closeModal(),
-  async showRipple(){ if (G.open.ripple){ G.open.ripple = false; return render(); }
+  async showRipple(){ if (G.open.ripple && G.ripple){ G.open.ripple = false; return render(); }
     const P = S.pending; const site = P ? P.site : 'A', code = P ? P.code : 'J1';
     try { G.ripple = await api(`/api/graph/ripple?site_id=${site}&step_code=${code}`); G.open.ripple = true; render(); } catch(e){ toast(`Couldn’t trace the ripple: ${e.message}`); } },
-  async showSwap(){ if (G.open.swap){ G.open.swap = false; return render(); }
+  async showSwap(){ if (G.open.swap && G.swap){ G.open.swap = false; return render(); }
     const sg = S.srv.board && S.srv.board.gaps && S.srv.board.gaps[0]; if (!sg) return toast('No open gap.');
     try { G.swap = await api(`/api/graph/swap-explain?gap_id=${encodeURIComponent(sg.id)}`); G.open.swap = true; render(); } catch(e){ toast(`Couldn’t explain the match: ${e.message}`); } },
   markRead(){ act(() => api('/api/notifications/read', {method:'POST', body:{}})); },
   noImpact(){ act(() => api('/api/signals/clear', {body:{site_id:'A', step_code:'J1'}}), 'Risk flag cleared.'); },
   openUpdate(){ openUpdate(); },
+  syncPlaud(){ PLAUD.list = null; openUpdate('plaud'); },
+  overlayOffer(){ S.overlay.marcus = 'A'; setMode('trades'); saveUI(); render(); },
   openStep(b){ openStep(b.dataset.site, b.dataset.code, null, true); },
   editStep(){ const p = el('pop'); openStep(p.dataset.site, p.dataset.code, null, true); },
   pickRec(b){ pickRecording(b.dataset.id); },
   async submitEdit(){ const v = editValues(); if (v.err) return toast(v.err); closePop();
-    try { await api('/api/proposals', {body:{site_id:v.site, step_id:`${v.site}-${v.code}`, start:v.start, finish:v.finish, reason:v.reason}}); }
+    try { await api('/api/proposals', {body: v.pauseDays ? {site_id:v.site, step_id:`${v.site}-${v.code}`, pause_start:v.pauseStart, pause_days:v.pauseDays, reason:v.reason}
+                                                    : {site_id:v.site, step_id:`${v.site}-${v.code}`, start:v.start, finish:v.finish, reason:v.reason}}); }
     catch(e){ if (e.status === 404 || e.status === 405) { if (v.lag) return toast('Start-date moves need the timeline-edit endpoint, which isn’t on the server yet.');
         await tryApi('/api/ingest/text', {body:{site_id:v.site, text:`${T[v.code].n} delayed ${v.delay - ((S.conf[v.site][v.code]||{}).delay||0)} working days, ${v.reason.toLowerCase()}.`}}); }
       else { await refresh(); return toast(`Couldn’t propose: ${e.message}`); } }
@@ -1210,21 +1259,26 @@ document.addEventListener('click', e => {
   if (b.dataset.view) { S.view = b.dataset.view; closePop(); saveUI(); return refresh(); }
   if (b.dataset.viewGo) { S.view = b.dataset.viewGo; saveUI(); return refresh(); }
   if (b.dataset.sitePick) { S.site[S.user] = b.dataset.sitePick; if (S.overlay[S.user]===b.dataset.sitePick) S.overlay[S.user] = null; return render(); }
-  if (b.dataset.mode) { S.mode = b.dataset.mode; return render(); }
+  if (b.dataset.mode) { setMode(b.dataset.mode); return render(); }
   if (b.dataset.step !== undefined) return jumpTo(+b.dataset.step);
-  if (b.dataset.overlay !== undefined) { S.overlay[S.user] = b.dataset.overlay || null; if (b.dataset.overlay) S.mode = 'trades';
-    if (b.dataset.overlay && SITES[b.dataset.overlay].org !== U().org && SITES[b.dataset.overlay].anonId)
-      return tryApi(`/api/city/${SITES[b.dataset.overlay].anonId}/overlay`).then(o => { S.srv.overlay = o; if (!o) toast('The anonymised view hasn’t been shared yet.'); render(); });
+  if (b.dataset.overlay !== undefined) { S.overlay[S.user] = b.dataset.overlay || null; if (b.dataset.overlay) setMode('trades');
     return render(); }
   if (b.dataset.utab) return openUpdate(b.dataset.utab);
   if (b.dataset.act && ACT[b.dataset.act]) ACT[b.dataset.act](b);
 });
+document.addEventListener('click', e => { const q = e.target.closest('.cq'); if (q) q.classList.toggle('open'); });
+document.addEventListener('toggle', e => { if (e.target.id === 'gact') { GACT_OPEN = e.target.open; try { localStorage.setItem('sitesync-gact', GACT_OPEN ? '1' : '0'); } catch(_) {} } }, true);
+function setGuide(on){ GUIDE = on; try { localStorage.setItem('sitesync-guide', on ? '1' : '0'); } catch(e) {} el('drawer').hidden = !on; el('guideBtn').setAttribute('aria-pressed', on); render(); }
+el('guideBtn').addEventListener('click', () => setGuide(!GUIDE));
+el('resetTop').addEventListener('click', () => el('reset').click());
+el('drawer').hidden = !GUIDE; el('guideBtn').setAttribute('aria-pressed', GUIDE);
 document.addEventListener('keydown', e => {
+  if (e.key==='g' && !e.metaKey && !e.ctrlKey && !['INPUT','TEXTAREA','SELECT'].includes((e.target.tagName||''))) setGuide(!GUIDE);
   if (e.key==='Escape'){ closePop(); closeModal(); }
   const bar = e.target.closest && e.target.closest('.bar');
   if (bar && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); const r = bar.getBoundingClientRect(); openStep(bar.dataset.site, bar.dataset.code, {x:r.left+20, y:r.bottom}, false); }
 });
-document.addEventListener('input', e => { if (['f-s','f-e','f-r'].includes(e.target.id)) previewEdit(); });
+document.addEventListener('input', e => { if (['f-s','f-e','f-r','f-ps','f-pd'].includes(e.target.id)) previewEdit(); });
 document.addEventListener('change', e => {
   if (e.target.id==='csvfile' && e.target.files[0]){ const r = new FileReader(); r.onload = () => { el('csvOut').innerHTML = csvDiff(String(r.result)); }; r.readAsText(e.target.files[0]); }
   if (e.target.id==='photofile' && e.target.files[0]) toast('Photo received. Vision parsing is a should-have and not in this demo build.');
@@ -1234,7 +1288,7 @@ el('bell').addEventListener('click', async e => { e.stopPropagation(); const n =
   n.innerHTML = `<div class="row" style="margin-bottom:6px"><b>Notifications</b><span class="sp"></span><span class="muted" style="font-size:.78rem">${U().full}</span></div>` + (mine.length ? mine.map(x => `<div class="note ${x.read?'':'unread'}"><span class="mono muted">${x.t}</span> ${x.text}</div>`).join('') : '<div class="muted" style="font-size:.86rem">Nothing yet.</div>');
   n.hidden = false; await tryApi('/api/notifications/read', {method:'POST', body:{}}); S.notes.forEach(x => x.read = true); renderBell(); });
 el('showMe').addEventListener('click', () => { const p = progress(); if (p < SCRIPT.length){ el('drawer').open = false; applyGuide.last = null; go(SCRIPT[p][0], SCRIPT[p][1]); toast(SCRIPT[p][2]); } });
-el('reset').addEventListener('click', async () => { await tryApi('/api/demo/reset', {method:'POST', body:{}}); PLAUD.list = null; PLAUD.sel = null; S = fresh(); S.user = 'dan'; S.view = 'timeline'; S.overlay = {priya:null, marcus:null}; S.mode = 'steps'; closePop(); closeModal(); await refresh(); toast('Demo reset to the seed state.'); });
+el('reset').addEventListener('click', async () => { await tryApi('/api/demo/reset', {method:'POST', body:{}}); PLAUD.list = null; PLAUD.sel = null; S = fresh(); S.user = 'dan'; S.view = 'timeline'; S.overlay = {priya:null, marcus:null}; S.mode = {dan:'steps', priya:'steps', marcus:'steps', sam:'steps'}; closePop(); closeModal(); await refresh(); toast('Demo reset to the seed state.'); });
 // extra data for specific views, loaded on each refresh
 const _sync = sync;
 sync = async function(){
@@ -1243,7 +1297,7 @@ sync = async function(){
     S.user === 'sam' ? tryApi('/api/sub/bookings', {}, 'sam') : null,
     S.view === 'city' ? tryApi('/api/city') : null,
     S.view === 'links' ? tryApi('/api/links') : null,
-    (S.user === 'marcus' && S.overlay.marcus === 'A' && SITES.A.anonId) ? tryApi(`/api/city/${SITES.A.anonId}/overlay`, {}, 'marcus') : null]);
+    null]);
   const sb = extra[0] ? arr(extra[0].bookings || extra[0]) : null;
   S.srv.subBookings = sb && sb.length ? sb.map(b => ({crew: b.crew, client: (b.org_name || '').split(' ')[0], site: b.site_name, step: b.step_name || b.step_code,
       s: (b.booking||[])[0], e: (b.booking||[])[1], ss: (b.step_active||[])[0], se: (b.step_active||[])[1]})) : null;

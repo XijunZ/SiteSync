@@ -42,7 +42,7 @@ def _llm_extract(world: World, site_id: str, text: str) -> list[ExtractedUpdate]
               "is delayed or on hold (e.g. a failed delivery, supplier problem, access blocked); ignore anything on track. "
               "If the note reports no delay, return an empty list. delay_days is the working days lost "
               "(a week = 5; 'replacement due in five working days' = 5). reason is short, e.g. "
-              "'supplier: membrane failed QA'. excerpt is the exact phrase from the note.")
+              "'supplier: batch 2 failed QA'. excerpt is the exact phrase from the note.")
     user = f"Catalogue:\n{_catalogue(world, site_id, text)}\n\nVoice note:\n{text}\n\nReturn {{\"updates\": [...]}}"
     try:
         return llm.extract_json(system, user, ExtractedList).updates
@@ -54,9 +54,10 @@ def _deterministic(world: World, site_id: str, text: str) -> list[ExtractedUpdat
     days = words_to_days(text)
     steps = match_steps(world, site_id, text)
     t = text.lower()
-    if days is None or not steps or not any(w in t for w in ("delay", "late", "behind", "slip", "on hold", "failed", "stood down", "paused")):
+    if days is None or not steps or not any(w in t for w in ("delay", "late", "behind", "slip", "on hold", "failed", "stood down", "pause")):
         return []
-    reason = ("supplier: membrane failed QA" if "membrane" in t and ("fail" in t or "qa" in t or "quality" in t)
+    reason = (("supplier: batch 2 failed QA" if ("second" in t or "batch 2" in t) else "supplier: membrane failed QA")
+              if "membrane" in t and ("fail" in t or "qa" in t or "quality" in t)
               else next((r for r in REASONS if r in t), "unspecified"))
     return [ExtractedUpdate(step_code=steps[0], candidates=steps[1:3], delay_days=days, reason=reason,
                             excerpt=text.strip(), confidence=0.6)]

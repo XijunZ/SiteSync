@@ -34,7 +34,7 @@ def test_chatter_gives_no_proposal(monkeypatch):
 def test_demo_opens_with_supplier_signal_and_no_impact_clears_it():
     t = get("dan", "/api/sites/A/timeline").json()
     assert [r["step_code"] for r in t["risk_signals"]] == ["J1"]
-    assert "membrane batch failed QA" in t["risk_signals"][0]["detail"]
+    assert "batch 2" in t["risk_signals"][0]["detail"] and "failed factory QA" in t["risk_signals"][0]["detail"]
     site = get("priya", "/api/sites").json()[0]
     assert (site["confirmed_finish"], site["risk_finish"]) == (397, 402)
     r = post("dan", "/api/signals/clear", {"site_id": "A", "step_code": "J1"}).json()
