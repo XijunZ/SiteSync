@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
 from app import ingest, llm, plaud, signals, views
+from app.graph_neo4j import mirror_sync
 from app.network import decide_cross_proposal, decide_link, request_link
 from app.proposals import StaleProposal, build_proposal, decide_proposal
 from app.sync_engine import approve_option
@@ -173,7 +174,10 @@ def proposals(site_id: str, x_user_id: str | None = Header(None)):
 def decide(pid: str, body: DecideIn, x_user_id: str | None = Header(None)):
     if pid not in W().proposals:
         raise ApiError(404, "not_found", pid)
-    return decide_proposal(W(), user_of(x_user_id), pid, body.accept)
+    res = decide_proposal(W(), user_of(x_user_id), pid, body.accept)
+    if res.get("status") == "APPLIED":
+        mirror_sync(W())
+    return res
 
 
 @app.post("/api/signals")
@@ -249,4 +253,4 @@ def llm_log():
 def reset():
     STATE["world"] = build_world()
     llm.CALL_LOG.clear()
-    return {"ok": True}
+    return {"ok": True, "neo4j_synced": mirror_sync(W())}

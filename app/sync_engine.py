@@ -110,7 +110,13 @@ def _m3(world, gap, dp) -> Option:
                  parties=[world.sites[gap.site_id].org_id])
 
 
-def swap_candidates(world: World, gap: Gap) -> list[tuple]:
+def _overlap_ok(world: World, dates, gap: Gap, step_id: str) -> bool:
+    st = world.steps[step_id]
+    s, e = dates[st.site_id][st.id]
+    return min(e, gap.end) - max(s, gap.start) >= min(3, gap_days(gap))
+
+
+def swap_candidates_memory(world: World, gap: Gap) -> list[tuple]:
     """(target_step_id, target_crew_id, km) for the same sub's bookings on other sites active in the gap."""
     crew = world.crews[gap.crew_id]
     home = world.sites[gap.site_id]
@@ -121,14 +127,31 @@ def swap_candidates(world: World, gap: Gap) -> list[tuple]:
         st = world.steps[b.step_id]
         if c.org_id != crew.org_id or st.site_id == gap.site_id or st.trade != gap.trade:
             continue
-        s, e = dates[st.site_id][st.id]
-        overlap = min(e, gap.end) - max(s, gap.start)
         target_gc = world.sites[st.site_id].org_id
         approved = any(a.sub_org_id == crew.org_id and a.gc_org_id == target_gc for a in world.approvals)
         km = distance_km(home, world.sites[st.site_id])
-        if overlap >= min(3, gap_days(gap)) and approved and km <= MAX_SWAP_KM:
+        if _overlap_ok(world, dates, gap, st.id) and approved and km <= MAX_SWAP_KM:
             out.append((st.id, b.crew_id, km))
-    return sorted(out, key=lambda t: t[2])
+    return sorted(out, key=lambda t: (t[2], t[0]))
+
+
+def swap_candidates_neo4j(world: World, gap: Gap, mirror) -> list[tuple]:
+    """Same result, with approval, distance and trade matched in Cypher; date overlap from the engine."""
+    dates = all_dates(world)
+    rows = mirror.swap_candidates(world.crews[gap.crew_id].org_id, gap.site_id, gap.trade, MAX_SWAP_KM)
+    out = [(r["step_id"], r["crew_id"], r["km"]) for r in rows if _overlap_ok(world, dates, gap, r["step_id"])]
+    return sorted(out, key=lambda t: (t[2], t[0]))
+
+
+def swap_candidates(world: World, gap: Gap) -> list[tuple]:
+    from app.graph_neo4j import get_mirror
+    mirror = get_mirror()
+    if mirror:
+        try:
+            return swap_candidates_neo4j(world, gap, mirror)
+        except Exception:  # noqa: BLE001 - fall back to the in-memory search
+            pass
+    return swap_candidates_memory(world, gap)
 
 
 def _m8(world, gap, dp) -> Option | None:
