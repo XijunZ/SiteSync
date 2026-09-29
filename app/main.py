@@ -431,4 +431,6 @@ def llm_log():
 def reset():
     STATE["world"] = demo_world()
     llm.CALL_LOG.clear()
-    return {"ok": True, "neo4j_synced": mirror_sync(W())}
+    synced = mirror_sync(W())
+    graph_neo4j.GRAPH_LOG.clear()  # start the demo with an empty activity panel
+    return {"ok": True, "neo4j_synced": synced}
