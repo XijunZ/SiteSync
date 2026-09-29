@@ -1,165 +1,196 @@
-# SiteSync: Product Requirements (PRD)
+# SiteSync: Product Requirements (PRD v2)
 
 | | |
 |---|---|
-| Status | Draft for review |
+| Status | Draft v2 for review. Replaces v1 (written before the business model changed). |
 | Date | 2026-09-29 |
-| Context | The AI Conference Hack Day, Pier 48 SF. Build 9:00 to 19:00, demo at the end. |
-| Source brief | `CLAUDE.md` (identical `AGENTS.md` for Codex) |
-| Next doc | `02-technical-spec.md` |
+| Based on | `00-business-model.md` (CURRENT MODEL v5), `04-labour-mobility-research.md`, and the design brainstorm of 2026-09-29 |
+| Next | `02-technical-spec.md` v2 |
 
-## 1. Problem
+## 1. Identity
 
-On a residential development, every site runs to a programme of about 50 dependent on-site steps. When something slips (rain on the roof, a late inspection), the programme is updated by hand, days later, in a spreadsheet. Three things go wrong:
+**SiteSync keeps construction sites in sync.** It is the next-best-action engine that finds what falls out of sync when a timeline moves (crews, equipment, inspections, bookings, across sites and companies) and puts the right mechanism in front of the PM early enough for it to work.
 
-1. **Nobody sees the knock-on effect.** A 5-day roof delay quietly pushes services, drylining, fit-out and handover. Contractors find out when crews turn up to a site that is not ready.
-2. **Crews sit idle and still get paid.** A crew booked for a step that has slipped has nothing to do for those days. At roughly £1,200 per crew-day this is pure waste.
-3. **Idle capacity is invisible to the market.** A different contractor two miles away may need exactly that trade in exactly that window, but contractors do not share schedules because they are competitors.
+- **Not an ERP.** We are not the system of record for the project. We read from the tools and habits sites already use.
+- **Not a prediction tool.** The forecast is an input. The product is the **action**.
 
-The signals that a delay has happened already exist. They are just unstructured: a voice note from a site manager, a photo of a whiteboard labour plan, a weather forecast.
+## 2. Problem
 
-## 2. Product vision
+Construction sites don't fail alone. When one site slips, the crews, equipment, inspections and deliveries booked against the old plan, on that site, on the company's other sites, and on other companies' sites, fall out of sync. Today:
+- The knock-on effect is found late (at the morning briefing, or when a crew turns up to an area that isn't ready).
+- Labour surplus and shortage are discovered on the day, when only expensive fixes remain (agency labour at short notice, idle paid crews, overtime).
+- Companies can't see each other's needs, so a surplus on one site and a shortage 2 km away never meet.
+- Subs hedge by overbooking, which causes no-shows. GCs hedge by padding programmes, which delays completion.
 
-> SiteSync turns messy site updates into a live, predicted programme, spots crews that a delay will leave idle, and quietly offers that capacity to nearby sites without either contractor seeing the other's business.
+Each extra week of warning unlocks more ways to fix a mismatch (see §6.4). **SiteSync's job is to turn timeline changes into early, specific, executable actions.**
 
-## 3. Goals and non-goals
+## 3. Customer and users
 
-### Goals (for hack day)
+**Customer (signs and pays):** the general contractor (GC). Pricing is deferred (see business model); candidate structure: base fee per project as a preliminaries line + fill margin + optional turn-up guarantee.
 
-- G1. Show that one unstructured input (a voice-note transcript) can update a structured programme correctly, with a human confirming the change.
-- G2. Show the delay propagating through a real dependency graph and changing the predicted finish date.
-- G3. Show a newly idle crew being detected and matched to another contractor's nearby site.
-- G4. Prove neutrality: each contractor sees only its own data, even inside LLM prompts.
-- G5. Use sponsor tools meaningfully (Neo4j, OpenRouter, Plaud) for prize eligibility.
-
-### Non-goals
-
-- Real calendars, bank holidays, or partial working days (we use integer working days).
-- Authentication, user accounts, permissions beyond the GC switcher.
-- Real crew availability, contracts, payments, or booking confirmation between GCs.
-- Resource levelling or schedule optimisation (we predict and alert; humans decide).
-- Mobile app, notifications, or integrations with Procore, Asta, MS Project, etc.
-- Pre-construction phases (acquisition, design, planning). On-site phases F to L only.
-
-## 4. Personas
-
-### Primary
-
-**P1. Dan, site manager (Northgate Build, Site A)**
-- On site all day, hands full, sends updates as voice notes or photos. Does not open spreadsheets.
-- Needs: report a problem in 20 seconds and trust that the right people find out.
-- Pain: the programme is always out of date; gets blamed for knock-on delays he flagged weeks ago.
-- Success: says "roofing delayed, heavy rain, about five days" and sees the programme update correctly after one tap to confirm.
-
-**P2. Priya, operations director (Northgate Build, runs Sites A and B)**
-- Office-based, owns the programme and crew bookings across her sites. Answerable for cost and finish date.
-- Needs: see which steps and crews a delay actually affects, and what it costs, without reading 50 lines.
-- Pain: idle crews discovered after the fact; no way to recover the cost.
-- Success: an alert tells her the M&E crew is idle for 5 days, and that a vetted opportunity exists nearby worth about £6,000.
-
-**P3. Marcus, operations director (Riverside Construction, runs Sites C and D)**
-- Same role as Priya at a competing GC. Would never share his programme with Northgate.
-- Needs: extra trade capacity at short notice, especially M&E, which is scarce.
-- Success: sees "a vetted M&E crew is available days X to Y" with no mention of who or why, and never sees Northgate's sites.
-
-### Secondary
-
-**P4. Independent subcontractor (M&E or drylining firm working for both GCs)**
-- Wants continuous work and hates being double-booked by two clients. In the MVP they are represented only as data (a shared crew that can clash). There is no subcontractor UI.
-
-**P5. Hack day judge (demo audience)**
-- Has 3 to 5 minutes. Needs to understand the problem, see a real AI step, see the graph do something non-trivial, and see sponsor tools used. Will be put off by a crash or a long loading spinner.
-
-## 5. User stories and acceptance criteria
-
-Priority uses MoSCoW. **Must = MVP.**
-
-### Must (MVP)
-
-| ID | Story | Acceptance criteria |
+| Persona | Role in real life | Role in SiteSync |
 |---|---|---|
-| US-1 | As Priya or Marcus, I can switch between GCs and see only my own sites. | Switching GC changes the site list, timelines and alerts. No other GC's site names, IDs or step details appear anywhere in the UI or API response for that GC. |
-| US-2 | As Priya, I can see each site's timeline with planned vs predicted bars. | Each step shows a grey planned bar and a coloured predicted bar. Steps that moved are visibly different. Weather-sensitive steps are marked. A "today" line is shown. |
-| US-3 | As Dan, I can paste or upload a voice-note transcript and get a proposed schedule update. | Given "roofing delayed, heavy rain, about five days" for Site A, the system proposes `{site: A, step: J1, delay_days: 5, reason: weather}` within 10 s. If the step is ambiguous, it returns candidates instead of guessing. |
-| US-4 | As Dan or Priya, I confirm a proposed update before it changes anything. | Nothing is written until Apply is clicked. The proposal can be edited or dismissed. |
-| US-5 | As Priya, applying a delay updates every downstream step's predicted dates. | After a 5-day delay on A-J1, the 18 downstream steps on Site A shift by 5 days and the predicted finish moves by 5 days. Other sites are unchanged. |
-| US-6 | As Priya, I am alerted to crews newly left idle by the delay. | Exactly one alert for the demo: the Northgate M&E crew is idle for 5 working days (days 230 to 235) before A-K3. Gaps that already existed in the plan are not alerted. |
-| US-7 | As Priya, I see a cross-GC opportunity for my idle crew, without the other GC's details. | Alert shows "a nearby site needs M&E for 5 days in this window, about 2 km away" with days and £ value (5 × £1,200 = £6,000). No GC name, site name or step name from Riverside. |
-| US-8 | As Marcus, I see the same opportunity from my side, anonymised. | Riverside sees "a vetted M&E crew is available days 230 to 235" linked to Site C first fix. No Northgate details. |
-| US-9 | As the demo presenter, I can reset to the planned programme. | One click restores all predicted dates to planned and clears alerts, so the demo can be rerun. |
-| US-10 | As a judge, I can see what the AI did and what it cost. | Footer shows number of LLM calls, models used, and total cost in USD. |
+| **Dan, site manager** (Northgate, Site A) | Runs the site day to day: trades, sequencing, safety, deliveries, site diary | **Source of truth for the site.** Reports progress, blockers, readiness and headcount at any time; confirms facts |
+| **Priya, PM** (Northgate, Sites A and B) | Owns programme, cost, subcontract packages, client contract | **Owner of commitments.** Confirms material date changes, decides mechanisms, re-baselines, manages links and pools |
+| **Operations director** (Northgate) | Portfolio of projects | Portfolio view; escalations only |
+| **Marcus, PM** (Riverside, Sites C and D) | Same as Priya at a different GC | Sees Northgate's projects only in anonymised form; accepts or declines link requests and proposals |
+| **Sparks planner** (M&E subcontractor working for both GCs) | Schedules crews across clients | Sees only its own bookings; accepts or declines proposals involving its crews |
+| **SiteSync operator** (internal) | — | Runs cross-company proposals where no link exists yet (stage 1) |
 
-### Should
+## 4. Core concepts
 
-| ID | Story | Acceptance criteria |
+1. **Backbone: timeline built on a dependency graph.** Per project: steps, finish-to-start dependencies, durations, **labour loading** (planned headcount per step by trade), bookings (sub, crew size, window), equipment, and the network (GCs, subs, agencies, approvals, links).
+2. **Three timelines.** **Baseline** (contract programme, locked; changed only by a PM re-baseline) · **Confirmed forecast** (last approved view of reality) · **Proposed** (pending changes). Diff = proposed vs confirmed. Variance = confirmed vs baseline.
+3. **Facts vs signals.** Only confirmed human facts move the **confirmed forecast**. External signals (weather, strikes, city incidents, supplier notices) move the **risk-adjusted forecast** and ask the right person to confirm the impact.
+4. **Event-driven and live.** Any trigger (a human input at any time, an external signal, the clock, a counterparty reply) runs the pipeline immediately. Every change is an event with its source; state is built from events; forecasts are snapshotted per version.
+5. **Labour balance.** On every change: dates → demand per trade per day → minus supply (bookings) → **surplus, shortage, clash**, and the **diff** of what this change created or resolved.
+6. **Site-sync mechanisms.** A catalogue of playbooks (§6.4), each with preconditions, setup lead time, parties, steps, cost and outcome tracking.
+7. **Three tiers of visibility.** **Own company:** full timelines across all own projects. **Linked partners:** only the shared pool. **City network:** anonymised timelines of other projects.
+8. **Link and pool.** A company can request to link with an (anonymised) project's company. On acceptance, they agree pool terms, and pooled resources become available to cross-company mechanisms with less friction. Each completed sync leaves approved relationships (compounding moat).
+
+## 5. User journeys
+
+**J1: Update and see the knock-on effect (Dan, any time of day).** Dan records a Plaud note: "roofing delayed, heavy rain, about five days." SiteSync proposes *J1 finish 230 → 235*, shows the source phrase, the date knock-on (18 steps +5, handover day 397 → 402) and the **labour impact** (M&E surplus on Site A, days 230–235). Dan confirms the fact; because the finish date moves, Priya is asked to approve.
+
+**J2: Act on what fell out of sync (Priya).** The Sync Board shows the new M&E surplus with ranked options and start-by deadlines: re-slot downstream trades (M3); slot swap with a nearby project that needs M&E in that window (M8); resequence (M1) if ready work exists. It shows the "no action" outcome (crew likely returns late: handover +8 instead of +5) vs "with action" (+5), so **3 days protected**.
+
+**J3: Find a partner and pool (Priya → Marcus).** The matching need is on an anonymised project in the city view (~2 km, needs M&E in that window). Priya requests to link, "pool M&E capacity". Marcus sees Northgate's identity and purpose, accepts, and they agree pool terms. The slot swap proceeds; the Sparks planner accepts; each GC confirms the booking change in its own review.
+
+**J4: A signal arrives mid-day.** A weather update (or a city incident near a site) raises risk on exposed steps. The risk-adjusted forecast shifts; Dan is asked "confirm impact?". His answer becomes a fact, and J1 continues from there.
+
+**J5: Prove it.** A monthly report shows days protected (locked no-action snapshot vs outcome) × the GC's own day value, with the evidence trail.
+
+## 6. Requirements
+
+Priority: **M** = must for today's demo, **S** = should (if time), **L** = later stages.
+
+### 6.1 Backbone and onboarding
+
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| B-1 | Load projects as dependency graphs with labour loading | 4 sites × 52 on-site steps; dependencies incl. K3 → J6; planned headcount per step by trade (defaults per trade) | M |
+| B-2 | Network data: GCs, subs, crews, bookings, locations | Two GCs (Northgate: A, B; Riverside: C, D); Sparks (M&E) booked at A and C; East London coordinates | M |
+| B-3 | Baseline locked; confirmed forecast; proposed changes | Baseline changes only via PM re-baseline (logged) | M (re-baseline: S) |
+| B-4 | Import programme from MS Project / P6 / Excel / PDF | Parsed steps and dependencies, mapped and reviewed by the PM | L |
+
+### 6.2 Capture and ingestion
+
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| C-1 | Voice note from Plaud → proposed changes | Demo transcript gives *Site A, J1, +5 days, weather*, with the source phrase shown. Pasted text works as a fallback. | M |
+| C-2 | Typed input (field edit or free text) through the same pipeline | Same proposal, checks and diff as voice | M |
+| C-3 | Entity matching with site vocabulary | "the roof" → J1; corrections saved to vocabulary | M (basic) / S (learning) |
+| C-4 | Excel labour plan upload → bookings | Row-level diff vs last upload; duplicates ignored | S |
+| C-5 | Photo of whiteboard labour plan → bookings (vision) | Rows with confidence, reviewed before use | S |
+| C-6 | PDF reports/programmes | Text and tables extracted to fields | L |
+| C-7 | Question list + ask-back: what we need to know, chase what's missing or stale | Critical steps unreported for N days surface as questions; unanswered critical questions follow up | S |
+
+### 6.3 Change, diff and labour balance
+
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| D-1 | Proposed change shows date knock-on before confirming | J1 +5 → 18 steps +5, handover 397 → 402 | M |
+| D-2 | Proposed change shows labour impact before confirming | New M&E surplus at Site A, days 230–235, with crew size; created vs resolved listed | M |
+| D-3 | Validation | A finish before its predecessor's finish is blocked with an explanation | M |
+| D-4 | Confirmation rules (option B) | Site manager confirms facts; PM also approves when the finish date or the critical path moves beyond a threshold | M |
+| D-5 | Live updates and concurrency | Updates at any time; an edit against an outdated version must be re-confirmed with a refreshed knock-on | S |
+| D-6 | Event log, versions, snapshots | Every change stored with source, user and time; forecast version per confirmation | M (simple) |
+| D-7 | Labour balance view per trade over time (site / portfolio) | Surplus and shortage per trade per day | M (site) / S (portfolio) |
+
+### 6.4 Sync engine and mechanisms
+
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| E-1 | Detect out-of-sync gaps from the labour balance diff: surplus, shortage, clash | The demo change creates the M&E surplus at A, days 230–235 | M |
+| E-2 | Candidate mechanisms per gap, filtered by feasibility (setup lead time ≤ warning time, preconditions, market rules) | Options that need more warning than available are shown as unavailable, with the reason | M |
+| E-3 | Rank options, each with start-by deadline, cost and days protected | "No action" vs "with action" from real propagation: handover +8 vs +5 = 3 days protected | M |
+| E-4 | Mechanisms for the demo | **M1 resequence, M3 re-slot trades, M8 slot swap, M10 agency top-up** | M |
+| E-5 | Other mechanisms | M4 internal redeploy, M5 equipment transfer (S); M2, M6, M7, M9, M11, M12 (L) | S / L |
+| E-6 | Mechanism lifecycle | proposed → approved → in progress → confirmed → done / failed / expired; expired when the start-by deadline passes | M (simple) |
+| E-7 | Combined actions | E.g. M3 + M8 together | S |
+
+Mechanism catalogue (from the business model):
+
+| Scope | Mechanism | Setup lead time |
 |---|---|---|
-| US-11 | As Dan, I can upload a photo of a handwritten labour plan and get proposed crew bookings. | Vision model returns rows `{site, trade, crew_name, start_day, end_day}` with a confidence score, shown for confirmation before writing. |
-| US-12 | As Priya, I am alerted when a shared subcontractor crew is double-booked across sites. | Clash alert shows the crew and overlapping days, with the other site anonymised if it belongs to another GC. |
-| US-13 | As Priya, alerts are written in plain English. | A stronger LLM writes one short alert per GC, using only that GC's data plus anonymised offers. |
-| US-14 | As Dan, voice notes arrive directly from Plaud. | If Plaud provides API or export access, transcripts are pulled in. Otherwise, text upload is used (same pipeline). |
+| Within site | M1 Resequence · M2 Mitigate (cover, extended hours) · M3 Re-slot trades | Hours to days |
+| Across own sites | M4 Internal crew redeploy · M5 Equipment / temporary works transfer · M6 Shared specialist schedule · M7 Batched inspections | Hours to weeks |
+| Across companies | M8 Slot swap (shared sub) · M9 Sub-tier under approved sub · M10 Agency top-up via GC's framework · M11 Early prequalification (4+ weeks) · M12 Local-market routes | Hours to 4+ weeks |
 
-### Could
+### 6.5 Visibility, link and pool
 
-| ID | Story |
-|---|---|
-| US-15 | Weather risk flag on weather-sensitive steps in the next 2 weeks (Open-Meteo, or Brave Search). |
-| US-16 | Deployed at a public URL (Vultr or Crusoe). |
-| US-17 | Critical path highlighted on the timeline. |
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| V-1 | Own company sees full timelines of all its projects | Priya sees A and B in full; nothing of C or D | M |
+| V-2 | City view: anonymised timelines of other projects | Area (~1 km), weeks, phase level, trade need/surplus windows; no names; confidential projects hidden | M (simple) |
+| V-3 | Minimum-crowd rule for anonymisation | Only show where ≥ 3 projects in area and phase | L (demo has 4 sites) |
+| V-4 | Request to link | Requester's identity revealed to target; target anonymous until it answers; accept / decline | M |
+| V-5 | Pool terms | Shared resources (trades, equipment), recharge, return guarantee, priority rule, notice | M (simple form) |
+| V-6 | Cross-company mechanisms require a link or an operator-run anonymised proposal | M8 between Northgate and Riverside becomes available after linking | M |
+| V-7 | Subcontractor view | Sparks planner sees only its own bookings; accepts or declines proposals | M |
+| V-8 | Each company's data changes only through its own confirmation | Booking changes from a slot swap are confirmed by each GC separately | M |
 
-### Won't (this build)
+### 6.6 Signals
 
-Auth, real dates or calendars, booking confirmation between GCs, subcontractor-facing UI, notifications, pre-construction phases.
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| S-1 | Weather signal → risk flag on weather-sensitive steps → "confirm impact?" | Rain forecast over J1 raises risk; risk-adjusted forecast shifts; confirmed forecast doesn't | M |
+| S-2 | City incident / strike / supplier news → scoped risk flags | Location or trade scoped; expires if marked "no impact" | S |
+| S-3 | Company risk check on a proposed counterparty (news, insolvency) | One-line risk note on the option card, with sources | S |
+| S-4 | Material-change notifications only (no alert spam) | Notify on threshold crossings, new gaps, deadlines within 24h | S |
 
-## 6. MVP definition
+### 6.7 Roles, proof, and platform
 
-**The MVP is the demo story, end to end, reliably:** US-1 to US-10, **plus US-14 (Plaud voice note)**, with the LLM step running on **Crusoe** and the app **hosted on Crusoe**. Updated after the prize list was confirmed: Crusoe is required for every overall prize, and Plaud and Neo4j have their own prizes. See `03-setup-and-process.md` §1.
+| ID | Requirement | Acceptance criteria | P |
+|---|---|---|---|
+| R-1 | Role/user switcher for the demo: Dan, Priya, Marcus, Sparks planner | Each view shows only what that role may see | M |
+| R-2 | Permissions per §3 (site manager / PM / ops director / sub planner / operator) | Enforced server-side | M (simple) |
+| R-3 | Days protected report | Locked no-action snapshot vs outcome × day value | S (single number in demo: M) |
+| R-4 | AI cost and provider log | Calls, models, cost | S |
+| R-5 | Authentication, real accounts | — | L |
 
-In plain terms, a judge watches this happen in under 3 minutes:
+## 7. MVP for today (the demo story)
 
-1. Northgate view: its two sites (A and B), timelines on plan.
-2. Paste Dan's transcript. The system proposes "Site A, roof waterproofing (J1), +5 days, weather". Presenter clicks Apply.
-3. Site A's timeline visibly shifts. Predicted handover moves 5 days.
-4. Alert: "M&E crew idle 5 days (days 230 to 235). A nearby site needs M&E then. Potential saving £6,000."
-5. Switch to Riverside. Different sites, no Northgate data. Alert: "A vetted M&E crew is available days 230 to 235 for your Site C first fix."
-6. Footer: 1 to 2 LLM calls, models, cost under $0.01.
-7. Reset.
+Build exactly what makes this story work, end to end, reliably:
 
-Photo ingestion (US-11) is the first thing added after the MVP works.
+1. **Priya's view:** Northgate's two sites on the timeline (baseline vs forecast bars). City view shows two anonymised projects.
+2. **Dan's view:** the Plaud note (or pasted transcript) → proposed change *J1 +5* with source phrase → diff: 18 steps +5, handover 397 → 402, **M&E surplus at Site A days 230–235**. Dan confirms; Priya approves (finish date moved).
+3. **Weather signal:** rain over J1 shows as a risk flag (can be shown before step 2, prompting Dan's note).
+4. **Sync Board (Priya):** the M&E surplus with options: M3 re-slot (always), M1 resequence (if available), **M8 slot swap** "needs a link with a nearby project that needs M&E days 225–245", M10 agency top-up for the reverse case. No action: handover +8; with action: +5, **3 days protected**.
+5. **Link and pool:** Priya requests to link with the anonymised project; switch to **Marcus**, who accepts and sets simple pool terms (M&E, return by day 235).
+6. **Execute:** switch to **Sparks planner**, who accepts; each PM confirms the booking change in their own review. Sync Board shows the sync done; days protected recorded.
 
-## 7. Success metrics (for the demo)
+Anything not needed for this story is out of scope today.
+
+## 8. Non-goals (all stages unless stated)
+
+- Being the project's system of record (ERP), document management, cost control
+- Employing or supplying labour ourselves (stage 1); payments; contracts between companies (parties agree terms themselves)
+- Full programme import from P6 / MS Project (later), real calendars and holidays (integer working days for now)
+- Authentication and real messaging channels (WhatsApp, SMS) today
+
+## 9. Success metrics
 
 | Metric | Target |
 |---|---|
-| Demo story runs end to end from a clean seed | 3 times in a row with no manual fixes |
-| Transcript to proposal latency | under 10 s |
-| Apply to updated timeline and alerts | under 2 s |
-| Neutrality leaks (other GC's names or site details in UI, API or prompts for a GC) | 0 |
-| Engine tests | all green |
+| Demo story runs end to end from a clean seed | 3 times in a row |
+| Voice note → proposed change | under 15 s (excluding Plaud's own sync) |
+| Confirm → updated timeline, labour balance and options | under 2 s |
+| Cross-company leakage in any view or API response | 0 |
+| Engine tests (propagation, labour balance, options, visibility) | all green |
 
-## 8. Assumptions and constraints
+## 10. Assumptions and risks
 
-- One working day is the unit of time. "Today" is a fixed global day (day 220) for reproducibility.
-- The reference programme is the same for all four sites; sites differ only by start offset.
-- Crew-day cost is £1,200, stated on screen as an assumption.
-- One crew per trade per GC, plus two independent crews (M&E, drylining) shared by both GCs.
-- Tools: Neo4j Aura Free, OpenRouter (OpenAI SDK), Python 3.11, FastAPI, vanilla JS. If Neo4j is unavailable, an in-memory networkx store with the same interface is used.
+| Item | Note / mitigation |
+|---|---|
+| Plaud does not auto-transcribe notes under ~5 minutes; the phone app records only with a Plaud device connected | Tap "Generate" in the app, or fetch the audio and transcribe ourselves; pasted transcript as demo fallback |
+| Crusoe's docs don't confirm JSON-schema output or tool calling | Validate with pydantic, retry, fall back to JSON mode |
+| Anonymised views can still leak pipeline information | Coarse area/time/phase, minimum crowd, opt-in; state it in the pitch |
+| Labour loading (headcount per step) is often missing from programmes | Defaults per trade; labour plan upload overrides |
+| Scope for today is large | §7 is the cut; everything else is S/L |
 
-## 9. Risks and decisions needed
+## 11. Open questions
 
-Found by simulating the seed programme (see spec section 4 for numbers).
-
-| # | Finding | Proposed decision |
-|---|---|---|
-| R1 | In the CSV as given, a 5-day delay to J1 (roofing) changes nothing downstream except the J6 milestone, because drylining K8 has 13 days of slack. The demo story would fall flat. | Add one dependency: **K3 (M&E first fix) depends on J6 (building weathertight)**. Realistic, since services go in once the building is dry. The delay then shifts 18 steps. |
-| R2 | Planned M&E work already has gaps of 14 to 33 days, so "any gap over 2 days" would produce noisy alerts and break "exactly one gap". | Alert only on idle time **created by a delay** (planned start to predicted start, minus other bookings), within a **20 working-day lookahead** from today. |
-| R3 | `owner_or_trade` mixes trades, combined trades ("Groundworks, concrete") and non-crew owners (Council, Building control, Milestone). | Normalise with a fixed mapping table. Non-crew owners get no crew. |
-| R4 | Site C cannot be "just before first fix" and have first fix start exactly inside a 5-day gap. | Match on **overlap of at least 3 days** between the gap and the other site's step window, not only "start inside gap". |
-| R5 | Neo4j prize might not exist, or Aura setup may be slow. | Build against the store interface. networkx first if needed, Neo4j swapped in behind it. |
-| R6 | LLM variability breaks the live demo. | Structured output with pydantic, a fixed demo transcript, and a cached fallback response if OpenRouter fails. |
-
-## 10. Open questions
-
-1. Is the Neo4j prize confirmed? (Affects how much time goes into Cypher vs networkx.)
-2. Do we have Plaud API or export access, or is it transcript upload only?
-3. Which GitHub account and repo name for submission?
-4. Are decisions R1 to R4 accepted? They change the brief in `CLAUDE.md`, which Codex also reads.
+1. Is the Neo4j prize the main sponsor priority after Crusoe, or Plaud? (Affects where polish goes.)
+2. Demo city: keep London (East London sites), or switch to San Francisco for a local audience?
+3. GitHub repo name for submission.
