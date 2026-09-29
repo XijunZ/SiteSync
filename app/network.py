@@ -2,7 +2,7 @@
 import hashlib
 
 from app.config import MAX_SWAP_KM, TODAY
-from app.domain import Link, Offer, User, ViewGrant, World
+from app.domain import Link, Need, Offer, User, ViewGrant, World
 
 DEFAULT_POOL = {"trades": ["mep"], "recharge": "Sub's agreed day rate", "return_guarantee": True,
                 "priority_rule": "Critical path wins", "notice_days": 5}
@@ -38,6 +38,52 @@ def link_between(world: World, a: str, b: str) -> Link | None:
 def _require_pm(user: User) -> None:
     if user.role not in ("PM", "OPS_DIRECTOR"):
         raise PermissionError("only a PM can do this")
+
+
+# ---------------------------------------------------------------- needs (borrower asks first)
+LIVE_NEED = ("OPEN", "MATCHED", "REQUESTED")
+
+
+def post_need(world: World, user: User, gap_id: str) -> Need:
+    from app.schedule import all_dates
+    from app.sync_engine import open_gaps
+    _require_pm(user)
+    gap = next((g for g in open_gaps(world) if g.id == gap_id), None)
+    if gap is None:
+        raise ValueError("gap no longer open")
+    if gap.type != "SHORTAGE":
+        raise ValueError("only a shortage can be requested")
+    if world.sites[gap.site_id].org_id != user.org_id:
+        raise PermissionError("not your site")
+    for nd in world.needs.values():
+        if nd.step_id == gap.step_id and nd.status in LIVE_NEED:
+            return nd
+    s, e = all_dates(world)[gap.site_id][gap.step_id]
+    nd = Need(world.next_id("need"), gap.id, user.org_id, gap.site_id, gap.step_id, gap.trade, gap.workers, s, e,
+              world.sites[gap.site_id].area, created_at=world.now())
+    world.needs[nd.id] = nd
+    world.log("NeedPosted", user.id, gap.site_id, {"need_id": nd.id})
+    return nd
+
+
+def matching_need(world: World, trade: str, lender_org: str, lender_site: str, start: int, end: int) -> Need | None:
+    from app.sync_engine import distance_km
+    best = None
+    for nd in world.needs.values():
+        if nd.status != "OPEN" or nd.org_id == lender_org or nd.trade != trade:
+            continue
+        if distance_km(world.sites[lender_site], world.sites[nd.site_id]) > MAX_SWAP_KM:
+            continue
+        overlap = min(end, nd.end) - max(start, nd.start)
+        if overlap > 0 and (best is None or overlap > best[0]):
+            best = (overlap, nd)
+    return best[1] if best else None
+
+
+def need_view_for_lender(world: World, nd: Need) -> dict:
+    return {"id": nd.id, "anon_label": anon_label(nd.site_id), "anon_id": anon_id(nd.site_id),
+            "trade": nd.trade, "trade_label": trade_label(nd.trade), "workers": nd.workers,
+            "start": nd.start, "end": nd.end, "area": nd.area, "status": nd.status}
 
 
 # ---------------------------------------------------------------- offers
@@ -90,6 +136,17 @@ def publish_offer(world: World, user: User, gap_id: str) -> Offer:
                   gap.workers, gap.start, gap.end, world.sites[gap.site_id].area, created_at=world.now())
     world.offers[offer.id] = offer
     world.log("OfferPublished", user.id, gap.site_id, {"offer_id": offer.id})
+    nd = matching_need(world, gap.trade, user.org_id, gap.site_id, gap.start, gap.end)
+    if nd:
+        offer.need_id, nd.offer_id, nd.status = nd.id, offer.id, "MATCHED"
+        notice = gap.start - TODAY
+        world.notify(world.pms_of(nd.org_id),
+                     f"Your {trade_label(nd.trade)} request matched: {offer.workers} workers available days "
+                     f"{offer.start}–{offer.end} from {anon_label(offer.site_id)} · "
+                     f"{world.orgs[world.crews[gap.crew_id].org_id].name} already works on your "
+                     f"{world.steps[nd.step_id].code} (existing subcontract) · {notice} working days' notice",
+                     offer.id)
+        return offer
     for org in {s.org_id for s in world.sites.values() if s.org_id != user.org_id}:
         fit = offer_fit(world, offer, org)
         if fit:
@@ -171,6 +228,8 @@ def request_link(world: World, user: User, offer_id: str, purpose: str) -> Link:
                 target_step_id=fit["step_id"], created_at=world.now())
     world.links[link.id] = link
     o.status = "REQUESTED"
+    if o.need_id and o.need_id in world.needs:
+        world.needs[o.need_id].status = "REQUESTED"
     world.log("LinkRequested", user.id, None, {"link_id": link.id, "offer_id": o.id, "_org": user.org_id})
     world.notify(world.pms_of(o.org_id), f"{world.orgs[user.org_id].name} requests your offered "
                                          f"{trade_label(o.trade)} crew (days {o.start}–{o.end}) for their "
@@ -202,6 +261,8 @@ def decide_link(world: World, user: User, link_id: str, accept: bool, pool_terms
     world.log("LinkAccepted", user.id, None, {"link_id": link_id, "pool": link.pool})
     if offer:
         offer.status = "TAKEN"
+        if offer.need_id and offer.need_id in world.needs:
+            world.needs[offer.need_id].status = "AGREED"
         from app.sync_engine import approve_option
         res = approve_option(world, user, offer.gap_id, "M8", target_step_id=link.target_step_id)
         cp = world.cross_proposals[res["cross_proposal_id"]]

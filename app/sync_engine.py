@@ -6,7 +6,7 @@ from app.domain import User, World
 from app.labour import imbalances
 from app.schedule import all_dates, critical_steps, forward_pass, site_finish
 
-RELIABILITY = {"M1": 3, "M3": 3, "M8": 2, "M10": 2}
+RELIABILITY = {"M1": 3, "M3": 3, "M8": 2, "M10": 2, "M13": 2}
 
 
 @dataclass
@@ -188,14 +188,24 @@ def _m10(world, gap) -> Option | None:
         return None
     a = agencies[0]
     ok = a.setup_days <= gap.warning_days
-    return _base(world, gap, "M10", f"Agency top-up via {world.orgs[a.sub_org_id].name}",
+    return _base(world, gap, "M10", f"Agency top-up via {world.orgs[a.sub_org_id].name} (agency premium ~35–65%)",
                  ok, None if ok else "Not enough warning", a.setup_days, 0, parties=[gc, a.sub_org_id])
+
+
+def _m13(world, gap) -> Option | None:
+    """Request capacity from nearby projects: publish an anonymised need (trade, workers, window, area)."""
+    if gap.type != "SHORTAGE":
+        return None
+    gc = world.sites[gap.site_id].org_id
+    return _base(world, gap, "M13", f"Request {gap.workers} {gap.trade.upper() if gap.trade == 'mep' else gap.trade} "
+                 "workers from nearby projects (anonymised)", True, None, 0, 0, parties=[gc])
 
 
 def options_for(world: World, gap: Gap) -> list[Option]:
     dp = _days_protected(world, gap)
-    opts = [o for o in [_m1(world, gap, dp) if gap.type == "SURPLUS" else None, _m3(world, gap, dp),
-                        _m8(world, gap, dp), _m10(world, gap)] if o]
+    opts = [o for o in [_m1(world, gap, dp) if gap.type == "SURPLUS" else None,
+                        _m3(world, gap, dp) if gap.type == "SURPLUS" else None,
+                        _m8(world, gap, dp), _m13(world, gap), _m10(world, gap)] if o]
     for o in opts:
         o.status = world.option_states.get(o.id, "PROPOSED")
         if o.status == "PROPOSED" and TODAY > o.start_by:

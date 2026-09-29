@@ -64,6 +64,7 @@ def user_of(x_user_id: str | None):
 class TextIn(BaseModel):
     site_id: str
     text: str
+    source_label: str | None = None
 
 
 class PlaudIn(BaseModel):
@@ -177,6 +178,9 @@ def _propose_from_text(u, site_id: str, text: str, source_kind: str, extra: dict
 
 @app.post("/api/ingest/text")
 def ingest_text(body: TextIn, x_user_id: str | None = Header(None)):
+    if body.source_label:
+        return _propose_from_text(user_of(x_user_id), body.site_id, body.text, "voice",
+                                  {"source_label": body.source_label})
     return _propose_from_text(user_of(x_user_id), body.site_id, body.text, "typed")
 
 
@@ -294,6 +298,20 @@ def city_overlay(anon: str, x_user_id: str | None = Header(None)):
 def offer_publish(body: OfferIn, x_user_id: str | None = Header(None)):
     o = publish_offer(W(), user_of(x_user_id), body.gap_id)
     return {"id": o.id, "status": o.status}
+
+
+@app.post("/api/needs")
+def need_post(body: OfferIn, x_user_id: str | None = Header(None)):
+    from app.network import post_need
+    nd = post_need(W(), user_of(x_user_id), body.gap_id)
+    return {"id": nd.id, "status": nd.status, "workers": nd.workers, "start": nd.start, "end": nd.end}
+
+
+@app.get("/api/needs")
+def needs(x_user_id: str | None = Header(None)):
+    u = user_of(x_user_id)
+    return [{"id": n.id, "status": n.status, "trade": n.trade, "workers": n.workers, "start": n.start, "end": n.end,
+             "step_id": n.step_id, "offer_id": n.offer_id} for n in W().needs.values() if n.org_id == u.org_id]
 
 
 @app.get("/api/offers")

@@ -35,7 +35,10 @@ def build_world() -> World:
     for cid, name in [("SPARKS-S1", "Sparks crew 1"), ("SPARKS-S2", "Sparks crew 2")]:
         w.crews[cid] = Crew(cid, "SPARKS", "mep", 6, name)
     w.approvals += [Approval("SPARKS", "NG"), Approval("SPARKS", "RV"), Approval("VOLT", "NG"),
-                    Approval("VOLT", "RV"), Approval("CREWNOW", "NG", setup_days=1)]
+                    Approval("VOLT", "RV"), Approval("CREWNOW", "NG", setup_days=1),
+                    Approval("CREWNOW", "RV", setup_days=1)]
+    # Bow Wharf's lower-floor first fix is a large floor plate: two crews' worth of M&E (12), only one booked.
+    w.steps["C-K3"].headcount = 12
     for sid in w.sites:
         base = forward_pass(w, sid, "baseline")
         for st in [s for s in w.steps.values() if s.site_id == sid and s.has_crew and s.headcount]:

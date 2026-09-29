@@ -109,6 +109,25 @@ class Offer:
     area: str
     status: str = "OPEN"  # OPEN | REQUESTED | TAKEN | WITHDRAWN | EXPIRED
     created_at: str | None = None
+    need_id: str | None = None
+
+
+@dataclass
+class Need:
+    """A borrower's anonymised request for capacity (trade, workers, window, area)."""
+    id: str
+    gap_id: str
+    org_id: str  # borrower
+    site_id: str
+    step_id: str
+    trade: str
+    workers: int
+    start: int
+    end: int
+    area: str
+    status: str = "OPEN"  # OPEN | MATCHED | REQUESTED | AGREED | DONE | WITHDRAWN
+    created_at: str | None = None
+    offer_id: str | None = None
 
 
 @dataclass
@@ -141,6 +160,7 @@ class World:
     versions: dict[str, int] = field(default_factory=dict)
     snapshots: list = field(default_factory=list)
     offers: dict = field(default_factory=dict)
+    needs: dict = field(default_factory=dict)
     view_grants: dict = field(default_factory=dict)
     notifications: list = field(default_factory=list)
     risks: dict = field(default_factory=dict)  # step_id -> {days, kind, detail}

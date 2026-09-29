@@ -88,7 +88,23 @@ def _option_view(world: World, user: User, o) -> dict:
         d["target_site_name"] = world.sites[o.target_site_id].name
         d["target_org_name"] = world.orgs[target_org].name
     d["needs_link"] = o.needs_link_with is not None
+    if o.mechanism == "M13":
+        from app.network import LIVE_NEED
+        nd = next((n for n in world.needs.values() if n.step_id == world_gap_step(o.gap_id)
+                   and n.status in LIVE_NEED + ("AGREED", "DONE")), None)
+        d["need_state"] = nd.status.lower() if nd else "none"
+        d["need_id"] = nd.id if nd else None
     if o.mechanism == "M8":
+        from app.network import matching_need, need_view_for_lender
+        live_o = [x for x in world.offers.values() if x.gap_id == o.gap_id and x.status not in ("WITHDRAWN", "EXPIRED")]
+        nd = world.needs.get(live_o[-1].need_id) if live_o and live_o[-1].need_id else None
+        if nd is None:
+            g_step = world_gap_step(o.gap_id)
+            st = world.steps[g_step]
+            s_e = o.gap_id.rsplit(":", 1)[-1].split("-")
+            nd = matching_need(world, st.trade, st and world.sites[st.site_id].org_id, st.site_id,
+                               int(s_e[0]), int(s_e[1]))
+        d["matching_need"] = need_view_for_lender(world, nd) if nd else None
         d["offer_state"] = offer_state(world, o.gap_id)
         live = [x for x in world.offers.values() if x.gap_id == o.gap_id and x.status not in ("WITHDRAWN", "EXPIRED")]
         d["offer_id"] = live[-1].id if live else None
@@ -218,7 +234,10 @@ def offers_view(world: World, user: User) -> list[dict]:
                     "counterparty": world.orgs[o.org_id].name if linked else anon_company(o.site_id),
                     "view_status": next((g.status for g in world.view_grants.values()
                                          if g.site_id == o.site_id and g.viewer_org == user.org_id), None),
-                    "link_id": link.id if link else None, "link_status": link.status if link else None})
+                    "link_id": link.id if link else None, "link_status": link.status if link else None,
+                    "matches_your_request": bool(o.need_id and o.need_id in world.needs
+                                                 and world.needs[o.need_id].org_id == user.org_id),
+                    "notice_days": o.start - TODAY})
     return out
 
 def links_view(world: World, user: User) -> list[dict]:
@@ -297,9 +316,42 @@ def _act(label: str, path: str, body: dict, primary: bool = True) -> dict:
     return {"label": label, "method": "POST", "path": path, "body": body, "primary": primary}
 
 
+def world_gap_step(gap_id: str) -> str:
+    """Gap ids look like TYPE:STEP_ID:CREW:START-END."""
+    return gap_id.split(":")[1]
+
+
+def _need_items(world: World, user: User) -> list[dict]:
+    out = []
+    order = ["OPEN", "MATCHED", "REQUESTED", "AGREED", "DONE"]
+    for nd in world.needs.values():
+        if nd.org_id != user.org_id:
+            continue
+        idx = order.index(nd.status) if nd.status in order else 0
+        other = "Nearby projects"
+        offer = world.offers.get(nd.offer_id) if nd.offer_id else None
+        if offer:
+            active = link_between(world, offer.org_id, nd.org_id) is not None
+            other = world.orgs[offer.org_id].name if active else f"{anon_label(offer.site_id)}'s company"
+        st = world.steps[nd.step_id]
+        def s(i): return "done" if idx >= i else ("wait" if idx == i - 1 else "todo")
+        out.append({"id": nd.id, "kind": "need", "status": nd.status, "created_at": nd.created_at,
+                    "title": f"Request: {nd.workers} {trade_label(nd.trade)} workers for {st.code} "
+                             f"(days {nd.start}–{nd.end}), anonymised", "counterparty": other,
+                    "tracker": [{"party": world.orgs[nd.org_id].name, "label": "Posted", "state": "done",
+                                 "at": nd.created_at},
+                                {"party": other, "label": "Matched", "state": s(1)},
+                                {"party": world.orgs[nd.org_id].name, "label": "Crew requested", "state": s(2)},
+                                {"party": other, "label": "Agreed", "state": s(3)}],
+                    "actions": []})
+    return out
+
+
 def requests_view(world: World, user: User) -> dict:
     incoming, outgoing = [], []
     pm = user.role in ("PM", "OPS_DIRECTOR")
+    if pm:
+        outgoing += _need_items(world, user)
     # anonymised view requests
     for g in world.view_grants.values():
         if user.org_id == g.owner_org and pm:

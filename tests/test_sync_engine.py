@@ -8,14 +8,14 @@ def _delayed():
     return w
 
 def test_one_gap_with_warning_days():
-    gaps = open_gaps(_delayed())
+    gaps = [g for g in open_gaps(_delayed()) if g.site_id == "A"]
     assert len(gaps) == 1
     g = gaps[0]
     assert (g.type, g.step_id, g.start, g.end, g.warning_days) == ("SURPLUS", "A-K3", 230, 235, 10)
 
 def test_options_before_link():
     w = _delayed()
-    opts = {o.mechanism: o for o in options_for(w, open_gaps(w)[0])}
+    opts = {o.mechanism: o for o in options_for(w, [g for g in open_gaps(w) if g.type == "SURPLUS"][0])}
     assert not opts["M1"].feasible and "K5" in opts["M1"].reason
     assert opts["M3"].feasible and opts["M3"].days_protected == 3 and opts["M3"].start_by == 230
     m8 = opts["M8"]
@@ -27,7 +27,7 @@ def test_options_before_link():
 def test_m8_feasible_and_ranked_first_after_link():
     w = _delayed()
     w.links["L1"] = Link("L1", "NG", "RV", "priya", "pool M&E", status="ACTIVE")
-    ranked = options_for(w, open_gaps(w)[0])
+    ranked = options_for(w, [g for g in open_gaps(w) if g.type == "SURPLUS"][0])
     assert ranked[0].mechanism == "M8" and ranked[0].feasible
     assert ranked[0].value_gbp == 3 * 8000 + 6000
 
@@ -37,4 +37,4 @@ def test_m8_approve_without_link_is_refused():
     from app.sync_engine import approve_option
     w = _delayed()
     with pytest.raises(ValueError, match="Offer the idle days first"):
-        approve_option(w, w.users["priya"], open_gaps(w)[0].id, "M8")
+        approve_option(w, w.users["priya"], [g for g in open_gaps(w) if g.type == "SURPLUS"][0].id, "M8")

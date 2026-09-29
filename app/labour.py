@@ -74,10 +74,13 @@ def imbalances(world: World, dates_by_site: dict, window: tuple[int, int] | None
             continue
         s, e = dates_by_site[st.site_id][st.id]
         own = [b for b in world.bookings.values() if b.step_id == st.id]
-        short = [d for d in range(max(s, lo), min(e, hi))
-                 if not any(b.start <= d < effective_booking_end(world, b) for b in own)]
-        out += [Imbalance("SHORTAGE", st.site_id, st.id, None, st.trade, a, z, st.headcount)
-                for a, z in _runs(short)]
+        short: dict[int, list[int]] = defaultdict(list)  # workers short -> days
+        for d in range(max(s, lo), min(e, hi)):
+            booked = sum(world.crews[b.crew_id].size for b in own if b.start <= d < effective_booking_end(world, b))
+            if booked < st.headcount:
+                short[st.headcount - booked].append(d)
+        for workers, days in short.items():
+            out += [Imbalance("SHORTAGE", st.site_id, st.id, None, st.trade, a, z, workers) for a, z in _runs(days)]
     return sorted(out, key=lambda i: (i.start, i.site_id, i.step_id, i.type))
 
 

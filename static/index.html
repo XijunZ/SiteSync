@@ -295,7 +295,7 @@ const USERS = {
 const NAV = {
   dan:   [['timeline','Timeline'],['activity','Activity']],
   priya: [['timeline','Timeline'],['board','Sync Board'],['requests','Requests'],['approvals','Approvals'],['city','City view'],['links','Links & pools'],['labour','Labour balance'],['report','Days protected'],['activity','Activity']],
-  marcus:[['timeline','Timeline'],['requests','Requests'],['reviews','Reviews'],['activity','Activity']],
+  marcus:[['timeline','Timeline'],['board','Sync Board'],['requests','Requests'],['reviews','Reviews'],['activity','Activity']],
   sam:   [['timeline','Timeline'],['proposals','Proposals']]
 };
 const TRADE = {'Mechanical and electrical':'M&E','Groundworks, concrete':'Groundworks','Painting, flooring':'Finishes','Demolition, haulage':'Demolition','Fit-out carpentry':'Carpentry','Licensed asbestos contractor':'Asbestos','Piling contractor':'Piling','Lift contractor':'Lifts','Specialist contractor':'Ground investigation','RC frame':'RC frame','Roofing':'Roofing','Glazing':'Glazing','Cladding':'Cladding','Bricklaying':'Bricklaying','Drylining':'Drylining','Scaffolding':'Scaffolding','Landscaping':'Landscaping','Concrete':'Concrete','Groundworks':'Groundworks','Demolition':'Demolition'};
@@ -419,14 +419,15 @@ function mapBooking(b, site){
   return {id: b.id || `${site}-${step}-${crew}`, crew, org, size: b.size || b.workers || 6, site: b.site_id || site, step, s: bk[0], e: bk[1], extended: true, source: b.source};
 }
 async function sync(){
-  const [tA, tB, tC, tD, pA, pC, board, reqP, reqM, cross, offersM, notes, events, llm, report, labA, labC] = await Promise.all([
+  const [tA, tB, tC, tD, pA, pC, board, reqP, reqM, cross, offersM, notes, events, llm, report, labA, labC, boardM, needsM] = await Promise.all([
     tryApi('/api/sites/A/timeline', {}, 'priya'), tryApi('/api/sites/B/timeline', {}, 'priya'),
     tryApi('/api/sites/C/timeline', {}, 'marcus'), tryApi('/api/sites/D/timeline', {}, 'marcus'),
     tryApi('/api/proposals?site_id=A', {}, 'priya'), tryApi('/api/proposals?site_id=C', {}, 'marcus'),
     tryApi('/api/sync-board', {}, 'priya'), tryApi('/api/requests', {}, 'priya'), tryApi('/api/requests', {}, 'marcus'),
     tryApi('/api/cross-proposals', {}, 'sam'), tryApi('/api/offers', {}, 'marcus'),
     tryApi('/api/notifications', {}, S.user), tryApi('/api/events', {}, S.user), tryApi('/api/llm/log', {}, S.user),
-    tryApi('/api/report', {}, 'priya'), tryApi('/api/sites/A/labour', {}, 'priya'), tryApi('/api/sites/C/labour', {}, 'marcus')]);
+    tryApi('/api/report', {}, 'priya'), tryApi('/api/sites/A/labour', {}, 'priya'), tryApi('/api/sites/C/labour', {}, 'marcus'),
+    tryApi('/api/sync-board', {}, 'marcus'), tryApi('/api/needs', {}, 'marcus')]);
   G.stats = await tryApi('/api/graph/stats', {}, S.user);
   const srv = {tl:{A:tA,B:tB,C:tC,D:tD}, pA, pC, board, reqP, reqM, cross, offersM, report, labA, labC};
   [['A',tA],['B',tB],['C',tC],['D',tD]].forEach(([k,tl]) => { const r = confFromTimeline(tl); S.conf[k] = r.conf; S.riskD[k] = r.risk; });
@@ -440,7 +441,7 @@ async function sync(){
     const cur = S.conf.A[code] || {}; const lagCh = pend.changes.find(c => c.field === 'lag_days'), delCh = pend.changes.find(c => c.field === 'delay_days');
     const psCh = pend.changes.find(c => c.field === 'pause_start');
     S.pending = {id: pend.id, site: pend.site_id, code, lag: lagCh ? lagCh.to : (cur.lag || 0), delay: delCh ? delCh.to : (cur.delay || 0),
-      pause: psCh ? {start: psCh.to, end: psCh.to + ((delCh ? delCh.to : 0) - (cur.delay || 0))} : null, plaudFile: src.plaud_file_id, plaudTitle: src.plaud_title,
+      pause: psCh ? {start: psCh.to, end: psCh.to + ((delCh ? delCh.to : 0) - (cur.delay || 0))} : null, plaudFile: src.plaud_file_id, plaudTitle: src.source_label || src.plaud_title,
       reason: src.reason || '—', status: pend.status === 'PENDING' ? 'site' : 'pm', needsPm: pend.needs_pm, knock: pend.knock_on,
       source: {kind: src.kind === 'voice' ? 'voice' : src.kind === 'csv' ? 'csv' : src.kind === 'timeline' ? 'typed' : (src.excerpt ? 'text' : 'typed'), excerpt: src.excerpt || '', conf: src.confidence}};
   } else S.pending = null;
@@ -458,7 +459,9 @@ async function sync(){
   S.viewReq = {}; if (view) S.viewReq.A = ['GRANTED','SHARED','ACCEPTED','DONE'].includes(st(view)) ? 'granted' : st(view) === 'DECLINED' ? undefined : 'requested';
   if (S.offer === 'none' && (link || S.viewReq.A)) S.offer = 'offered';
   S.link = !link ? 'none' : ['ACTIVE','ACCEPTED','AGREED','DONE','TAKEN'].includes(st(link)) ? 'active' : st(link) === 'DECLINED' ? 'none' : 'requested';
-  S.srv = srv; S.srv.viewReq = view; S.srv.linkReq = link; S.srv.gap = gap; S.srv.m8 = m8;
+  S.srv = srv; S.srv.boardM = boardM; const needM = arr(needsM)[0]; S.srv.need = needM; S.need = needM ? String(needM.status).toLowerCase() : 'none';
+  S.srv.needReq = arr(reqM && reqM.outgoing).find(r => String(r.kind) === 'need');
+  S.srv.viewReq = view; S.srv.linkReq = link; S.srv.gap = gap; S.srv.m8 = m8;
   S.srv.trackers = [...arr(reqP && reqP.outgoing).map(r => ({...r, owner:'priya'})), ...arr(reqM && reqM.outgoing).map(r => ({...r, owner:'marcus'}))];
   // cross proposal → m8 state
   const cp = arr(cross)[0]; S.srv.cp = cp;
@@ -565,10 +568,11 @@ function knock(site){
 
 /* ---------------- script (progress derived from server state) ---------------- */
 const SCRIPT = [
+  ['marcus','board','Marcus: his C-K3 first fix is short 6 M&E workers. He requests capacity from nearby projects', () => S.need !== 'none'],
   ['dan','timeline','Dan updates J1: Sync from Plaud (or click the J1 bar)', () => !!S.pending || isDemoConfirmed()],
   ['dan','timeline','Dan checks the knock-on and confirms the fact', () => (S.pending && S.pending.status==='pm') || isDemoConfirmed()],
   ['priya','approvals','Priya approves. Sparks S1 is now idle days 230–235', () => isDemoConfirmed()],
-  ['priya','board','Priya offers S1’s idle days to nearby projects (anonymised)', () => S.offer==='offered'],
+  ['priya','board','Priya sees the matching request and offers S1’s idle days (anonymised)', () => S.offer==='offered'],
   ['marcus','timeline','Marcus overlays the offer on his timeline and requests the crew', () => S.link!=='none'],
   ['priya','requests','Priya accepts and sets terms: S1 back by day 235', () => S.link==='active'],
   ['sam','proposals','Sam (Sparks) accepts the move for crew S1', () => ['sam','marcus','done'].includes(S.m8)],
@@ -583,17 +587,18 @@ function guideTarget(){
   const pop = !el('pop').hidden, modal = !el('modal').hidden;
   const nav = x => S.view===x ? null : `.nav[data-view="${x}"]`;
   switch (p){
-    case 0: if (modal) return S.tab==='plaud' ? '[data-act="plaudPropose"]' : '[data-utab="plaud"]';
+    case 0: return nav('board') || '[data-act="postNeed"]';
+    case 1: if (modal) return S.tab==='plaud' ? '[data-act="plaudPropose"]' : '[data-utab="plaud"]';
             if (pop) return el('f-go') ? '#f-go' : '[data-act="editStep"]';
             return nav('timeline') || '[data-act="syncPlaud"]';
-    case 1: return nav('timeline') || '.review [data-act="confirmPending"]';
-    case 2: return nav('approvals') || '.review [data-act="approvePending"]';
-    case 3: return nav('board') || '[data-act="offerCapacity"]';
-    case 4: return nav('timeline') || (S.overlay.marcus==='A' ? '.banner [data-act="requestLink"]' : '.banner [data-act="overlayOffer"]');
-    case 5: return nav('requests') || '[data-act="acceptLink"]';
-    case 6: return nav('proposals') || '[data-act="samAccept"]';
-    case 7: return nav('reviews') || '[data-act="marcusConfirm"]';
-    case 8: return nav('approvals') || '[data-act="confirmBooking"]';
+    case 2: return nav('timeline') || '.review [data-act="confirmPending"]';
+    case 3: return nav('approvals') || '.review [data-act="approvePending"]';
+    case 4: return nav('board') || '[data-act="offerCapacity"]';
+    case 5: return nav('timeline') || (S.overlay.marcus==='A' ? '.banner [data-act="requestLink"]' : '.banner [data-act="overlayOffer"]');
+    case 6: return nav('requests') || '[data-act="acceptLink"]';
+    case 7: return nav('proposals') || '[data-act="samAccept"]';
+    case 8: return nav('reviews') || '[data-act="marcusConfirm"]';
+    case 9: return nav('approvals') || '[data-act="confirmBooking"]';
   }
 }
 function applyGuide(){
@@ -886,7 +891,7 @@ function sentStrip(){
   const list = [];
   if (S.user==='dan' && S.ts['upd.sent']) list.push(TRK.update());
   if (S.user==='priya' && S.ts['offer.sent']) list.push(TRK.offer());
-  if (S.user==='marcus'){ if (S.ts['link.sent']) list.push(TRK.crew()); }
+  if (S.user==='marcus'){ if (S.srv.needReq) list.push(serverTracker(S.srv.needReq)); if (S.ts['link.sent']) list.push(TRK.crew()); }
   if (!list.length) return '';
   return `<div class="card" style="margin-bottom:12px"><div class="eyebrow" style="margin-bottom:8px">Your requests</div><div class="grid g2">${list.join('')}</div></div>`;
 }
@@ -902,7 +907,7 @@ function availBanner(){
   const feas = existing ? `<div style="font-size:.86rem;margin-top:4px;color:var(--good)"><b>Feasible:</b> Sparks already works on your C-${fitCode} package (existing subcontract, no onboarding) · ${(o.start ?? 230) - TODAY} working days’ notice</div>` : '';
   return `<div class="banner good fade" role="status">
     <svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="var(--good)" opacity=".18"/><path d="M8 14.5l4 4 8-9" stroke="var(--good)" stroke-width="2.4" fill="none"/></svg>
-    <div class="txt"><b>${tradeLabel(o.trade || 'mep')} crew available near you: ${o.workers || 6} workers, days ${g.s}–${g.e}</b><span class="muted">Offered by anonymised project ${S.link==='active'?`${SITES.A.anon} (Northgate Build)`:SITES.A.anon}, ${o.distance_band || '~2 km'} away. ${fits} ${ov?'The green window on the overlay is the offer.':''}</span>${feas}</div>${action}</div>`;
+    <div class="txt"><b>${o.matches_your_request ? `Your ${tradeLabel(o.trade || 'mep')} request matched: ${o.workers || 6} workers available days ${g.s}–${g.e} from ${SITES.A.anon}` : `${tradeLabel(o.trade || 'mep')} crew available near you: ${o.workers || 6} workers, days ${g.s}–${g.e}`}</b><span class="muted">Offered by anonymised project ${S.link==='active'?`${SITES.A.anon} (Northgate Build)`:SITES.A.anon}, ${o.distance_band || '~2 km'} away. ${fits} ${ov?'The green window on the overlay is the offer.':''}</span>${feas}</div>${action}</div>`;
 }
 function decided(title, who, at, body){ return `<div class="card decided fade"><div class="row"><span class="chip good">✓ ${who}</span><h3 style="margin:0">${title}</h3><span class="sp"></span><span class="mono muted" style="font-size:.78rem">${at||''}</span></div>${body?`<p class="muted" style="margin:6px 0 0;font-size:.86rem">${body}</p>`:''}</div>`; }
 V.approvals = () => {
@@ -931,7 +936,32 @@ function optionCard(o){
     ${o.track||''}${o.actions?`<div class="row">${o.actions}</div>`:''}
   </div>`;
 }
+function serverTracker(r){ if (!r) return '';
+  const all = arr(r.tracker), firstOpen = all.findIndex(s => s.state !== 'done'), done = firstOpen < 0;
+  return `<div class="trk ${done?'ok':''}"><div class="trk-h"><b>${esc(r.title || '')}</b><span class="chip ${done?'good':'info'}">${done?'Done':'In progress'}</span></div>
+    <ol class="trk-steps">${all.map((s,i) => `<li class="${s.state==='done'?'done':i===firstOpen?'wait':''}"><span class="dotm" aria-hidden="true"></span><span><b>${esc(s.label)}</b><br><small>${s.state==='done' ? `✓ ${esc(s.party)}${s.at?' · '+s.at:''}` : i===firstOpen ? `Waiting for ${esc(s.party)}…` : esc(s.party)}</small></span></li>`).join('')}</ol></div>`; }
+function marcusBoard(){
+  const b = S.srv.boardM || {gaps:[]}, gs = arr(b.gaps).filter(g => g.type === 'SHORTAGE'), g = gs[0], nd = S.srv.need;
+  const head = `<div class="ph"><div><div class="eyebrow">Riverside Construction · Sites C, D</div><h1>Sync Board</h1><p>What fell out of sync, and what to do before each deadline passes.</p></div></div>`;
+  const covered = S.m8 === 'done' || S.m8 === 'marcus';
+  if (!g) return head + '<div class="empty">No gaps in the next 20 working days.</div>';
+  const opt = m => arr(g.options).find(o => o.mechanism === m) || {};
+  const m13 = opt('M13'), m10 = opt('M10');
+  const needCard = {code:'M13', best:true, title:`Request ${g.workers} M&E workers from nearby projects`,
+    chip: S.need === 'none' ? '<span class="chip">Not requested</span>' : `<span class="chip ${['agreed','done'].includes(S.need)?'good':'info'}">${S.need === 'open' ? 'Posted · anonymised' : S.need === 'matched' ? 'Matched' : S.need === 'requested' ? 'Crew requested' : 'Agreed'}</span>`,
+    desc: `Publish an anonymised request: M&amp;E, ${g.workers} workers, first fix (days ${nd ? nd.start : 225}–${nd ? nd.end : 245}), ~1 km area. Nearby projects with idle M&amp;E crews see it. Nothing else about Bow Wharf is shared.`,
+    facts:[['Setup','0 days'],['Cost','sub’s agreed rate'],['Reliability','medium']],
+    track: S.srv.needReq ? serverTracker(S.srv.needReq) : '',
+    actions: S.need === 'none' ? `<span class="sp"></span><button class="btn accent" data-act="postNeed">Request M&amp;E capacity from nearby projects</button>` : S.need === 'matched' ? `<span class="sp"></span><button class="btn accent" data-view-go="timeline">See the match on your timeline</button>` : ''};
+  const agency = {code:'M10', title: m10.title || 'Agency top-up via CrewNow', desc:'CrewNow is on your approved list. Agency labour costs a premium (~35–65%) and needs site induction.', facts:[['Setup',(m10.setup_days ?? 1)+' day'],['Start by','day '+(m10.start_by ?? 224)],['Reliability','medium']]};
+  return head + `<div class="card fade">
+    <div class="row"><span class="chip shortage">SHORTAGE</span><h3 style="margin:0">M&amp;E · C-K3 first fix · short ${g.workers} workers · Bow Wharf</h3><span class="sp"></span><span class="chip">days ${nd ? nd.start : 225}–${nd ? nd.end : 245}</span><span class="chip hot">${g.warning_days} days' warning</span></div>
+    <p class="muted" style="margin:6px 0 12px;font-size:.88rem">First fix on the lower floors needs 12 M&amp;E workers (large floor plate); only Sparks crew 2 (6) is booked.${covered ? ' <b style="color:var(--good)">Days 230–235 now covered by Sparks crew 1.</b>' : ''}</p>
+    <div class="eyebrow" style="margin-bottom:8px">Options</div>
+    <div class="grid">${[needCard, agency].map(optionCard).join('')}</div></div>`;
+}
 V.board = () => {
+  if (S.user === 'marcus') return marcusBoard();
   const board = S.srv.board || {gaps:[]}, sg = board.gaps && board.gaps[0], g = demoGap(), done = S.m8==='done' || S.m3;
   const open = (board.gaps || []).length;
   const head = `<div class="ph"><div><div class="eyebrow">Northgate Build · Sites A, B</div><h1>Sync Board</h1><p>What fell out of sync, and what to do before each deadline passes.</p></div></div>
@@ -947,11 +977,11 @@ V.board = () => {
     feas: (() => { const sub = (G.swap && G.swap.sub) || 'Sparks Electrical', subShort = sub.split(' ')[0];
       const existing = (G.swap && G.swap.rows && G.swap.rows.length) || S.bookings.some(b => b.site !== sg.site_id && new RegExp(subShort, 'i').test(b.crew) && T[b.step] && T[b.step].trade === tradeLabel(sg.trade));
       return existing ? `<div class="preview" style="margin-top:6px;background:var(--good-soft);color:var(--good)"><b>Feasible:</b> ${esc(subShort)} already holds an ${tradeLabel(sg.trade)} package at the nearby project (existing subcontract, approved at both companies, no onboarding) · ${sg.start - TODAY} working days’ notice (gap starts day ${sg.start})</div>` : ''; })(),
-    desc: S.offer==='offered' ? `Offered anonymised to nearby projects: M&E, ${sg.workers} workers, days ${sg.start}–${sg.end}, ~1 km area. A project that needs M&E can ask for it; you set the terms, including S1’s return to A-K3 on day ${sg.end}.`
-      : `Share S1’s idle window anonymised (trade, crew size, days ${sg.start}–${sg.end}, ~1 km area) with nearby projects. Projects that need M&E can request it. Nothing is shared about your programme.`,
+    desc: (m8s.matching_need ? `<b>A nearby project (${esc(m8s.matching_need.anon_label)}) has requested ${m8s.matching_need.workers} ${tradeLabel(m8s.matching_need.trade)} workers, days ${m8s.matching_need.start}–${m8s.matching_need.end}. Your idle days ${sg.start}–${sg.end} fit.</b> ` : '') + (S.offer==='offered' ? `Offered anonymised to nearby projects: M&E, ${sg.workers} workers, days ${sg.start}–${sg.end}, ~1 km area. A project that needs M&E can ask for it; you set the terms, including S1’s return to A-K3 on day ${sg.end}.`
+      : `Share S1’s idle window anonymised (trade, crew size, days ${sg.start}–${sg.end}, ~1 km area) with nearby projects. Projects that need M&E can request it. Nothing is shared about your programme.`),
     facts:[['Start by','day '+(m8s.start_by ?? sg.start-1)],['Setup',(m8s.setup_days ?? 1)+' day'],['Protects',prot+' days'],['Value',gbp(m8s.value_gbp ?? prot*DAY_VALUE + (sg.end-sg.start)*CREW_DAY)],['Reliability','medium']],
     track: (S.offer==='offered' ? TRK.offer(true) : '') + `<div class="row"><button class="btn ghost" style="padding-left:0" data-act="showSwap">${G.open.swap && G.swap ? 'Hide graph' : 'How we found this · Neo4j'}</button></div>${swapPanel()}`,
-    actions: S.m3 ? '' : S.offer==='none' ? `<span class="muted" style="font-size:.82rem">Nearby projects that need M&amp;E in that window will see it.</span><span class="sp"></span><button class="btn accent" data-act="offerCapacity">Offer to nearby projects</button>`
+    actions: S.m3 ? '' : S.offer==='none' ? `<span class="muted" style="font-size:.82rem">Nearby projects that need M&amp;E in that window will see it.</span><span class="sp"></span><button class="btn accent" data-act="offerCapacity">${m8s.matching_need ? 'Offer S1 to this request' : 'Offer to nearby projects'}</button>`
       : S.link==='none' ? `<span class="muted" style="font-size:.82rem">Waiting for a nearby project to ask.</span>`
       : S.link==='requested' ? `<span class="sp"></span><button class="btn accent" data-view-go="requests">Review Riverside’s request</button>`
       : S.m8==='marcus' ? `<span class="sp"></span><button class="btn primary" data-view-go="approvals">Confirm your booking change</button>`
@@ -1155,6 +1185,10 @@ function openUpdate(tab){
       recs.slice(0,5).map(r => `<button class="rec" aria-pressed="${PLAUD.sel===r.id}" data-act="pickRec" data-id="${r.id}"><svg class="wave" viewBox="0 0 44 28" aria-hidden="true">${[6,14,20,10,24,16,8,18,12,6].map((h,i)=>`<rect x="${i*4.4+1}" y="${14-h/2}" width="2.4" height="${h}" rx="1" fill="var(--muted)"/>`).join('')}</svg><span style="flex:1"><b style="font-weight:600">${r.title || r.name || 'Recording'}</b><br><span class="muted mono" style="font-size:.75rem">${r.created_at || r.id}</span></span><span class="chip">Plaud</span></button>`).join('')}
     ${PLAUD.sel ? `<div class="quote" style="max-height:180px;overflow:auto">${PLAUD.text || ''}</div><div class="row"><span class="muted" style="font-size:.8rem">Audio stays with Northgate. Only the approved update is shared.</span><span class="sp"></span><button class="btn accent" data-act="plaudPropose" ${PLAUD.busy?'disabled':''}>${PLAUD.busy?'Reading note on Crusoe…':'Propose update'}</button></div>` : ''}
     <div class="sep"></div>
+    <div class="eyebrow">Or upload a Plaud transcript export</div>
+    <div class="row"><label class="btn" for="plaudFile">Choose export (.txt, .md, .srt, .vtt)</label><input id="plaudFile" type="file" accept=".txt,.md,.srt,.vtt,text/plain" hidden>${PLAUD.upload ? `<span class="chip hot">Plaud export · ${esc(PLAUD.upload.name)}</span>` : ''}</div>
+    ${PLAUD.upload ? `<div class="quote" style="max-height:160px;overflow:auto">${esc(PLAUD.upload.text)}</div><div class="row"><span class="sp"></span><button class="btn accent" data-act="plaudUploadPropose" ${PLAUD.busy?'disabled':''}>${PLAUD.busy?'Reading note on Crusoe…':'Propose from Plaud export'}</button></div>` : ''}
+    <div class="sep"></div>
     <div class="eyebrow">Or paste a transcript</div>
     <textarea id="pasteText">${DEMO_TRANSCRIPT}</textarea>
     <div class="row"><span class="muted" style="font-size:.8rem">Extraction runs on Crusoe (gpt-oss-120b), with an offline fallback.</span><span class="sp"></span><button class="btn ${PLAUD.sel?'':'accent'}" data-act="${PLAUD.sel?'pasteProposeAlt':'plaudPropose'}" ${PLAUD.busy?'disabled':''}>${PLAUD.busy?'Reading…':'Propose from text'}</button></div></div>`;
@@ -1228,6 +1262,11 @@ const ACT = {
   approvePending(){ const P = S.pending; if (!P) return;
     act(() => api(`/api/proposals/${P.id}/decide`, {body:{accept:true}}), () => { const g = S.srv.gap; return g ? `Approved. New gap: ${g.crew} idle days ${g.start}–${g.end}. See Sync Board.` : 'Approved. Timeline updated.'; }); },
   discardPending(){ const P = S.pending; if (!P) return; act(() => api(`/api/proposals/${P.id}/decide`, {body:{accept:false}}), 'Proposal discarded; nothing moved.'); },
+  postNeed(){ const g = arr((S.srv.boardM||{}).gaps).find(x => x.type === 'SHORTAGE'); if (!g) return toast('No shortage to request.');
+    act(() => api('/api/needs', {body:{gap_id:g.id}}), 'Request posted, anonymised. Nearby projects with idle M&E crews will see it.'); },
+  async plaudUploadPropose(){ if (!PLAUD.upload) return; PLAUD.busy = true; openUpdate('plaud');
+    try { await api('/api/ingest/text', {body:{site_id:'A', text: PLAUD.upload.text, source_label:`Plaud export · ${PLAUD.upload.name}`}}); PLAUD.busy = false; closeModal(); S.view='timeline'; await refresh(); toast('Update proposed from the Plaud export.'); }
+    catch(e){ PLAUD.busy = false; openUpdate('plaud'); toast(`Couldn’t read the export: ${e.message}`); } },
   offerCapacity(){ const g = S.srv.gap; if (!g) return toast('No open gap to offer.');
     act(() => api('/api/offers', {body:{gap_id:g.id}}), 'Offered. Nearby projects that need M&E will see it, anonymised.'); },
   requestView(){ const anon = SITES.A.anonId || (S.srv.offerM && S.srv.offerM.anon_id); if (!anon) return toast('No offer visible yet.');
@@ -1283,6 +1322,12 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('input', e => { if (['f-s','f-e','f-r','f-ps','f-pd'].includes(e.target.id)) previewEdit(); });
 document.addEventListener('change', e => {
+  if (e.target.id==='plaudFile' && e.target.files[0]){ const f = e.target.files[0], r = new FileReader();
+    r.onload = () => { const raw = String(r.result);
+      const text = raw.split(/\r?\n/).filter(l => l.trim() && !/^\d+$/.test(l.trim()) && !/^WEBVTT/.test(l) && !/-->/.test(l))
+        .map(l => l.replace(/^\s*\[?\d{1,2}:\d{2}(:\d{2})?([.,]\d+)?(\s*-\s*\d{1,2}:\d{2}(:\d{2})?)?\]?\s*/, '').replace(/^[^:]{1,30}:\s+/, '')).join(' ');
+      PLAUD.upload = {name: f.name, text}; openUpdate('plaud'); };
+    r.readAsText(f); }
   if (e.target.id==='csvfile' && e.target.files[0]){ const r = new FileReader(); r.onload = () => { el('csvOut').innerHTML = csvDiff(String(r.result)); }; r.readAsText(e.target.files[0]); }
   if (e.target.id==='photofile' && e.target.files[0]) toast('Photo received. Vision parsing is a should-have and not in this demo build.');
 });

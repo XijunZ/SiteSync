@@ -37,7 +37,7 @@ def test_cypher_swap_search_matches_memory(mirror):
     w = build_world()
     w.steps["A-J1"].delay_days = 5
     mirror.sync(w)
-    gap = open_gaps(w)[0]
+    gap = [g for g in open_gaps(w) if g.type == "SURPLUS"][0]
     cypher = swap_candidates_neo4j(w, gap, mirror)
     memory = swap_candidates_memory(w, gap)
     assert [(s, c) for s, c, _ in cypher] == [(s, c) for s, c, _ in memory]
