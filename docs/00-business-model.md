@@ -8,6 +8,10 @@
 | Scope | **Global**: any city with enough concurrent private projects (London, Paris, New York, Dubai, Hong Kong, ...). Nothing here is jurisdiction-specific. |
 | Note | Competitor and market sizing are being researched separately; add findings in §11. |
 
+## 0. Feasibility in one paragraph
+
+A subcontractor's workers are its own people (employees, or its regular self-employed gang), and subs routinely move them between contracts they hold with different GCs. That is normal, legal, daily practice. SiteSync does not supply, lend or move workers, and workers do not freelance through it. It **forecasts** when a sub's booking will slip and when another site it already works for will be ready, and **introduces** the opportunity weeks earlier than the sub would find out today. The sub moves its own crew under its existing contracts. Out of scope because it's a regulated, different business: freelance labour marketplaces, GCs lending direct staff, and short-notice new sub-to-GC relationships. The real risks are commercial (GC adoption, and whether 2 to 4 weeks' notice fills gaps that 1 to 2 days can't), not legal.
+
 ## 1. Positioning (decided)
 
 **Stage 1 is proactive prediction and cross-company matching, not a marketplace.** SiteSync predicts, weeks ahead, which crews a delay will leave idle and which sites will need that trade in that window, across companies. It then makes a warm, double-blind introduction. Humans agree terms and contract **off-platform** using the relationships and contracts they already have. There are no payments, no contracts and no platform-issued paperwork in stage 1.
