@@ -1190,7 +1190,7 @@ function plaudTitle(id){ const r = (PLAUD.list || []).find(x => x.id === id); re
 function openUpdate(tab){
   S.tab = tab || S.tab || 'plaud';
   const m = el('modal'); m.hidden = false; m.className = 'modal-bg';
-  const tabs = [['plaud','Plaud (voice)'],['csv','CSV upload'],['photo','Labour plan photo'],['manual','Edit on timeline']];
+  const tabs = [['plaud','Plaud (voice)'],['csv','CSV upload'],['photo','Labour plan photo · Crusoe vision'],['manual','Edit on timeline']];
   let body = '';
   if (S.tab==='plaud'){
     if (PLAUD.list === null) { loadPlaud(); }
@@ -1212,7 +1212,7 @@ function openUpdate(tab){
   else if (S.tab==='csv') body = `<div class="drop"><b>Upload a labour plan or programme CSV</b><span style="font-size:.84rem">Columns: crew, step, start, end, size. Rows are compared with current bookings; duplicates are ignored.</span>
       <div class="row"><label class="btn" for="csvfile">Choose file</label><input id="csvfile" type="file" accept=".csv,text/csv" hidden><button class="btn" data-act="csvSample">Use sample: labour-plan-wk44.csv</button></div></div>
       <div id="csvOut" style="margin-top:12px"></div>`;
-  else if (S.tab==='photo') body = `<div class="drop"><b>Photo of the whiteboard labour plan</b><span style="font-size:.84rem">A vision model reads rows with a confidence score. You review before anything becomes a booking.</span><div class="row"><label class="btn" for="photofile">Choose photo</label><input id="photofile" type="file" accept="image/*" hidden></div><span style="font-size:.78rem">Runs server-side on Crusoe (Kimi K2.6 vision). Should-have; not in this demo build.</span></div>`;
+  else if (S.tab==='photo') body = `<div class="drop"><b>Photo of the whiteboard labour plan</b><span style="font-size:.84rem">A vision model reads rows with a confidence score. You review before anything becomes a booking.</span><div class="row"><label class="btn" for="photofile">Choose photo</label><input id="photofile" type="file" accept="image/*" hidden></div><span style="font-size:.78rem">Read by a vision model on Crusoe Cloud (Kimi K2.6), same review step as voice notes.</span></div>`;
   else body = `<p>Close this and click any bar on the timeline. Change its start or finish; the preview shows how many steps move and any crew gaps before you propose it.</p><div class="row"><span class="sp"></span><button class="btn primary" data-act="closeModal">Go to timeline</button></div>`;
   m.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mh"><div class="row"><h2 id="mh">Update timeline</h2><span class="sp"></span><button class="btn ghost" data-act="closeModal" aria-label="Close">✕</button></div>
     <p class="muted" style="margin:0 0 12px">Every source becomes the same proposed change, with the same checks and knock-on preview.</p>
@@ -1345,7 +1345,7 @@ document.addEventListener('change', e => {
       PLAUD.upload = {name: f.name, text}; openUpdate('plaud'); };
     r.readAsText(f); }
   if (e.target.id==='csvfile' && e.target.files[0]){ const r = new FileReader(); r.onload = () => { el('csvOut').innerHTML = csvDiff(String(r.result)); }; r.readAsText(e.target.files[0]); }
-  if (e.target.id==='photofile' && e.target.files[0]) toast('Photo received. Vision parsing is a should-have and not in this demo build.');
+  if (e.target.id==='photofile' && e.target.files[0]) toast('Photo parsing on Crusoe vision is the next input we are wiring up. Use a Plaud note for this demo.');
 });
 el('bell').addEventListener('click', async e => { e.stopPropagation(); const n = el('notes'); if (!n.hidden) { n.hidden = true; return; }
   const mine = S.notes;
