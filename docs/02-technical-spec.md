@@ -51,6 +51,7 @@ Design rules:
 | `seed/seed.py`, `seed/programme.py` | Claude | CSV parsing, trade mapping, site and crew generation |
 | `app/llm.py`, `app/prompts.py` | Codex | OpenRouter client, model routing, cost log |
 | `app/ingest.py` | Codex | Transcript and photo extraction |
+| `app/plaud.py` | Claude | Plaud CLI wrapper: list recent recordings, fetch polished transcript (subprocess, parsed text output) |
 | `app/weather.py` | Codex | Open-Meteo lookup (Could) |
 | `static/index.html` | Codex | UI |
 | `tests/` | Claude (engine), Codex (ingest, mocked LLM) | pytest |
@@ -235,6 +236,8 @@ GET  /api/gcs                                   → [{id, name}]
 GET  /api/sites?gc=NG                           → [{id, name, lat, lon, stage, planned_finish, pred_finish}]
 GET  /api/timeline?gc=NG&site=A                 → {site, today, steps: [TimelineStep]}
 POST /api/ingest/transcript  {gc_id, text}      → {proposals: [DelayProposal], candidates: [DelayProposal], llm_call_id}
+GET  /api/plaud/recordings?days=1               → [{file_id, name, created_at, duration_s}]   (via Plaud CLI)
+POST /api/ingest/plaud       {gc_id, file_id}   → same as ingest/transcript, plus {source: "plaud", file_id}
 POST /api/ingest/photo       multipart: gc_id, file → {bookings: [BookingProposal], confidence, llm_call_id}
 POST /api/updates/apply      {gc_id, delays: [DelayProposal], bookings: [BookingProposal]}
                                                 → {shifted_steps, finish_change_days, alerts: AlertsView}
@@ -272,7 +275,7 @@ class AlertsView(BaseModel):
     summary: str | None                # LLM-written (US-13); null if the LLM is unavailable
 
 class LlmCall(BaseModel):
-    id: str; purpose: str; model: str; latency_ms: int; prompt_tokens: int; completion_tokens: int; cost_usd: float; ok: bool
+    id: str; purpose: str; provider: Literal["crusoe","openrouter","fallback"]; model: str; latency_ms: int; prompt_tokens: int; completion_tokens: int; cost_usd: float; ok: bool
 ```
 
 Codex builds the UI against fixtures in `tests/fixtures/*.json`, which Claude generates from the real engine. Fixtures are available before the routes are finished.
@@ -284,8 +287,15 @@ Codex builds the UI against fixtures in `tests/fixtures/*.json`, which Claude ge
 def call(purpose: str, messages: list, schema: type[BaseModel] | None, tier: Literal["cheap","strong","vision"]) -> BaseModel | str
 ```
 
-- OpenAI SDK, `base_url="https://openrouter.ai/api/v1"`, key `OPENROUTER_API_KEY`.
-- Models come from env (`MODEL_CHEAP`, `MODEL_STRONG`, `MODEL_VISION`, each a comma-separated fallback list). Pick current models from OpenRouter's `/models` at build time; nothing is hardcoded in code.
+- Two OpenAI-compatible providers through the same OpenAI SDK:
+  - `crusoe`: `base_url=https://api.inference.crusoecloud.com/v1`, key `CRUSOE_API_KEY`. **Primary for text.** Required for the overall prizes.
+  - `openrouter`: `base_url=https://openrouter.ai/api/v1`, key `OPENROUTER_API_KEY`. Vision, plus fallback for text.
+- Models come from env as `provider:model` fallback lists (defaults in `.env.example`, verified 2026-09-29):
+  - `MODEL_CHEAP`: `crusoe:openai/gpt-oss-120b`, then `openrouter:openai/gpt-oss-120b`
+  - `MODEL_STRONG`: `crusoe:moonshotai/Kimi-K2.6`, then `openrouter:moonshotai/kimi-k2.6`
+  - `MODEL_VISION`: `openrouter:google/gemini-3.8-flash`
+- Crusoe's docs don't mention JSON-schema output, so use JSON mode plus pydantic validation for Crusoe, and `response_format` JSON schema for OpenRouter.
+- `LlmCall` logs `provider` as well as `model`, so the UI can show Crusoe vs OpenRouter usage.
 - Structured output with a JSON schema from pydantic. Validate, and retry once with the validation error on failure.
 - Cost is taken from the OpenRouter usage response. Every call is appended to an in-memory log.
 - **Transcript prompt input:** transcript text plus the caller GC's site list and step catalogue (code, name, trade). No other GC data.
@@ -328,6 +338,8 @@ Branches: `main` (always demo-able), `claude/engine`, `codex/ui-llm`. Merge to `
 4. Matching uses at least 3 days of overlap instead of "start inside the gap" (PRD R4).
 5. API: request bodies carry `gc_id`; `timeline` takes `gc`; new `GET /api/gcs`; `apply` takes `delays` and `bookings` instead of a generic `updates`. Needed to enforce neutrality at the API boundary.
 6. `delay_days` property added to Step so propagation preserves a step's own delay.
-7. New modules: `store.py`, `graph_nx.py`, `engine.py`, `views.py`, `config.py`, `prompts.py`.
+7. New modules: `store.py`, `graph_nx.py`, `engine.py`, `views.py`, `config.py`, `prompts.py`, `plaud.py`.
+8. LLM inference is on Crusoe first, with OpenRouter for vision and fallback (the brief had OpenRouter only). This is required because Crusoe gates the overall prizes.
+9. Plaud is integrated through the Plaud CLI (new routes `GET /api/plaud/recordings` and `POST /api/ingest/plaud`). Deployment moves from last priority to a smoke deploy on Crusoe by 12:30.
 
 Once approved, update `CLAUDE.md` and `AGENTS.md` to point at `docs/` as the source of truth.

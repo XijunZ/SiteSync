@@ -112,7 +112,7 @@ Auth, real dates or calendars, booking confirmation between GCs, subcontractor-f
 
 ## 6. MVP definition
 
-**The MVP is the demo story, end to end, reliably:** US-1 to US-10.
+**The MVP is the demo story, end to end, reliably:** US-1 to US-10, **plus US-14 (Plaud voice note)**, with the LLM step running on **Crusoe** and the app **hosted on Crusoe**. Updated after the prize list was confirmed: Crusoe is required for every overall prize, and Plaud and Neo4j have their own prizes. See `03-setup-and-process.md` §1.
 
 In plain terms, a judge watches this happen in under 3 minutes:
 

@@ -1,0 +1,23 @@
+[project]
+name = "sitesync"
+version = "0.1.0"
+description = "Construction timeline engine: delay propagation, idle crew detection, cross-GC matching"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "pydantic>=2",
+    "python-dotenv",
+    "neo4j>=5",
+    "networkx",
+    "openai>=1",
+    "httpx",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
