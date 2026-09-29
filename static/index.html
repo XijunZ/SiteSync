@@ -982,8 +982,8 @@ V.board = () => {
   const open = (board.gaps || []).length;
   const head = `<div class="ph"><div><div class="eyebrow">Northgate Build · Sites A, B</div><h1>Sync Board</h1><p>What fell out of sync, and what to do before each deadline passes.</p></div></div>
   <div class="grid g3" style="margin-bottom:14px"><div class="card stat"><b>${open&&!done?1:2}</b><span>sites in sync</span></div><div class="card stat"><b style="color:${open&&!done?'var(--risk)':'var(--good)'}">${done?0:open}</b><span>open gaps</span></div><div class="card stat"><b>${['approved','sam','marcus'].includes(S.m8)?1:0}</b><span>syncs in flight</span></div></div>`;
-  if (!sg && !done) return headM + `<div class="empty">No gaps in the next 20 working days.${S.pending?' A proposed change on Site A is waiting for confirmation.':''}</div>`;
-  if (!sg && done) return headM + `<div class="banner good"><div class="txt"><b>In sync. ${board.days_protected || 3} days protected (${gbp((board.days_protected || 3)*DAY_VALUE)}).</b><span class="muted">Sparks S1 worked days 230–235 at Bow Wharf and is booked back on Site A from day 235.</span></div><button class="btn" data-view-go="report">See report</button></div>`;
+  if (!sg && !done) return head + `<div class="empty">No gaps in the next 20 working days.${S.pending?' A proposed change on Site A is waiting for confirmation.':''}</div>`;
+  if (!sg && done) return head + `<div class="banner good"><div class="txt"><b>In sync. ${board.days_protected || 3} days protected (${gbp((board.days_protected || 3)*DAY_VALUE)}).</b><span class="muted">Sparks S1 worked days 230–235 at Bow Wharf and is booked back on Site A from day 235.</span></div><button class="btn" data-view-go="report">See report</button></div>`;
   const conf = sched('A','conf'), noAct = schedule('A', merge(S.conf.A, {K3:{lag:RETURN_LAG + ((S.conf.A.K3||{}).lag||0)}}));
   const base = sched('A','base')._end;
   const opt = m => (sg.options || []).find(o => o.mechanism === m) || {};
@@ -1007,7 +1007,7 @@ V.board = () => {
     actions: S.m8==='none' && S.offer==='none' ? `<span class="sp"></span><button class="btn" data-act="approveM3">Approve re-slot</button>` : ''};
   const m1 = {code:'M1', off:!m1s.feasible, title:'Resequence: pull forward other M&E work on Site A', chip: m1s.feasible ? '' : '<span class="chip bad">Not available</span>', desc: m1s.reason || 'No unstaffed, ready M&E work in the window.', facts:[['Setup','0 days']]};
   const m10 = {code:'M10', off:true, title:'Agency top-up via your framework', chip:'<span class="chip">For shortages</span>', desc:'Applies when you’re short of a trade. CrewNow is approved at Northgate.', facts:[['Setup','1 day']]};
-  return headM + `<div class="card fade">
+  return head + `<div class="card fade">
     <div class="row"><span class="chip surplus">${sg.type}</span><h3 style="margin:0">${tradeLabel(sg.trade)} · ${sg.crew} · ${sg.workers} workers · Site ${sg.site_id}</h3><span class="sp"></span><span class="chip">days ${sg.start}–${sg.end}</span><span class="chip hot">${sg.warning_days} days' warning</span></div>
     <p class="muted" style="margin:6px 0 12px;font-size:.88rem">S1 idle ${sg.start}–${sg.end} because the roof now finishes day ${conf.J1[1]} (membrane batch 2 failed QA); back on A-K3 day ${sg.end} when first fix can start.</p>
     <div class="cmp"><div><div class="eyebrow">No action</div><b class="num">+${noAct._end-base} days</b><div class="muted" style="font-size:.85rem">S1 redeploys and returns ${RETURN_LAG} days late. Handover ${noAct._end}.</div></div>
