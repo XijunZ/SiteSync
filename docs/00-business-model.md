@@ -157,6 +157,20 @@ Why not pure %-of-savings: the counterfactual is disputable, attribution is uncl
 
 **Demo:** rename the offer card to "Slot swap: Sparks M&E does Site C first (days 230–235), back on Site A on day 235". Equipment and inspections go on the roadmap slide. In the data model, equipment is just another resource node with a booking window.
 
+### B.7 Research update on labour mobility (supersedes the qualification claims in §4.1 and #1 in §B.6)
+
+Full findings: `04-labour-mobility-research.md`. Summary:
+- **Workers can move fast (same day to 3 days) in every market studied** when they already hold their site credentials (CSCS, SST card, carte BTP, HK registration and Green Card). Credentials are portable and belong to the worker.
+- **Fast legal routes:** agencies and manpower suppliers (all markets); labour-only gangs (UK CIS, HK gang leaders); sub-tier under a subcontractor already approved on the destination site (with written consent); UAE temporary work permit (about 1 week); French intérim.
+- **Slow:** new company-level subcontractor approval (1 to 6+ weeks). **Blocked:** licensed trades tied to the licensee's payroll (NYC), union jobs, imported labour (HK), for-profit lending outside agencies (France, Germany).
+- **Commercial lessons:** employer-of-record staffing works (25 to 35%+ margins); peer-to-peer equipment and skilled-labour marketplaces failed or were absorbed. Closest comparables: SmartBench (US), Sukedachi (Japan).
+
+**Model changes:**
+1. SiteSync does not employ or broker labour. **Agencies, manpower suppliers and rental companies are fulfilment partners.**
+2. **New revenue line: referral and partner fees** when a predicted need is filled through a partner. Agencies value the 1 to 3 week demand signal, which only SiteSync has.
+3. The next-best-action engine chooses a **fulfilment route per market**: slot swap → sub-tier under the approved sub → approved sub adds agency labour → temporary permit or at-cost framework loan → equipment via rental partner. It checks a per-market compliance list and never proposes a blocked route.
+4. Stage 2 "pre-cleared pools": credentials verified ahead, frameworks and consents pre-signed.
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
