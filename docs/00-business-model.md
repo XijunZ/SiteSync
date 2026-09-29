@@ -43,7 +43,27 @@
 - Success fee used as **proof** (days protected report), not as the main billing
 - Avoid: per-alert pricing (rewards noise); per-placement agency referral fees (bias the ranking)
 
-**Honest limits:** cross-company crew moves only work with enough lead time or an existing relationship; peer-to-peer marketplaces failed historically, so we coordinate and fulfil through approved channels; GCs won't share raw recordings (30-second summaries, GC-approved).
+### v5.1 additions (from the product design brainstorm, 2026-09-29)
+
+**Identity:** SiteSync **keeps sites in sync**. It is the next-best-action engine that finds what falls out of sync when a timeline moves (crews, equipment, inspections, bookings, across sites and companies) and runs the mechanism that fixes it. **Not an ERP** (not the system of record) and **not a prediction tool** (the forecast is an input; the product is the action).
+
+**Foundation:** each project's timeline built on its dependency graph, with **labour loading** (planned headcount per step by trade) and bookings. Every change (a human input at any time, or a signal such as weather, strikes or city incidents) propagates through dependencies and recomputes the **labour balance**: which trades now have a **surplus** (booked, no work), a **shortage** (work, nobody booked) or a **clash**. Each new imbalance becomes an out-of-sync gap with its warning time.
+
+**Site-sync mechanisms (the product surface):** a catalogue of playbooks, each with preconditions, setup lead time, parties and outcome tracking. Within site: M1 resequence, M2 mitigate, M3 re-slot trades. Across own sites: M4 crew redeploy, M5 equipment transfer, M6 shared specialists, M7 batched inspections. Across companies: M8 slot swap, M9 sub-tier, M10 agency top-up, M11 early prequalification, M12 local-market routes.
+
+**Three tiers of visibility and the network:**
+- **Own company:** full timelines across all its projects
+- **Linked partners:** only the shared pool
+- **City network:** anonymised timelines of other projects using SiteSync (area, weeks, phase, trade need or surplus windows; no names; minimum-crowd rule; confidential projects excluded)
+
+**Link and pool:** a company can request to link with an anonymised project's company (the requester reveals itself; the target stays anonymous until it answers). On acceptance they agree pool terms (resources, recharge, return guarantee, priority rule), and cross-company mechanisms between them get easier. Each completed sync leaves approved relationships, so the network compounds.
+
+**What this adds to the business model:**
+- **Network effects:** every project added makes the city view richer, and more surplus meets more shortage. A dense city is the unit of expansion.
+- **The city view as a sales tool:** prospects can see anonymised demand near their sites before joining.
+- **A future data product:** anonymised trade × week surplus and shortage heatmaps per city, for agencies, subs and plant hire (a subscription to demand data, not per-placement fees).
+
+**Honest limits:** anonymised demand windows still reveal something about a company's pipeline to competitors (mitigated by coarse data, the minimum-crowd rule and opt-in; answered in the pitch as "you see theirs too, and only linked partners see detail"); cross-company crew moves only work with enough lead time or an existing relationship; peer-to-peer marketplaces failed historically, so we coordinate and fulfil through approved channels; GCs won't share raw recordings (30-second summaries, GC-approved).
 
 ## B. Audience and who pays (v4; superseded by the CURRENT MODEL above)
 
