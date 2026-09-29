@@ -1,0 +1,1193 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SiteSync Interface Designs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: timeline-first operations console. App bar with role switcher and notifications, left rail per role, timeline as the main canvas, popovers for step updates, request trackers for every hand-off, demo-script drawer. */
+:root{
+  --bg:#EEF0EC; --surface:#FFFFFF; --sunk:#F6F7F4; --fg:#18202C; --muted:#5A6270; --faint:#8A919B; --line:#D7DAD3;
+  --accent:#D9531E; --accent-soft:#FBE4D8; --steel:#2F5D8A; --steel-soft:#DCE6F0;
+  --plan:#BFC3BC; --risk:#B7791F; --risk-soft:#F7EAD2; --good:#2E7D4F; --good-soft:#DCEFE2; --bad:#B42318; --bad-soft:#F9E0DC;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 1px 2px rgba(20,24,30,.06),0 4px 16px rgba(20,24,30,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151A; --surface:#1A1E25; --sunk:#161A20; --fg:#E6E8E4; --muted:#9BA2AC; --faint:#6F7680; --line:#2C323B;
+  --accent:#FF7B42; --accent-soft:#3A2419; --steel:#86AEDB; --steel-soft:#1D2A38;
+  --plan:#4B515A; --risk:#E3A64A; --risk-soft:#3A2F1A; --good:#6CC08E; --good-soft:#1B3325; --bad:#F2877A; --bad-soft:#3B1E1B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151A; --surface:#1A1E25; --sunk:#161A20; --fg:#E6E8E4; --muted:#9BA2AC; --faint:#6F7680; --line:#2C323B;
+  --accent:#FF7B42; --accent-soft:#3A2419; --steel:#86AEDB; --steel-soft:#1D2A38;
+  --plan:#4B515A; --risk:#E3A64A; --risk-soft:#3A2F1A; --good:#6CC08E; --good-soft:#1B3325; --bad:#F2877A; --bad-soft:#3B1E1B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+
+/* app bar */
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{font:700 1.35rem/1 var(--f-display);letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.brand i{display:inline-block;width:18px;height:10px;border-top:3px solid var(--accent);border-bottom:3px solid var(--steel)}
+.today{font:500 .75rem var(--f-mono);color:var(--muted);padding:4px 8px;border:1px solid var(--line);border-radius:4px}
+.roles{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.role{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border:1px solid var(--line);border-radius:99px;background:var(--surface);font-size:.82rem}
+.role .av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:600 .7rem var(--f-body);color:#fff}
+.role small{color:var(--muted);font-size:.72rem}
+.role[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.role .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+/* shell */
+.shell{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:calc(100% - 56px)}
+.rail{border-right:1px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:2px;background:var(--sunk)}
+.rail .org{font:500 .7rem var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 10px 10px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:6px;border:0;background:none;text-align:left;font-weight:500;color:var(--muted)}
+.nav:hover{background:var(--surface);color:var(--fg)}
+.nav[aria-current="page"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.badge{font:600 .68rem/1 var(--f-mono);padding:3px 6px;border-radius:99px;background:var(--accent);color:#fff}
+main{padding:22px 24px 120px;min-width:0}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.ph h1{font:700 1.9rem/1 var(--f-display);margin:0}
+.ph p{margin:4px 0 0;color:var(--muted)}
+.eyebrow{font:500 .7rem var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+
+/* cards and primitives */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.card h3{font:600 1.15rem/1.2 var(--f-display);margin:0 0 8px;letter-spacing:.01em}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;font-weight:600;font-size:.85rem}
+.btn:hover{border-color:var(--fg)}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:5px;font:500 .7rem/1 var(--f-mono);padding:4px 7px;border-radius:4px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.surplus{background:var(--risk-soft);border-color:transparent;color:var(--risk)}
+.chip.shortage,.chip.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.chip.good{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.chip.info{background:var(--steel-soft);border-color:transparent;color:var(--steel)}
+.chip.hot{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.88rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.stat b{display:block;font:700 1.7rem/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted)}
+.banner{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--risk-soft);margin-bottom:14px;flex-wrap:wrap}
+.banner.info{background:var(--steel-soft)}
+.banner.good{background:var(--good-soft)}
+.banner .ico{width:28px;height:28px;flex:none}
+.banner .txt{flex:1 1 280px;min-width:0}
+.banner b{display:block}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .68rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.sep{height:1px;background:var(--line);margin:12px 0}
+.quote{border-left:3px solid var(--accent);padding:6px 12px;background:var(--sunk);border-radius:0 6px 6px 0;font-size:.92rem}
+.quote mark{background:var(--accent-soft);color:inherit;padding:0 2px;border-radius:2px}
+
+/* diff & compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.cmp > div{background:var(--surface);padding:12px 14px}
+.cmp b{font:700 1.6rem/1 var(--f-display)}
+.protect{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:8px;background:var(--good-soft);color:var(--good);margin-top:10px}
+.protect b{font:700 2rem/1 var(--f-display)}
+
+/* option cards */
+.opt{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px;background:var(--surface)}
+.opt.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.opt.off{background:var(--sunk);opacity:.8}
+.opt .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.opt .hd h4{margin:0;font:600 1.05rem/1.2 var(--f-body);flex:1 1 220px}
+.opt .code{font:600 .72rem var(--f-mono);color:var(--accent)}
+.facts{display:flex;gap:18px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+.facts b{color:var(--fg);font-weight:600}
+.steps{display:flex;gap:4px;flex-wrap:wrap}
+.steps span{font:500 .66rem/1 var(--f-mono);padding:4px 6px;border-radius:3px;background:var(--sunk);color:var(--faint);border:1px solid var(--line)}
+.steps span.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.steps span.done{background:var(--good-soft);color:var(--good);border-color:transparent}
+
+/* timeline */
+.tl{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
+.tl svg{display:block;min-width:900px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin:8px 2px 12px}
+.legend i{display:inline-block;width:18px;height:7px;border-radius:2px;margin-right:6px;vertical-align:1px}
+
+/* capture */
+.rec{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);width:100%;text-align:left}
+.rec[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.wave{width:44px;height:28px;flex:none}
+textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:6px;padding:10px;background:var(--surface);resize:vertical}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.tab{border:0;background:none;padding:8px 12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+
+/* form */
+.field{display:grid;gap:4px;font-size:.85rem}
+.field label{color:var(--muted);font-size:.78rem}
+.field input,.field select{border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:var(--surface)}
+.checks{display:flex;gap:8px;flex-wrap:wrap}
+.checks label{display:flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:.85rem}
+
+/* demo drawer */
+.drawer{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;width:min(360px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 14px;font-weight:600}
+.drawer summary::-webkit-details-marker{display:none}
+.drawer ol{margin:0;padding:0 14px 12px 34px;font-size:.84rem;max-height:46vh;overflow:auto}
+.drawer li{margin:6px 0;color:var(--muted)}
+.drawer li.now{color:var(--fg);font-weight:600}
+.drawer li.done{color:var(--faint);text-decoration:line-through}
+.drawer .foot{display:flex;gap:8px;padding:0 14px 12px}
+.footer{display:flex;gap:14px;flex-wrap:wrap;font:500 .72rem var(--f-mono);color:var(--muted);border-top:1px solid var(--line);margin-top:24px;padding-top:12px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;z-index:40;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+
+@media (max-width:820px){
+  .shell{grid-template-columns:1fr}
+  .rail{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px 16px}
+  .rail .org{display:none}
+  .nav{white-space:nowrap}
+  main{padding:16px 16px 120px}
+  .roles{margin-left:0;width:100%;overflow-x:auto;flex-wrap:nowrap}
+  .role small{display:none}
+  .cmp{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){ .fade{animation:fade .25s ease-out} }
+@keyframes fade{from{opacity:.4;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* v2 additions: timeline-first */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 11px;font-weight:600;font-size:.82rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.tl .bar{cursor:pointer}
+.tl .bar:hover rect.hit,.tl .bar:focus rect.hit{fill:var(--accent);fill-opacity:.12}
+.tl .bar:focus{outline:none}
+.pop{position:fixed;z-index:50;max-height:calc(100vh - 24px);overflow:auto;width:min(360px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.18);padding:14px}
+.pop h4{margin:0;font:600 1.05rem/1.25 var(--f-body)}
+.pop .x{position:absolute;top:8px;right:8px}
+.pop .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.preview{border-radius:6px;padding:8px 10px;background:var(--sunk);font-size:.84rem;margin-top:8px}
+.preview.err{background:var(--bad-soft);color:var(--bad)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,12,16,.45);z-index:45;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border-radius:12px;width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h2{font:700 1.6rem/1 var(--f-display);margin:0 0 4px}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;color:var(--muted);display:grid;gap:8px;justify-items:center}
+.review{border:1px solid var(--accent);box-shadow:0 0 0 1px var(--accent);margin-bottom:12px}
+.overlay-key{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin:6px 2px 10px}
+.overlay-key i{display:inline-block;width:18px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
+.pulse{animation:pulse 1.2s ease-in-out 2}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--accent-soft)}}
+.drawer ol{max-height:34vh}
+
+/* v3: hand-offs made visible */
+.trk{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);min-width:0}
+.trk.ok{border-color:var(--good)}
+.trk.compact{border:0;padding:0;background:none}
+.trk-h{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap}
+.trk-steps{list-style:none;margin:0;padding:0;display:flex;gap:6px;flex-wrap:wrap}
+.trk-steps li{display:flex;gap:7px;align-items:flex-start;flex:1 1 140px;min-width:0;padding:6px 8px;border-radius:6px;background:var(--sunk);font-size:.82rem;line-height:1.3}
+.trk-steps li small{color:var(--muted);font-size:.74rem}
+.trk-steps li.done{background:var(--good-soft)}
+.trk-steps li.done small{color:var(--good)}
+.trk-steps li.wait{background:var(--steel-soft)}
+.trk-steps li.wait small{color:var(--steel);font-weight:600}
+.dotm{width:9px;height:9px;border-radius:50%;margin-top:4px;flex:none;border:2px solid var(--faint)}
+li.done .dotm{background:var(--good);border-color:var(--good)}
+li.wait .dotm{border-color:var(--steel);animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{50%{background:var(--steel)}}
+.decided{border-color:var(--good)}
+.demo-press{outline:3px solid var(--accent)!important;outline-offset:3px;animation:press 1s ease-in-out infinite;position:relative}
+@keyframes press{50%{box-shadow:0 0 0 8px var(--accent-soft)}}
+.bell{position:relative;border:1px solid var(--line);background:var(--surface);border-radius:99px;width:36px;height:36px;display:grid;place-items:center;color:var(--fg)}
+.bell .badge{position:absolute;top:-4px;right:-4px}
+.notes{position:absolute;right:16px;top:58px;width:min(380px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:12px;z-index:35;max-height:60vh;overflow:auto}
+.note{padding:7px 0;border-top:1px solid var(--line);font-size:.86rem}
+.note.unread{font-weight:600}
+@media (prefers-reduced-motion:reduce){ .demo-press,li.wait .dotm{animation:none} }
+
+.stepbtn{all:unset;cursor:pointer;display:block;border-radius:4px;padding:2px 4px;margin:-2px -4px}
+.stepbtn:hover{background:var(--sunk)}
+.stepbtn:focus-visible{outline:2px solid var(--accent)}
+.drawer li.done .stepbtn{text-decoration:line-through}
+.drawer .hint{margin:0;padding:0 14px 12px;font-size:.76rem;color:var(--muted)}
+.demo-target{outline:3px solid var(--accent)!important;outline-offset:3px;animation:press 1.2s ease-in-out infinite}
+.bar.demo-target{outline:none!important;animation:none}
+.bar.demo-target rect.hit{fill:var(--accent);fill-opacity:.2;stroke:var(--accent);stroke-width:2.5}
+@media (prefers-reduced-motion:reduce){.demo-target{animation:none}}
+.drawer summary .cur{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;font-size:.86rem}
+.drawer .chev{color:var(--muted);transition:transform .2s}
+.drawer[open] .chev{transform:rotate(180deg)}
+main{padding-bottom:160px}
+.drawer[open] ol{max-height:min(60vh,520px)}
+[hidden]{display:none!important}
+</style>
+<header class="appbar">
+  <div class="brand"><i aria-hidden="true"></i>SiteSync</div>
+  <span class="today" title="Integer working days on a common axis">TODAY · DAY 220</span>
+  <div class="roles" id="roles" role="group" aria-label="View as"></div>
+  <button class="bell" id="bell" aria-label="Notifications"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v4.5L4 16v1h16v-1l-2-2.5V9a6 6 0 0 0-6-6zm-2.2 15a2.2 2.2 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.7"/></svg><span class="badge" id="bellN" hidden></span></button>
+  <div id="notes" class="notes" hidden></div>
+</header>
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Sections"></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<details class="drawer" id="drawer">
+  <summary><span class="badge" id="stepBadge">1/11</span><span id="curStep" class="cur">Demo script</span><span class="chev" aria-hidden="true">▴</span></summary>
+  <ol id="script"></ol>
+  <div class="foot"><button class="btn primary" id="showMe">Show me where</button><button class="btn ghost" id="reset">Reset</button></div><p class="hint">Click any step to jump there. The pulsing button is what to click next.</p>
+</details>
+<div id="pop" class="pop" hidden role="dialog" aria-modal="false"></div>
+<div id="modal" hidden></div>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script>
+const TEMPLATE = [["F1","Pre-demolition asbestos and structural surveys","Surveyor","task",0,5,[],"Demolition and enabling"],["F2","Section 80 demolition notice period (6 weeks)","Council","wait",0,30,["F1"],"Demolition and enabling"],["F3","Disconnect existing gas, electricity, water","Utility companies","wait",0,30,[],"Demolition and enabling"],["F4","Hoarding, welfare cabins, site set-up","Groundworks","task",1,10,[],"Demolition and enabling"],["F5","Soft strip of fixtures and fittings","Demolition","task",0,10,["F4","F1"],"Demolition and enabling"],["F6","Licensed asbestos removal","Licensed asbestos contractor","task",0,10,["F5"],"Demolition and enabling"],["F7","Structural demolition","Demolition","task",1,20,["F2","F3","F6"],"Demolition and enabling"],["F8","Crush, sort and clear rubble, grub out old foundations","Demolition, haulage","task",1,10,["F7"],"Demolition and enabling"],["G1","Ground investigation boreholes and any contamination remediation","Specialist contractor","task",1,15,["F8"],"Substructure"],["G2","Piling mat and piling","Piling contractor","task",1,25,["G1"],"Substructure"],["G3","Pile integrity testing","Piling contractor","task",0,5,["G2"],"Substructure"],["G4","Excavate and cut down piles","Groundworks","task",1,10,["G3"],"Substructure"],["G5","Pile caps and ground beams","Groundworks, concrete","task",1,20,["G4"],"Substructure"],["G6","Below-ground drainage and service ducts","Groundworks","task",1,10,["G5"],"Substructure"],["G7","Ground floor slab","Concrete","task",1,10,["G6"],"Substructure"],["H1","RC frame: level 1 columns, core and slab","RC frame","task",1,8,["G7"],"Superstructure"],["H2","RC frame: level 2","RC frame","task",1,8,["H1"],"Superstructure"],["H3","RC frame: level 3","RC frame","task",1,8,["H2"],"Superstructure"],["H4","RC frame: level 4","RC frame","task",1,8,["H3"],"Superstructure"],["H5","RC frame: level 5","RC frame","task",1,8,["H4"],"Superstructure"],["H6","RC frame: roof slab","RC frame","task",1,8,["H5"],"Superstructure"],["H7","Strike props and back-propping","RC frame","task",0,10,["H6"],"Superstructure"],["J1","Roof waterproofing (single-ply membrane)","Roofing","task",1,10,["H6"],"Envelope"],["J2","Windows, lower floors (ground to level 2)","Glazing","task",0,10,["H3"],"Envelope"],["J3","Windows, upper floors (level 3 to 5)","Glazing","task",0,10,["H6","J2"],"Envelope"],["J4","Brick-slip or rainscreen cladding, lower floors","Cladding","task",1,25,["J2"],"Envelope"],["J5","Cladding, upper floors","Cladding","task",1,25,["J3","J4"],"Envelope"],["J6","Building weathertight","Milestone","milestone",0,0,["J1","J3"],"Envelope"],["J7","Strike scaffold, fit balconies","Scaffolding","task",1,10,["J5"],"Envelope"],["K1","Blockwork party walls and cores, lower floors","Bricklaying","task",0,15,["J2"],"Services and fit-out"],["K2","Blockwork, upper floors","Bricklaying","task",0,15,["J3","K1"],"Services and fit-out"],["K3","MEP first fix (pipes, cables, ducts), lower floors","Mechanical and electrical","task",0,20,["K1","J6"],"Services and fit-out"],["K4","MEP first fix, upper floors","Mechanical and electrical","task",0,20,["K2","K3"],"Services and fit-out"],["K5","Risers and plant room","Mechanical and electrical","task",0,20,["H7"],"Services and fit-out"],["K6","First fix inspection, lower floors","Building control","approval",0,2,["K3"],"Services and fit-out"],["K7","First fix inspection, upper floors","Building control","approval",0,2,["K4"],"Services and fit-out"],["K8","Drylining, plastering and screed, lower floors","Drylining","task",0,20,["K6","J6"],"Services and fit-out"],["K9","Drylining, plastering and screed, upper floors","Drylining","task",0,20,["K7","K8"],"Services and fit-out"],["K10","Kitchens, bathrooms, doors and joinery, lower floors","Fit-out carpentry","task",0,20,["K8"],"Services and fit-out"],["K11","Kitchens, bathrooms, doors and joinery, upper floors","Fit-out carpentry","task",0,20,["K9","K10"],"Services and fit-out"],["K12","Decoration and flooring, lower floors","Painting, flooring","task",0,15,["K10"],"Services and fit-out"],["K13","Decoration and flooring, upper floors","Painting, flooring","task",0,15,["K11","K12"],"Services and fit-out"],["K14","MEP second fix (sockets, taps, heat pumps), lower floors","Mechanical and electrical","task",0,10,["K12"],"Services and fit-out"],["K15","MEP second fix, upper floors","Mechanical and electrical","task",0,10,["K13","K14"],"Services and fit-out"],["K16","Lift installation","Lift contractor","task",0,30,["K5"],"Services and fit-out"],["L1","Permanent power and water energised","Utility companies","approval",0,5,["K5"],"Commissioning and handover"],["L2","Test and commission fire alarm, smoke vents, ventilation, electrics","Mechanical and electrical","task",0,20,["L1","K15","K16"],"Commissioning and handover"],["L3","External works, paving and landscaping","Landscaping","task",1,25,["J7"],"Commissioning and handover"],["L4","Snagging and defect fixes","General contractor","task",0,15,["L2"],"Commissioning and handover"],["L5","Building control completion certificate","Building control","approval",0,10,["L2","L3"],"Commissioning and handover"],["L6","Practical completion and handover to developer","Developer","milestone",0,5,["L4","L5"],"Commissioning and handover"],["L7","Sales completions and first occupation","Developer","task",0,20,["L6"],"Commissioning and handover"]];
+const OFFSET = {A:12, B:100, C:7, D:185};
+const SITES = {
+  A:{name:'Hackney Wick Yard', org:'N', anon:'#—', x:0.74, y:0.75},
+  B:{name:'Stratford Mill',    org:'N', anon:'#9D2', x:2.18, y:0.93},
+  C:{name:'Bow Wharf',         org:'R', anon:'#7F3', x:1.16, y:2.42},
+  D:{name:'Canning Town Works',org:'R', anon:'#2B9', x:2.98, y:3.92}
+};
+const ORGS = {N:'Northgate Build', R:'Riverside Construction', SP:'Sparks Electrical', VL:'Voltline', AG:'CrewNow (agency)'};
+const TODAY = 220, LOOK = 20, DAY_VALUE = 8000, CREW_DAY = 1200, RETURN_LAG = 3;
+const gbp = n => '£' + Math.round(n).toLocaleString('en-GB');
+const USERS = {
+  dan:   {name:'Dan',   full:'Dan Okafor', role:'Site manager · A', org:'N', sites:['A'], edit:['A'], color:'#2F5D8A'},
+  priya: {name:'Priya', full:'Priya Shah', role:'PM · A, B', org:'N', sites:['A','B'], edit:['A','B'], color:'#D9531E'},
+  marcus:{name:'Marcus',full:'Marcus Bell',role:'PM · C, D', org:'R', sites:['C','D'], edit:['C','D'], color:'#2E7D4F'},
+  sam:   {name:'Sam',   full:'Sam Reyes',  role:'Planner · Sparks', org:'SP', sites:[], edit:[], color:'#7A5AA6'}
+};
+const NAV = {
+  dan:   [['timeline','Timeline'],['activity','Activity']],
+  priya: [['timeline','Timeline'],['board','Sync Board'],['requests','Requests'],['approvals','Approvals'],['city','City view'],['links','Links & pools'],['labour','Labour balance'],['report','Days protected'],['activity','Activity']],
+  marcus:[['timeline','Timeline'],['requests','Requests'],['reviews','Reviews'],['activity','Activity']],
+  sam:   [['timeline','Timeline'],['proposals','Proposals']]
+};
+const TRADE = {'Mechanical and electrical':'M&E','Groundworks, concrete':'Groundworks','Painting, flooring':'Finishes','Demolition, haulage':'Demolition','Fit-out carpentry':'Carpentry','Licensed asbestos contractor':'Asbestos','Piling contractor':'Piling','Lift contractor':'Lifts','Specialist contractor':'Ground investigation','RC frame':'RC frame','Roofing':'Roofing','Glazing':'Glazing','Cladding':'Cladding','Bricklaying':'Bricklaying','Drylining':'Drylining','Scaffolding':'Scaffolding','Landscaping':'Landscaping','Concrete':'Concrete','Groundworks':'Groundworks','Demolition':'Demolition'};
+const SLUG = {mep:'M&E', roofing:'Roofing', glazing:'Glazing', drylining:'Drylining', carpentry:'Carpentry', bricklaying:'Bricklaying', cladding:'Cladding', scaffolding:'Scaffolding', rc_frame:'RC frame', finishes:'Finishes', lifts:'Lifts', landscaping:'Landscaping', groundworks:'Groundworks', concrete:'Concrete', demolition:'Demolition', piling:'Piling', asbestos:'Asbestos', ground_investigation:'Ground investigation'};
+const tradeLabel = t => SLUG[t] || TRADE[t] || t;
+const HEAD = {'M&E':6,'Roofing':4,'Glazing':4,'Drylining':5,'Carpentry':4,'Bricklaying':5,'Cladding':5,'Scaffolding':4,'RC frame':8,'Finishes':4,'Lifts':3,'Landscaping':4,'Groundworks':6,'Concrete':5,'Demolition':6,'Piling':4,'Asbestos':4,'Ground investigation':3};
+const T = {}; TEMPLATE.forEach(([c,n,t,k,w,d,deps,ph]) => T[c] = {c,n,trade:TRADE[t]||null,raw:t,k,w:!!w,d,deps,ph});
+const SUCC = {}; TEMPLATE.forEach(([c]) => SUCC[c] = []); TEMPLATE.forEach(([c,,,,,,deps]) => deps.forEach(p => SUCC[p].push(c)));
+const TOPO = (() => { const seen = new Set(), out = []; const v = c => { if (seen.has(c)) return; seen.add(c); T[c].deps.forEach(v); out.push(c); }; Object.keys(T).forEach(v); return out; })();
+const DEMO_TRANSCRIPT = 'Morning briefing, Hackney Wick Yard. Kev says heavy rain from Thursday, so the roof waterproofing is delayed about five working days. Windows and cladding are on track.';
+
+/* ---------------- API ---------------- */
+async function api(path, opts = {}, as){
+  const r = await fetch(path, {method: opts.method || (opts.body ? 'POST' : 'GET'),
+    headers: {'X-User-Id': as || S.user, 'Content-Type': 'application/json'},
+    body: opts.body ? JSON.stringify(opts.body) : undefined});
+  let j = null; try { j = await r.json(); } catch(e) {}
+  if (!r.ok) { const err = new Error((j && (j.detail || j.error)) || r.statusText || ('HTTP ' + r.status)); err.status = r.status; err.body = j; throw err; }
+  return j;
+}
+const tryApi = async (path, opts, as) => { try { return await api(path, opts, as); } catch(e) { return null; } };
+const MISSING = new Set();
+async function act(fn, okMsg){
+  try { const r = await fn(); await refresh(); if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg); return r; }
+  catch(e){ await refresh(); toast(e.status === 404 ? 'That action is not available on the server yet.' : `Couldn’t do that: ${e.message}`); }
+}
+const arr = x => Array.isArray(x) ? x : (x && (x.items || x.results || x.recordings || x.offers)) || [];
+
+/* ---------------- state ---------------- */
+let UI = {user:'dan', view:'timeline'};
+try { UI = Object.assign(UI, JSON.parse(localStorage.getItem('sitesync-ui')) || {}); } catch(e) {}
+function saveUI(){ try { localStorage.setItem('sitesync-ui', JSON.stringify({user:S.user, view:S.view, site:S.site, mode:S.mode, overlay:S.overlay})); } catch(e) {} }
+function fresh(){ return {
+  user: UI.user || 'dan', view: UI.view || 'timeline', site: UI.site || {dan:'A',priya:'A',marcus:'C'}, mode: UI.mode || 'steps', overlay: UI.overlay || {priya:null, marcus:null},
+  conf:{A:{},B:{},C:{},D:{}}, riskD:{A:{},B:{},C:{},D:{}}, pending:null, risk:false, viewReq:{}, offer:'none', link:'none', m8:'none', m3:false, ts:{}, notes:[],
+  bookings: seedBookings(), aiCalls:0, events:[], srv:{}
+};}
+function seedBookings(){ return [
+  {id:'b1', crew:'Roofing crew', org:'N', size:4, site:'A', step:'J1', s:220, e:230},
+  {id:'b2', crew:'Glazing crew', org:'N', size:4, site:'A', step:'J3', s:220, e:230},
+  {id:'b3', crew:'Sparks S1', org:'SP', size:6, site:'A', step:'K3', s:230, e:250},
+  {id:'b4', crew:'Sparks S1', org:'SP', size:6, site:'A', step:'K4', s:250, e:270},
+  {id:'b5', crew:'Voltline V1', org:'VL', size:6, site:'A', step:'K5', s:230, e:250},
+  {id:'b6', crew:'Sparks S2', org:'SP', size:6, site:'C', step:'K3', s:225, e:245},
+  {id:'b7', crew:'Sparks S2', org:'SP', size:6, site:'C', step:'K4', s:245, e:265},
+  {id:'b8', crew:'Voltline V2', org:'VL', size:6, site:'C', step:'K5', s:225, e:245},
+  {id:'b9', crew:'Groundworks crew', org:'N', size:6, site:'B', step:'G5', s:220, e:240}
+];}
+let S = fresh();
+const el = id => document.getElementById(id);
+const U = () => USERS[S.user];
+function toast(msg){ const t = el('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 4200); }
+const unread = u => S.notes.filter(n => !n.read);
+const anonLabel = a => a ? '#' + String(a).slice(0,3).toUpperCase() : '#—';
+
+/* ---------------- server → view state ---------------- */
+function confFromTimeline(tl){
+  const out = {}, ends = {}, risk = {};
+  if (!tl || !tl.steps) return {conf: out, risk};
+  const by = {}; tl.steps.forEach(s => by[s.code] = s);
+  TOPO.forEach(c => { const s = by[c]; if (!s) return; const [cs, ce] = s.confirmed; const [rs, re] = s.risk || s.confirmed;
+    const natural = T[c].deps.length ? Math.max(...T[c].deps.map(p => ends[p] ?? 0)) : OFFSET[tl.site_id];
+    ends[c] = ce; const lag = cs - natural, delay = (ce - cs) - T[c].d;
+    if (lag || delay) out[c] = {lag, delay};
+    if (s.risk_flag && (re - rs) !== (ce - cs)) risk[c] = {delay: (re - rs) - T[c].d - delay}; });
+  return {conf: out, risk};
+}
+function mapBooking(b, site){
+  const step = b.step_code || (b.step_id || b.step || '').split('-').pop();
+  const crew = b.crew_name || b.crew || b.crew_id || '';
+  const org = /sparks/i.test(crew) ? 'SP' : /voltline/i.test(crew) ? 'VL' : (site === 'C' || site === 'D' ? 'R' : 'N');
+  const bk = b.booking || [b.start ?? b.s, b.end ?? b.e];
+  return {id: b.id || `${site}-${step}-${crew}`, crew, org, size: b.size || b.workers || 6, site: b.site_id || site, step, s: bk[0], e: bk[1], extended: true, source: b.source};
+}
+async function sync(){
+  const [tA, tB, tC, tD, pA, pC, board, reqP, reqM, cross, offersM, notes, events, llm, report, labA, labC] = await Promise.all([
+    tryApi('/api/sites/A/timeline', {}, 'priya'), tryApi('/api/sites/B/timeline', {}, 'priya'),
+    tryApi('/api/sites/C/timeline', {}, 'marcus'), tryApi('/api/sites/D/timeline', {}, 'marcus'),
+    tryApi('/api/proposals?site_id=A', {}, 'priya'), tryApi('/api/proposals?site_id=C', {}, 'marcus'),
+    tryApi('/api/sync-board', {}, 'priya'), tryApi('/api/requests', {}, 'priya'), tryApi('/api/requests', {}, 'marcus'),
+    tryApi('/api/cross-proposals', {}, 'sam'), tryApi('/api/offers', {}, 'marcus'),
+    tryApi('/api/notifications', {}, S.user), tryApi('/api/events', {}, S.user), tryApi('/api/llm/log', {}, S.user),
+    tryApi('/api/report', {}, 'priya'), tryApi('/api/sites/A/labour', {}, 'priya'), tryApi('/api/sites/C/labour', {}, 'marcus')]);
+  const srv = {tl:{A:tA,B:tB,C:tC,D:tD}, pA, pC, board, reqP, reqM, cross, offersM, report, labA, labC};
+  [['A',tA],['B',tB],['C',tC],['D',tD]].forEach(([k,tl]) => { const r = confFromTimeline(tl); S.conf[k] = r.conf; S.riskD[k] = r.risk; });
+  const j1 = tA && tA.steps.find(s => s.code === 'J1');
+  S.risk = !!(j1 && j1.risk_flag);
+  // pending timeline change (Site A)
+  const pend = arr(pA).find(p => (p.changes || []).length && ['PENDING','SITE_CONFIRMED'].includes(p.status));
+  if (pend){ const ch = pend.changes[0], code = ch.step_id.split('-').pop(), src = pend.source || {};
+    const cur = S.conf.A[code] || {}; const lagCh = pend.changes.find(c => c.field === 'lag_days'), delCh = pend.changes.find(c => c.field === 'delay_days');
+    S.pending = {id: pend.id, site: pend.site_id, code, lag: lagCh ? lagCh.to : (cur.lag || 0), delay: delCh ? delCh.to : (cur.delay || 0),
+      reason: src.reason || '—', status: pend.status === 'PENDING' ? 'site' : 'pm', needsPm: pend.needs_pm, knock: pend.knock_on,
+      source: {kind: src.kind === 'voice' ? 'voice' : src.kind === 'csv' ? 'csv' : src.kind === 'timeline' ? 'typed' : (src.excerpt ? 'text' : 'typed'), excerpt: src.excerpt || '', conf: src.confidence}};
+  } else S.pending = null;
+  // offer / m3 state from the Sync Board
+  const gap = board && board.gaps && board.gaps[0];
+  const m8 = gap && (gap.options || []).find(o => o.mechanism === 'M8');
+  const offerState = (m8 && (m8.offer_state || (m8.offer && m8.offer.status))) || 'none';
+  S.offer = String(offerState).toLowerCase() === 'none' ? 'none' : 'offered';
+  S.m3 = !!(board && (board.outcomes || []).some(o => o.mechanism === 'M3' || String(o.option_id || '').endsWith('|M3')));
+  // requests
+  const all = [...arr(reqP && reqP.incoming), ...arr(reqP && reqP.outgoing), ...arr(reqM && reqM.incoming), ...arr(reqM && reqM.outgoing)];
+  const kindOf = r => String(r.kind || '').toLowerCase();
+  const view = all.find(r => kindOf(r) === 'view'), link = all.find(r => kindOf(r) === 'crew');
+  const st = r => String(r && r.status || '').toUpperCase();
+  S.viewReq = {}; if (view) S.viewReq.A = ['GRANTED','SHARED','ACCEPTED','DONE'].includes(st(view)) ? 'granted' : st(view) === 'DECLINED' ? undefined : 'requested';
+  if (S.offer === 'none' && (link || S.viewReq.A)) S.offer = 'offered';
+  S.link = !link ? 'none' : ['ACTIVE','ACCEPTED','AGREED','DONE','TAKEN'].includes(st(link)) ? 'active' : st(link) === 'DECLINED' ? 'none' : 'requested';
+  S.srv = srv; S.srv.viewReq = view; S.srv.linkReq = link; S.srv.gap = gap; S.srv.m8 = m8;
+  S.srv.trackers = [...arr(reqP && reqP.outgoing).map(r => ({...r, owner:'priya'})), ...arr(reqM && reqM.outgoing).map(r => ({...r, owner:'marcus'}))];
+  // cross proposal → m8 state
+  const cp = arr(cross)[0]; S.srv.cp = cp;
+  const bookPend = site => arr(site === 'A' ? pA : pC).find(p => p.bookings !== undefined || p.kind === 'add_swap_booking' || p.kind === 'confirm_return' || (p.source || {}).kind === 'cross_proposal');
+  S.srv.bookA = bookPend('A'); S.srv.bookC = bookPend('C');
+  const days = report ? (report.days_protected ?? report.total_days_protected ?? 0) : (board ? board.days_protected || 0 : 0);
+  if (!cp) S.m8 = 'none';
+  else if (cp.your_decision === null || cp.your_decision === undefined) S.m8 = cp.status === 'DECLINED' ? 'none' : 'approved';
+  else if (S.srv.bookC) S.m8 = 'sam';
+  else if (S.srv.bookA) S.m8 = 'marcus';
+  else S.m8 = (days > 0 || cp.status === 'AGREED') ? 'done' : 'sam';
+  if (S.m8 !== 'none' && S.link === 'none') S.link = 'active';
+  // bookings (for dots, idle bars, labour lanes)
+  const bks = [...arr(labA && labA.bookings).map(b => mapBooking(b, 'A')), ...arr(labC && labC.bookings).map(b => mapBooking(b, 'C'))].filter(b => b.step && b.s !== undefined);
+  S.bookings = bks.length ? bks : seedBookings();
+  if (!bks.length){ // mirror server outcomes on the fallback seed
+    if (['marcus','done'].includes(S.m8)) S.bookings.push({id:'b10', crew:'Sparks S1', org:'SP', size:6, site:'C', step:'K3', s:230, e:235});
+    if (S.m8 === 'done' || S.m3) { const b = S.bookings.find(x => x.id === 'b3'); b.s = 235; b.e = 255; }
+    const bJ1 = S.bookings.find(x => x.id === 'b1'); const c = S.conf.A.J1; if (c && c.delay) { bJ1.e = 230 + c.delay; bJ1.extended = true; }
+  }
+  // offers visible to Marcus: learn A's anonymous id
+  const off = arr(offersM).find(o => !o.own) || arr(offersM)[0]; S.srv.offerM = off;
+  if (off && off.anon_id) { SITES.A.anonId = off.anon_id; SITES.A.anon = off.anon_label || anonLabel(off.anon_id); }
+  // derived tracker timestamps (from state; times from server trackers when present)
+  const ts = {}, mk = (k, who, cond) => { if (cond) ts[k] = {who, at:''}; };
+  const confirmedJ1 = (S.conf.A.J1 || {}).delay > 0;
+  mk('upd.sent','Dan', !!S.pending || confirmedJ1); mk('upd.confirmed','Dan', (S.pending && S.pending.status==='pm') || confirmedJ1); mk('upd.approved','Priya', confirmedJ1);
+  mk('offer.sent','Priya', S.offer !== 'none'); mk('view.sent','Marcus', !!S.viewReq.A); mk('view.granted','#4K1’s company', S.viewReq.A === 'granted');
+  mk('link.sent','Marcus (Riverside)', S.link !== 'none'); mk('link.accepted','Priya (Northgate)', S.link === 'active');
+  mk('m8.sent','Priya', S.m8 !== 'none'); mk('m8.sam','Sam (Sparks)', ['sam','marcus','done'].includes(S.m8)); mk('m8.marcus','Marcus (Riverside)', ['marcus','done'].includes(S.m8)); mk('m8.done','Priya', S.m8 === 'done');
+  S.srv.trackers.forEach(r => arr(r.tracker).forEach(t => { if (t.at) Object.values(ts).forEach(v => { if (v.who.startsWith(t.party) && !v.at) v.at = t.at; }); }));
+  S.ts = ts;
+  S.notes = arr(notes).map(n => ({text: n.text, t: n.at || n.t || '', read: !!n.read}));
+  S.events = arr(events).map((e, i) => ({t: e.at || '', who: (e.user_id && USERS[e.user_id] ? USERS[e.user_id].name : (e.user_id || 'System')), what: describe(e), src: (e.source && e.source.kind) || 'system'})).reverse();
+  const calls = llm ? arr(llm.calls) : []; S.aiCalls = calls.length; S.llm = calls;
+}
+function describe(e){
+  const p = e.payload || {};
+  const map = {ProposalCreated:'Proposed a timeline change', ProposalSiteConfirmed:'Confirmed the fact on site', ForecastConfirmed:'Confirmed forecast change' + (p.changes && p.changes[0] ? ` (${p.changes[0].step_id} +${p.changes[0].to} days)` : ''),
+    RiskFlagRaised:`Risk flag: ${p.detail || ''} ${p.step_id || ''}`, RiskFlagCleared:`Risk flag cleared ${p.step_id || ''}`, OfferPublished:'Offered idle capacity to nearby projects', ViewRequested:'Requested an anonymised view',
+    ViewGranted:'Shared an anonymised view', LinkRequested:'Requested the offered crew', LinkAccepted:'Accepted crew request and set pool terms', ProposalSent:'Slot-swap proposal sent to the subcontractor',
+    ProposalAccepted:'Accepted the slot swap', OptionApproved:`Approved ${p.mechanism || 'option'}`, BookingChanged:'Booking changed', OutcomeRecorded:'Sync done'};
+  return map[e.type] || e.type;
+}
+async function refresh(){ await sync(); render(); }
+
+/* ---------------- engine (display only; the server is the source of truth) ---------------- */
+function schedule(site, mods){
+  const out = {}, off = OFFSET[site];
+  const f = c => {
+    if (out[c]) return out[c];
+    const t = T[c], m = mods[c] || {};
+    const natural = t.deps.length ? Math.max(...t.deps.map(p => f(p)[1])) : off;
+    const s = natural + (m.lag || 0), e = s + t.d + (m.delay || 0);
+    return out[c] = [s, e, natural];
+  };
+  Object.keys(T).forEach(f);
+  const end = Math.max(...Object.values(out).map(v => v[1]));
+  const lf = {};
+  const L = c => lf[c] !== undefined ? lf[c] : (lf[c] = SUCC[c].length ? Math.min(...SUCC[c].map(x => L(x) - (out[x][1]-out[x][0]))) : end);
+  Object.keys(T).forEach(c => { out[c][3] = L(c) - out[c][1] <= 0; });
+  out._end = end; return out;
+}
+const merge = (a, b) => { const r = JSON.parse(JSON.stringify(a)); for (const k in b) r[k] = Object.assign({}, r[k], b[k]); return r; };
+function riskMods(site){ const out = {}; for (const c in (S.riskD[site] || {})) out[c] = {delay: ((S.conf[site][c] || {}).delay || 0) + S.riskD[site][c].delay}; return out; }
+function sched(site, kind){
+  if (kind === 'base') return schedule(site, {});
+  if (kind === 'risk') return schedule(site, merge(S.conf[site], riskMods(site)));
+  if (kind === 'prop' && S.pending && S.pending.site === site) return schedule(site, merge(S.conf[site], {[S.pending.code]:{lag:S.pending.lag, delay:S.pending.delay}}));
+  return schedule(site, S.conf[site]);
+}
+function gaps(bookings, getSched){
+  const out = [];
+  bookings.forEach(b => {
+    const sc = getSched(b.site)[b.step]; if (!sc) return;
+    const [ss, se] = sc;
+    if (b.s < ss) { const g = {type:'SURPLUS', b, s:b.s, e:Math.min(ss, b.e)}; g.inLook = g.s < TODAY + LOOK && g.e > TODAY; out.push(g); }
+    if (se > b.e && !(b.extended)) {
+      const ownDelayed = S.pending && S.pending.site===b.site && S.pending.code===b.step || (S.conf[b.site][b.step]||{}).delay;
+      if (!ownDelayed) { const g = {type:'SHORTAGE', b, s:Math.max(b.e, ss), e:se}; g.inLook = g.s < TODAY + LOOK; out.push(g); }
+      else out.push({type:'EXTEND', b, s:b.e, e:se, inLook:true});
+    }
+  });
+  return out;
+}
+const gkey = g => g.type + g.b.id + g.s + '-' + g.e;
+function confGaps(){ return gaps(S.bookings, s => sched(s,'conf')); }
+function demoGap(){
+  const g = S.srv.gap; if (g) { const b = S.bookings.find(x => x.site === g.site_id && x.step === g.step_code && x.crew && /S1|Sparks crew 1/.test(x.crew)) || S.bookings.find(x => x.site === g.site_id && x.step === g.step_code) || {id:'srv', crew:g.crew, size:g.workers, site:g.site_id, step:g.step_code, s:g.start, e:g.end};
+    return {type:g.type, b:{...b, crew: g.crew || b.crew, size: g.workers || b.size}, s:g.start, e:g.end, inLook:true, id:g.id}; }
+  return confGaps().find(x => x.type==='SURPLUS' && x.inLook && x.b.step==='K3' && x.b.site==='A');
+}
+function knock(site){
+  const a = sched(site,'conf'), b = sched(site,'prop');
+  const moved = Object.keys(T).filter(c => a[c][0]!==b[c][0] || a[c][1]!==b[c][1]);
+  const ga = gaps(S.bookings, s => s===site ? a : sched(s,'conf')), gb = gaps(S.bookings, s => s===site ? b : sched(s,'conf'));
+  const ka = new Set(ga.map(gkey)), kb = new Set(gb.map(gkey));
+  return {moved, from:a._end, to:b._end, created: gb.filter(g => !ka.has(gkey(g))), resolved: ga.filter(g => !kb.has(gkey(g))), critMoved: moved.some(c => a[c][3])};
+}
+
+/* ---------------- script (progress derived from server state) ---------------- */
+const SCRIPT = [
+  ['dan','timeline','Dan updates J1: click the bar (or Update timeline → Plaud note)', () => !!S.pending || isDemoConfirmed()],
+  ['dan','timeline','Dan checks the knock-on and confirms the fact', () => (S.pending && S.pending.status==='pm') || isDemoConfirmed()],
+  ['priya','approvals','Priya approves. Sparks S1 is now idle days 230–235', () => isDemoConfirmed()],
+  ['priya','board','Priya offers S1’s idle days to nearby projects (anonymised)', () => S.offer==='offered'],
+  ['marcus','timeline','Marcus sees M&E available near him and requests an anonymised view', () => !!S.viewReq.A],
+  ['priya','requests','Priya shares an anonymised view with Riverside', () => S.viewReq.A==='granted'],
+  ['marcus','timeline','Marcus overlays the view, sees the match and requests the crew', () => S.link!=='none'],
+  ['priya','requests','Priya accepts and sets terms: S1 back by day 235', () => S.link==='active'],
+  ['sam','proposals','Sam (Sparks) accepts the move for crew S1', () => ['sam','marcus','done'].includes(S.m8)],
+  ['marcus','reviews','Marcus confirms the booking on his site', () => ['marcus','done'].includes(S.m8)],
+  ['priya','approvals','Priya confirms her booking: sync done, 3 days protected', () => S.m8==='done']
+];
+function isDemoConfirmed(){ return ((S.conf.A.J1||{}).delay || 0) >= 5; }
+const progress = () => { const i = SCRIPT.findIndex(s => !s[3]()); return i < 0 ? SCRIPT.length : i; };
+function guideTarget(){
+  const p = progress(); if (p >= SCRIPT.length) return null;
+  const [u] = SCRIPT[p]; if (S.user !== u) return null;
+  const pop = !el('pop').hidden, modal = !el('modal').hidden;
+  const nav = x => S.view===x ? null : `.nav[data-view="${x}"]`;
+  switch (p){
+    case 0: if (modal) return S.tab==='plaud' ? '[data-act="plaudPropose"]' : '[data-utab="plaud"]';
+            if (pop) return el('f-go') ? '#f-go' : '[data-act="editStep"]';
+            return nav('timeline') || '.bar[data-code="J1"]';
+    case 1: return nav('timeline') || '.review [data-act="confirmPending"]';
+    case 2: return nav('approvals') || '.review [data-act="approvePending"]';
+    case 3: return nav('board') || '[data-act="offerCapacity"]';
+    case 4: return nav('timeline') || '.banner [data-act="requestView"]';
+    case 5: return nav('requests') || '[data-act="grantView"]';
+    case 6: return nav('timeline') || (S.overlay.marcus==='A' ? '.banner [data-act="requestLink"]' : '.banner [data-overlay="A"]');
+    case 7: return nav('requests') || '[data-act="acceptLink"]';
+    case 8: return nav('proposals') || '[data-act="samAccept"]';
+    case 9: return nav('reviews') || '[data-act="marcusConfirm"]';
+    case 10: return nav('approvals') || '[data-act="confirmBooking"]';
+  }
+}
+function applyGuide(){
+  document.querySelectorAll('.demo-target').forEach(x => x.classList.remove('demo-target'));
+  const p = progress();
+  if (p < SCRIPT.length && S.user !== SCRIPT[p][0]) { const r = document.querySelector(`.role[data-user="${SCRIPT[p][0]}"]`); if (r) r.classList.add('demo-target'); return; }
+  const sel = guideTarget(); const t = sel && document.querySelector(sel); if (!t) return;
+  t.classList.add('demo-target');
+  const r = t.getBoundingClientRect(), d = el('drawer').getBoundingClientRect();
+  const hidden = r.bottom > innerHeight - 8 || r.top < 60 || (r.right > d.left && r.bottom > d.top && r.left < d.right);
+  if (hidden && applyGuide.last !== sel) t.scrollIntoView({block:'center'});
+  applyGuide.last = sel;
+}
+function jumpTo(i){
+  const p = progress(); closePop(); closeModal();
+  if (i < p) toast('Finished steps can’t be replayed on the live server. Use Reset to start again.');
+  else if (i > p) toast('Complete the current step first; every step is a real server action.');
+  go(SCRIPT[Math.min(i, p)][0], SCRIPT[Math.min(i, p)][1]);
+  el('drawer').open = false; applyGuide.last = null;
+}
+
+/* ---------------- chrome ---------------- */
+function attention(u){ const p = progress(); return p < SCRIPT.length && SCRIPT[p][0] === u; }
+function renderBell(){ const c = unread(S.user).length; el('bellN').textContent = c; el('bellN').hidden = !c; }
+function renderRoles(){
+  el('roles').innerHTML = Object.entries(USERS).map(([k,u]) => `
+    <button class="role" aria-pressed="${S.user===k}" data-user="${k}">
+      <span class="av" style="background:${u.color}">${u.name[0]}</span>
+      <span>${u.name} <small>${u.role}</small></span>${attention(k)?'<span class="dot" aria-label="next step is here"></span>':''}
+    </button>`).join('');
+}
+function renderRail(){
+  const p = progress(), here = p < SCRIPT.length && SCRIPT[p][0]===S.user ? SCRIPT[p][1] : null;
+  el('rail').innerHTML = `<div class="org">${ORGS[U().org]}</div>` + NAV[S.user].map(([id,label]) =>
+    `<button class="nav" data-view="${id}" ${S.view===id?'aria-current="page"':''}><span>${label}</span>${here===id?'<span class="badge">1</span>':''}</button>`).join('');
+}
+function renderScript(){
+  const p = progress();
+  el('stepBadge').textContent = `${Math.min(p+1, SCRIPT.length)}/${SCRIPT.length}`;
+  el('script').innerHTML = SCRIPT.map(([u,,t],i) => `<li class="${i<p?'done':i===p?'now':''}"><button class="stepbtn" data-step="${i}" title="${i===p?'Go to this step':i<p?'Done':'Not yet'}">${t} <span class="muted" style="font-weight:400">(${USERS[u].name})</span></button></li>`).join('') + (p>=SCRIPT.length?'<li class="now">Done. Reset to run it again.</li>':'');
+  el('showMe').disabled = p >= SCRIPT.length;
+  el('curStep').textContent = p < SCRIPT.length ? `${SCRIPT[p][2]} (${USERS[SCRIPT[p][0]].name})` : 'Demo done. Reset to run it again.';
+}
+async function go(user, view){ S.user = user; S.view = view || NAV[user][0][0]; closePop(); saveUI(); await refresh(); }
+function footer(){
+  const last = S.llm && S.llm.length ? S.llm[S.llm.length - 1] : null;
+  return `<div class="footer"><span>AI calls ${S.aiCalls}</span>${last ? `<span>${last.model || 'gpt-oss-120b'} on ${last.provider === 'crusoe' ? 'Crusoe' : (last.provider || 'Crusoe')}</span><span>last ${last.latency_ms ?? '—'} ms${last.ok === false ? ' (failed, fallback used)' : ''}</span>` : '<span>gpt-oss-120b on Crusoe</span>'}<span>Graph: Neo4j Aura</span><span>Viewing as ${U().full} · ${ORGS[U().org]}</span></div>`;
+}
+function render(){
+  if (!NAV[S.user].some(([id]) => id===S.view)) S.view = NAV[S.user][0][0];
+  renderRoles(); renderRail(); renderBell();
+  const un = unread(S.user);
+  let body; try { body = V[S.view](); } catch(e) { console.error(e); body = `<div class="empty">This view couldn’t render: ${e.message}</div>`; }
+  el('main').innerHTML = `${un.length?`<div class="banner info fade" role="status"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="var(--steel)" opacity=".18"/><path d="M14 7a5 5 0 0 0-5 5v4l-2 2h14l-2-2v-4a5 5 0 0 0-5-5zm-2 12a2 2 0 0 0 4 0" fill="var(--steel)"/></svg><div class="txt"><b>${un.length} new for you</b>${un.slice(0,3).map(n=>`<div style="font-size:.88rem"><span class="mono muted">${n.t}</span> ${n.text}</div>`).join('')}</div><button class="btn ghost" data-act="markRead">Mark read</button></div>`:''}<div class="fade">${body}</div>${footer()}`;
+  renderScript(); saveUI(); applyGuide();
+}
+
+/* ---------------- shared bits ---------------- */
+const drop = (x,y,s=10) => `<path d="M${x} ${y-s/2} C ${x+s/2.2} ${y} ${x+s/2.2} ${y+s/2} ${x} ${y+s/2} C ${x-s/2.2} ${y+s/2} ${x-s/2.2} ${y} ${x} ${y-s/2}Z" fill="var(--steel)"/>`;
+function weatherBanner(site){
+  if (site!=='A' || !S.risk) return '';
+  const canAct = S.user==='dan' || S.user==='priya';
+  return `<div class="banner" role="status">
+    <svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="var(--risk)" opacity=".18"/>${drop(14,14,12)}</svg>
+    <div class="txt"><b>Rain forecast over J1 Roof waterproofing</b>
+    <span class="muted">Weather-sensitive step on the critical path. Risk-adjusted handover ${sched('A','conf')._end} → ${sched('A','risk')._end}. The confirmed timeline moves only when someone on site confirms the impact.</span></div>
+    ${canAct ? `<div class="row"><button class="btn" data-act="noImpact">No impact</button><button class="btn primary" data-act="openStep" data-site="A" data-code="J1">Update J1</button></div>` : ''}
+  </div>`;
+}
+function gapLabel(g){ return `${g.b.crew} (${g.b.size}) · ${T[g.b.step] ? T[g.b.step].trade : ''} · ${g.b.site}-${g.b.step}`; }
+function knockBlock(k){
+  const rows = [...k.created.map(g => [g, 'CREATED']), ...k.resolved.map(g => [g, 'RESOLVED'])];
+  return `<div class="grid g3" style="margin-top:10px">
+    <div class="stat"><b>${k.moved.filter(c=>c!==S.pending.code).length}</b><span>downstream steps move</span></div>
+    <div class="stat"><b>${k.from} → ${k.to}</b><span>handover (L7 end)</span></div>
+    <div class="stat"><b style="color:${k.created.some(g=>g.inLook&&g.type!=='EXTEND')?'var(--risk)':'var(--good)'}">${k.created.filter(g=>g.inLook&&g.type!=='EXTEND').length}</b><span>new gaps in the 20-day lookahead</span></div>
+  </div>
+  ${rows.length?`<div class="sep"></div><div class="eyebrow" style="margin-bottom:6px">Labour impact</div><div class="scroll"><table><tbody>${rows.map(([g,w]) => `<tr><td><span class="chip ${w==='RESOLVED'?'good':g.type==='EXTEND'?'info':g.inLook?'surplus':''}">${w==='RESOLVED'?'RESOLVED':g.type==='EXTEND'?'ASSUMED':g.inLook?'CREATED · '+g.type:'LATER · '+g.type}</span></td><td>${g.type==='EXTEND'?`${g.b.crew} booking extended to match (confirm with sub)`:gapLabel(g)}</td><td class="r mono">days ${g.s}–${g.e}</td></tr>`).join('')}</tbody></table></div>`:''}`;
+}
+function reviewCard(){
+  const P = S.pending; if (!P) return '';
+  const site = P.site, k = knock(site), t = T[P.code], c = sched(site,'conf')[P.code], p = sched(site,'prop')[P.code];
+  const isPM = S.user!=='dan' && U().edit.includes(site), isSM = S.user==='dan' && site==='A';
+  let actions = '', chip = '';
+  if (P.status==='site'){ chip = '<span class="chip hot">Draft · needs site confirmation</span>';
+    actions = isSM ? `<button class="btn ghost" data-act="discardPending">Discard</button><span class="sp"></span><button class="btn primary" data-act="confirmPending">Confirm fact</button>` : isPM ? `<span class="sp"></span><button class="btn primary" data-act="confirmPending">Confirm</button>` : ''; }
+  else { chip = '<span class="chip good">Confirmed by site</span><span class="chip hot">Needs PM approval</span>';
+    actions = isPM ? `<button class="btn ghost" data-act="discardPending">Send back</button><span class="sp"></span><button class="btn primary" data-act="approvePending">Approve change</button>` : `<span class="muted" style="font-size:.85rem">Waiting for the PM because the handover date moves.</span>`; }
+  return `<div class="card review fade">
+    <div class="row"><h3 style="margin:0">${site}-${P.code} ${t.n}</h3><span class="sp"></span>${chip}</div>
+    <dl class="kv" style="margin-top:8px"><dt>Change</dt><dd>Start <span class="mono">${c[0]} → ${p[0]}</span> · Finish <span class="mono">${c[1]} → ${p[1]}</span></dd><dt>Reason</dt><dd>${P.reason||'—'}</dd><dt>Source</dt><dd>${P.source.kind==='voice'?`Plaud note: “<mark style="background:var(--accent-soft);color:inherit">${P.source.excerpt}</mark>”`:P.source.kind==='text'?`Transcript: “<mark style="background:var(--accent-soft);color:inherit">${P.source.excerpt}</mark>”`:P.source.kind==='csv'?'CSV upload':'Edited on the timeline'} ${P.source.conf?`<span class="chip">confidence ${P.source.conf}</span>`:''}</dd></dl>
+    ${knockBlock(k)}
+    ${S.user==='dan' && P.status==='pm' ? `<div style="margin-top:10px">${TRK.update()}</div>` : ''}
+    ${actions?`<div class="row" style="margin-top:12px">${actions}</div>`:''}
+  </div>`;
+}
+
+
+/* ---------------- timeline: steps ---------------- */
+function stepsSVG(site){
+  const base = sched(site,'base'), conf = sched(site,'conf'), prop = S.pending && S.pending.site===site ? sched(site,'prop') : null, risk = S.risk ? sched(site,'risk') : null;
+  const d0 = TODAY - 25, d1 = Math.max(conf._end, prop?prop._end:0) + 10;
+  const rows = Object.keys(T).filter(c => conf[c][1] >= d0 || (prop && prop[c][1] >= d0)).sort((a,b) => conf[a][0]-conf[b][0] || a.localeCompare(b));
+  const x0 = 270, W = 1080, px = (W - x0 - 20) / (d1 - d0), rh = 23, top = 44, H = top + rows.length*rh + 12;
+  const X = d => x0 + (d - d0) * px;
+  const bk = S.bookings.filter(b => b.site===site);
+  const g0 = demoGap();
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Site ${site} timeline. Click a bar to see details and update it.">`;
+  for (let d = Math.ceil(d0/10)*10; d <= d1; d += 10){ g += `<line x1="${X(d)}" y1="${top-6}" x2="${X(d)}" y2="${H-6}" stroke="var(--line)"/>`; if (d % 20 === 0) g += `<text x="${X(d)}" y="${top-14}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)" text-anchor="middle">${d}</text>`; }
+  g += `<rect x="${X(TODAY)}" y="${top-6}" width="${LOOK*px}" height="${H-top}" fill="var(--steel-soft)" opacity=".35"/>`;
+  g += `<line x1="${X(TODAY)}" y1="${top-24}" x2="${X(TODAY)}" y2="${H-6}" stroke="var(--accent)" stroke-width="1.5"/><text x="${X(TODAY)+4}" y="10" font-family="IBM Plex Mono" font-size="10" fill="var(--accent)">TODAY</text>`;
+  rows.forEach((c,i) => {
+    const t = T[c], y = top + i*rh, [bs,be] = base[c], [cs,ce,,crit] = conf[c];
+    if (i % 2) g += `<rect x="0" y="${y}" width="${W}" height="${rh}" fill="var(--sunk)" opacity=".7"/>`;
+    const nb = bk.filter(b => b.step===c);
+    g += `<text x="8" y="${y+15}" font-family="IBM Plex Mono" font-size="10.5" fill="${crit?'var(--bad)':'var(--muted)'}">${c}</text>`;
+    g += `<text x="46" y="${y+15}" font-family="Public Sans" font-size="11.5" fill="var(--fg)">${t.n.length>31?t.n.slice(0,30)+'…':t.n}</text>`;
+    if (t.w) g += drop(252, y+11, 9);
+    g += `<g class="bar" tabindex="0" role="button" aria-label="${c} ${t.n}, days ${cs} to ${ce}. Open details" data-site="${site}" data-code="${c}">`;
+    g += `<rect class="hit" x="${Math.min(X(bs),X(cs))-4}" y="${y+1}" width="${Math.max(X(Math.max(be,ce,prop?prop[c][1]:0))-Math.min(X(bs),X(cs))+8, 16)}" height="${rh-2}" rx="3" fill="transparent"/>`;
+    if (t.k==='milestone'){
+      g += `<path d="M${X(be)} ${y+4} l5 6 -5 6 -5 -6z" fill="var(--plan)"/>`;
+      g += `<path d="M${X(ce)} ${y+6} l5 6 -5 6 -5 -6z" fill="${crit?'var(--fg)':'var(--steel)'}"/>`;
+      if (prop && prop[c][1]!==ce) g += `<path d="M${X(prop[c][1])} ${y+6} l5 6 -5 6 -5 -6z" fill="none" stroke="var(--accent)" stroke-width="1.5"/>`;
+    } else {
+      g += `<rect x="${X(bs)}" y="${y+4}" width="${Math.max(2,(be-bs)*px)}" height="4" rx="1" fill="var(--plan)"/>`;
+      g += `<rect x="${X(cs)}" y="${y+10}" width="${Math.max(2,(ce-cs)*px)}" height="8" rx="2" fill="${crit?'var(--fg)':'var(--steel)'}"/>`;
+      if (prop && (prop[c][0]!==cs || prop[c][1]!==ce)) g += `<rect x="${X(prop[c][0])}" y="${y+9}" width="${(prop[c][1]-prop[c][0])*px}" height="10" rx="2" fill="var(--accent)" fill-opacity=".25" stroke="var(--accent)" stroke-dasharray="3 2"/>`;
+      if (risk && !prop && (risk[c][1]!==ce)) g += `<rect x="${X(risk[c][0])}" y="${y+9}" width="${(risk[c][1]-risk[c][0])*px}" height="10" rx="2" fill="none" stroke="var(--risk)" stroke-width="1.4" stroke-dasharray="2 2"/>`;
+      if (nb.length) g += `<circle cx="${X(cs)-7}" cy="${y+14}" r="3.2" fill="var(--muted)"><title>${nb.map(b=>b.crew).join(', ')}</title></circle>`;
+      if (g0 && g0.b.site===site && g0.b.step===c && S.m8!=='done' && !S.m3) g += `<rect x="${X(g0.s)}" y="${y+9}" width="${(g0.e-g0.s)*px}" height="10" fill="var(--risk)" opacity=".55"/><text x="${X(g0.s)-4}" y="${y+17}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--risk)">S1 idle ${g0.s}–${g0.e}</text>`;
+    }
+    g += `</g>`;
+  });
+  return g + '</svg>';
+}
+function stepsLegend(){ return `<div class="legend"><span><i style="background:var(--plan);height:4px"></i>Baseline</span><span><i style="background:var(--steel)"></i>Confirmed</span><span><i style="background:var(--fg)"></i>Critical path</span><span><i style="background:var(--accent);opacity:.35;outline:1px dashed var(--accent)"></i>Proposed</span><span><i style="border:1.4px dashed var(--risk);height:6px"></i>Risk-adjusted</span><span><i style="background:var(--steel-soft)"></i>20-day lookahead</span><span><svg width="10" height="10" viewBox="0 0 10 10" style="vertical-align:-1px;margin-right:6px">${drop(5,5,9)}</svg>Weather-sensitive</span><span>● crew booked</span></div>`; }
+
+/* ---------------- timeline: trades overlay ---------------- */
+function tradeWindows(site, sc){
+  const by = {};
+  Object.keys(T).forEach(c => { const t = T[c].trade; if (!t) return; const [s,e] = sc[c]; (by[t] = by[t] || []).push([s,e]); });
+  for (const t in by){ by[t].sort((a,b)=>a[0]-b[0]); const m = []; by[t].forEach(w => { const l = m[m.length-1]; if (l && w[0] <= l[1]) l[1] = Math.max(l[1], w[1]); else m.push([...w]); }); by[t] = m; }
+  return by;
+}
+function overlayWindows(ov){
+  // own site: computed; other company: only what the server shares (week level)
+  if (SITES[ov].org === U().org) return {B: tradeWindows(ov, sched(ov,'conf')), offered: [], anon:false};
+  const o = S.srv.overlay; if (!o) return {B:{}, offered:[], anon:true};
+  const B = {}; Object.entries(o.trades || o.windows || {}).forEach(([t, ws]) => { B[tradeLabel(t)] = ws.map(w => Array.isArray(w) ? w : [w.start ?? w.week_from*5, w.end ?? (w.week_to+1)*5]); });
+  const offered = (o.offered || []).map(w => Array.isArray(w) ? w : [w.start, w.end]);
+  return {B, offered, anon:true};
+}
+function tradesSVG(site, ov){
+  const d0 = TODAY - 25, d1 = TODAY + 110;
+  const A = tradeWindows(site, sched(site,'conf')), OV = ov ? overlayWindows(ov) : {B:{}, offered:[], anon:false}, B = OV.B, anon = OV.anon;
+  const trades = [...new Set([...Object.keys(A), ...Object.keys(B)])].filter(t => [...(A[t]||[]), ...(B[t]||[])].some(([s,e]) => e > d0 && s < d1));
+  const order = ['Demolition','Ground investigation','Piling','Groundworks','Concrete','RC frame','Roofing','Glazing','Cladding','Scaffolding','Bricklaying','M&E','Drylining','Carpentry','Finishes','Lifts','Landscaping','Asbestos'];
+  trades.sort((a,b) => order.indexOf(a) - order.indexOf(b));
+  const x0 = 150, W = 1080, px = (W - x0 - 20) / (d1 - d0), lh = 36, top = 36, H = top + trades.length*lh + 14;
+  const X = d => x0 + (Math.max(d0, Math.min(d1, d)) - d0) * px;
+  const g0 = demoGap(), ovName = ov ? (anon ? SITES[ov].anon : 'Site '+ov) : '';
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Trade windows for Site ${site}${ov?' overlaid with '+ovName:''}">`;
+  for (let d = Math.ceil(d0/10)*10; d <= d1; d += 10){ g += `<line x1="${X(d)}" y1="${top-6}" x2="${X(d)}" y2="${H-6}" stroke="var(--line)"/>`; if (d % 20 === 0) g += `<text x="${X(d)}" y="${top-14}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)" text-anchor="middle">${anon?'wk '+Math.floor(d/5):d}</text>`; }
+  g += `<line x1="${X(TODAY)}" y1="${top-8}" x2="${X(TODAY)}" y2="${H-6}" stroke="var(--accent)" stroke-width="1.5"/>`;
+  g += `<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--accent)" fill-opacity=".18"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--accent)" stroke-width="2"/></pattern></defs>`;
+  trades.forEach((t,i) => {
+    const y = top + i*lh;
+    if (i % 2) g += `<rect x="0" y="${y}" width="${W}" height="${lh}" fill="var(--sunk)" opacity=".7"/>`;
+    g += `<text x="8" y="${y+22}" font-family="Public Sans" font-size="12" font-weight="600" fill="var(--fg)">${t}</text>`;
+    (A[t]||[]).forEach(([s,e]) => { if (e<=d0||s>=d1) return; g += `<rect x="${X(s)}" y="${y+7}" width="${X(e)-X(s)}" height="9" rx="2" fill="var(--steel)"/>`; });
+    (B[t]||[]).forEach(([s,e]) => { if (e<=d0||s>=d1) return; g += `<rect x="${X(s)}" y="${y+19}" width="${X(e)-X(s)}" height="9" rx="2" fill="${anon?'url(#hatch)':'var(--accent)'}" ${anon?'stroke="var(--accent)" stroke-width="1"':''}/>`; });
+    if (g0 && t===T[g0.b.step].trade && site===g0.b.site && S.m8!=='done' && !S.m3){
+      g += `<rect x="${X(g0.s)}" y="${y+7}" width="${X(g0.e)-X(g0.s)}" height="9" fill="var(--risk)"/>`;
+      const hit = (B[t]||[]).some(([s,e]) => s < g0.e && e > g0.s);
+      if (ov && hit) g += `<rect x="${X(g0.s)-2}" y="${y+3}" width="${X(g0.e)-X(g0.s)+4}" height="${lh-6}" rx="4" fill="none" stroke="var(--good)" stroke-width="2"/>`;
+    }
+    if (ov && anon && t==='M&E' && S.m8!=='done'){
+      OV.offered.forEach(([s,e]) => { g += `<rect x="${X(s)}" y="${y+19}" width="${X(e)-X(s)}" height="9" fill="var(--good)"/>`;
+        if ((A[t]||[]).some(([a,b]) => a < e && b > s)) g += `<rect x="${X(s)-3}" y="${y+3}" width="${X(e)-X(s)+6}" height="${lh-6}" rx="4" fill="none" stroke="var(--good)" stroke-width="2"/>`; });
+    }
+  });
+  return g + '</svg>';
+}
+
+/* ---------------- views ---------------- */
+const V = {};
+V.timeline = () => {
+  if (S.user==='sam') return samTimeline();
+  const u = U(), site = S.site[S.user] || u.sites[0], ov = S.overlay[S.user];
+  const canEdit = u.edit.includes(site);
+  const others = Object.keys(SITES).filter(x => x!==site && (SITES[x].org===u.org || (S.user==='marcus' && x==='A' && S.offer!=='none')));
+  const ovBtn = x => { const own = SITES[x].org===u.org, st = S.viewReq[x];
+    if (own) return `<button data-overlay="${x}" aria-pressed="${ov===x}">Site ${x}</button>`;
+    return `<button data-overlay="${x}" aria-pressed="${ov===x}" ${st!=='granted'?'disabled':''} title="${st==='granted'?'Anonymised view shared':'Request an anonymised view first'}">${SITES[x].anon}${st==='granted'?'':' 🔒'}</button>`; };
+  return `${weatherBanner(site)}
+  <div class="ph"><div><div class="eyebrow">${ORGS[SITES[site].org]} · ${SITES[site].name}</div><h1>Site ${site} timeline</h1><p>${canEdit?'Click any bar to see it and update it. Everything downstream moves automatically.':'Read-only for your role.'}</p></div>
+    <div class="row">${canEdit?`<button class="btn primary" data-act="openUpdate">Update timeline ▾</button>`:''}</div></div>
+  ${S.pending && S.pending.site===site ? reviewCard() : ''}${availBanner()}${sentStrip()}
+  <div class="toolbar">
+    ${u.sites.length>1?`<div class="seg" role="group" aria-label="Site">${u.sites.map(x=>`<button data-site-pick="${x}" aria-pressed="${site===x}">${x} · ${SITES[x].name}</button>`).join('')}</div>`:''}
+    <div class="seg" role="group" aria-label="View"><button data-mode="steps" aria-pressed="${S.mode==='steps'}">Steps</button><button data-mode="trades" aria-pressed="${S.mode==='trades'}">Trades</button></div>
+    ${S.user!=='dan'?`<span class="muted" style="font-size:.82rem;margin-left:6px">Overlay</span><div class="seg" role="group" aria-label="Overlay"><button data-overlay="" aria-pressed="${!ov}">None</button>${others.map(ovBtn).join('')}</div>`:''}
+  </div>
+  ${S.mode==='steps' ? stepsLegend() + `<div class="tl">${stepsSVG(site)}</div>` :
+   `<div class="overlay-key"><span><i style="background:var(--steel)"></i>Site ${site} (confirmed)</span>${ov?`<span><i style="${SITES[ov].org!==u.org?'background:var(--accent-soft);outline:1px solid var(--accent)':'background:var(--accent)'}"></i>${SITES[ov].org!==u.org?SITES[ov].anon+' · anonymised, week level':'Site '+ov}</span>`:'<span>Pick an overlay to compare trade windows</span>'}<span><i style="background:var(--risk)"></i>Idle crew</span>${S.offer==='offered'?'<span><i style="background:var(--good)"></i>Offered capacity</span>':''}</div>
+    <div class="tl">${tradesSVG(site, ov)}</div>`}
+  `;
+};
+function samTimeline(){
+  const sb = S.srv.subBookings;
+  const rows = sb && sb.length ? sb : S.bookings.filter(b => b.org==='SP').map(b => { const [ss,se] = sched(b.site,'conf')[b.step]; return {crew:b.crew, client:ORGS[SITES[b.site].org].split(' ')[0], site:SITES[b.site].name, step:T[b.step].n, s:b.s, e:b.e, ss, se}; });
+  const d0 = TODAY-10, d1 = TODAY+60, x0 = 290, W = 1000, px = (W-x0-20)/(d1-d0), rh = 34, top = 34;
+  const X = d => x0 + (Math.max(d0,Math.min(d1,d)) - d0)*px, H = top + rows.length*rh + 10;
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Sparks crew bookings against when each step is active">`;
+  for (let d=d0; d<=d1; d+=10){ g += `<line x1="${X(d)}" y1="${top-6}" x2="${X(d)}" y2="${H-6}" stroke="var(--line)"/><text x="${X(d)}" y="${top-14}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)">${d}</text>`; }
+  g += `<line x1="${X(TODAY)}" y1="${top-8}" x2="${X(TODAY)}" y2="${H-6}" stroke="var(--accent)" stroke-width="1.5"/>`;
+  rows.forEach((b,i) => { const y = top + i*rh;
+    g += `<text x="8" y="${y+14}" font-family="Public Sans" font-size="12" font-weight="600" fill="var(--fg)">${b.crew} · ${b.client}</text><text x="8" y="${y+28}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)">${b.site} · ${String(b.step).slice(0,22)}</text>`;
+    g += `<rect x="${X(b.ss)}" y="${y+4}" width="${Math.max(0,X(b.se)-X(b.ss))}" height="8" rx="2" fill="var(--steel)"/><rect x="${X(b.s)}" y="${y+16}" width="${Math.max(0,X(b.e)-X(b.s))}" height="11" rx="2" fill="none" stroke="var(--fg)" stroke-width="1.2"/>`;
+    if (b.s < b.ss) g += `<rect x="${X(b.s)}" y="${y+16}" width="${X(Math.min(b.ss,b.e))-X(b.s)}" height="11" fill="var(--risk)" opacity=".6"/>`;
+  });
+  g += '</svg>';
+  return `<div class="ph"><div><div class="eyebrow">Sparks Electrical · M&amp;E subcontractor</div><h1>Timeline</h1><p>Your crews across all your clients: when you're booked (outline) against when the step is actually ready (bar). You only see steps your crews work on.</p></div></div>
+  <div class="legend"><span><i style="background:var(--steel)"></i>Step active (client's confirmed timeline)</span><span><i style="border:1.2px solid var(--fg);height:8px"></i>Your booking</span><span><i style="background:var(--risk);opacity:.6"></i>Idle</span></div>
+  <div class="tl">${g}</div>`;
+}
+
+/* request trackers: each hand-off shows who it waits for and who approved */
+function tracker(title, steps, opts={}){
+  const firstOpen = steps.findIndex(s => !S.ts[s.key]);
+  const allDone = firstOpen < 0;
+  return `<div class="trk ${allDone?'ok':''} ${opts.compact?'compact':''}">
+    ${title?`<div class="trk-h"><b>${title}</b><span class="chip ${allDone?'good':'info'}">${allDone?(opts.doneLabel||'Approved'):'In progress'}</span></div>`:''}
+    <ol class="trk-steps">${steps.map((s,i) => { const t = S.ts[s.key];
+      return `<li class="${t?'done':i===firstOpen?'wait':''}"><span class="dotm" aria-hidden="true"></span><span><b>${s.label}</b><br><small>${t ? `✓ ${t.who}${t.at?' · '+t.at:''}` : i===firstOpen ? `Waiting for ${s.who}…` : s.who}</small></span></li>`; }).join('')}</ol>
+  </div>`;
+}
+const TRK = {
+  update: () => tracker('A-J1 roof +5 days', [
+    {key:'upd.sent', label:'Proposed', who:'Dan'},
+    {key:'upd.confirmed', label:'Fact confirmed', who:'Dan (site)'},
+    {key:'upd.approved', label:'PM approval', who:'Priya'}]),
+  offer: (compact) => tracker(compact?'':'Offer: Sparks S1 idle days 230–235', [
+    {key:'offer.sent', label:'Offered nearby', who:'Priya'},
+    {key:'link.sent', label:'Crew requested', who:S.ts['link.sent']?'Riverside':'a nearby project'},
+    {key:'link.accepted', label:'Terms agreed', who:'Priya'},
+    {key:'m8.sam', label:'Sub accepts', who:'Sam (Sparks)'},
+    {key:'m8.marcus', label:'Borrower confirms', who:'Riverside'},
+    {key:'m8.done', label:'Your booking', who:'Priya'}], {doneLabel:'Done', compact}),
+  view: () => tracker(`Anonymised view of ${SITES.A.anon}`, [
+    {key:'view.sent', label:'Requested', who:'Marcus'},
+    {key:'view.granted', label:'Shared', who:`${SITES.A.anon}’s company`}], {doneLabel:'Shared'}),
+  crew: () => tracker('Crew request: M&E days 230–235', [
+    {key:'link.sent', label:'Requested', who:'Marcus'},
+    {key:'link.accepted', label:'Accepted + terms', who:S.link==='active'?'Northgate':`${SITES.A.anon}’s company`},
+    {key:'m8.sam', label:'Sub accepts', who:'Sam (Sparks)'},
+    {key:'m8.marcus', label:'Your booking', who:'Marcus'},
+    {key:'m8.done', label:'Lender confirms', who:S.link==='active'?'Northgate':'the lender'}], {doneLabel:'Done'})
+};
+function sentStrip(){
+  const list = [];
+  if (S.user==='dan' && S.ts['upd.sent']) list.push(TRK.update());
+  if (S.user==='priya' && S.ts['offer.sent']) list.push(TRK.offer());
+  if (S.user==='marcus'){ if (S.ts['view.sent']) list.push(TRK.view()); if (S.ts['link.sent']) list.push(TRK.crew()); }
+  if (!list.length) return '';
+  return `<div class="card" style="margin-bottom:12px"><div class="eyebrow" style="margin-bottom:8px">Your requests</div><div class="grid g2">${list.join('')}</div></div>`;
+}
+function availBanner(){
+  if (S.user!=='marcus' || S.offer!=='offered' || S.m8==='done' || (S.site.marcus||'C')!=='C') return '';
+  const o = S.srv.offerM || {}, g = {s: o.start ?? 230, e: o.end ?? 235};
+  const st = S.viewReq.A, ov = S.overlay.marcus==='A';
+  const fits = o.fits ? `Fits your ${o.fits.step_code ? 'C-' + o.fits.step_code : ''} ${o.fits.step_name || 'first fix'}${o.fits.start !== undefined ? ` (${o.fits.start}–${o.fits.end})` : ''}.` : 'Fits your C-K3 first fix (225–245).';
+  const action = !st ? `<button class="btn accent" data-act="requestView" data-site="A">Request view of ${SITES.A.anon}</button>`
+    : st==='requested' ? `<span class="chip info">View requested · waiting</span>`
+    : !ov ? `<button class="btn primary" data-overlay="A">Overlay ${SITES.A.anon}</button>`
+    : S.link==='none' ? `<button class="btn accent" data-act="requestLink">Request this crew</button>`
+    : `<span class="chip ${S.link==='active'?'good':'info'}">${S.link==='active'?'Agreed with Northgate':'Crew requested · waiting'}</span>`;
+  return `<div class="banner good fade" role="status">
+    <svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="var(--good)" opacity=".18"/><path d="M8 14.5l4 4 8-9" stroke="var(--good)" stroke-width="2.4" fill="none"/></svg>
+    <div class="txt"><b>${tradeLabel(o.trade || 'mep')} crew available near you: ${o.workers || 6} workers, days ${g.s}–${g.e}</b><span class="muted">Offered by anonymised project ${S.link==='active'?`${SITES.A.anon} (Northgate Build)`:SITES.A.anon}, ${o.distance_band || '~2 km'} away. ${fits} ${ov?'The green window on the overlay is the offer.':''}</span></div>${action}</div>`;
+}
+function decided(title, who, at, body){ return `<div class="card decided fade"><div class="row"><span class="chip good">✓ ${who}</span><h3 style="margin:0">${title}</h3><span class="sp"></span><span class="mono muted" style="font-size:.78rem">${at||''}</span></div>${body?`<p class="muted" style="margin:6px 0 0;font-size:.86rem">${body}</p>`:''}</div>`; }
+V.approvals = () => {
+  const items = [];
+  if (S.pending && S.pending.status==='pm' && U().edit.includes(S.pending.site)) items.push(reviewCard());
+  if (S.m8==='marcus' && S.user==='priya') items.push(`<div class="card review fade"><div class="row"><h3 style="margin:0">Booking change from slot swap (M8)</h3><span class="sp"></span><span class="chip good">✓ Sam (Sparks)</span><span class="chip good">✓ Marcus (Riverside)</span></div>
+    <div class="scroll"><table style="margin-top:8px"><thead><tr><th>Crew</th><th>Step</th><th class="r">Before</th><th class="r">After</th></tr></thead><tbody>
+    <tr><td>Sparks S1 (6)</td><td>A-K3 MEP first fix</td><td class="r mono">230–250</td><td class="r mono">235–255</td></tr>
+    <tr><td>Sparks S1 (6)</td><td>Days 230–235</td><td class="r mono">idle</td><td class="r mono">partner site</td></tr></tbody></table></div>
+    <p class="muted" style="font-size:.85rem">Return guarantee: S1 back on Site A on day 235. Only your booking changes here; Riverside confirmed theirs separately.</p>
+    <div class="row"><span class="sp"></span><button class="btn primary" data-act="confirmBooking">Confirm booking change</button></div></div>`);
+  const done = [];
+  if (S.ts['m8.done'] && S.user==='priya') done.push(decided('Booking change: Sparks S1 to 235–255', 'You confirmed', S.ts['m8.done'].at, 'Sync done. 3 days protected.'));
+  if (S.ts['upd.approved'] && S.user==='priya') done.push(decided('A-J1 roof +5 days', 'You approved', S.ts['upd.approved'].at, 'The new forecast is live. Dan was notified.'));
+  return `<div class="ph"><div><div class="eyebrow">${ORGS[U().org]}</div><h1>Approvals</h1><p>Changes that move a handover date or the critical path need a PM.</p></div></div>
+  <div class="eyebrow" style="margin:4px 0 8px">Waiting for you</div>
+  ${items.length ? `<div class="grid">${items.join('')}</div>` : `<div class="empty">Nothing waiting for you.</div>`}
+  ${sentStrip() ? `<div style="margin-top:18px">${sentStrip()}</div>` : ''}
+  ${done.length ? `<div class="eyebrow" style="margin:18px 0 8px">Decided</div><div class="grid">${done.join('')}</div>` : ''}`;
+};
+function optionCard(o){
+  return `<div class="opt ${o.best?'best':''} ${o.off?'off':''}">
+    <div class="hd"><span class="code">${o.code}</span><h4>${o.title}</h4>${o.chip||''}</div>
+    <div style="font-size:.88rem">${o.desc}</div>
+    <div class="facts">${o.facts.map(([k,v])=>`<span>${k} <b>${v}</b></span>`).join('')}</div>
+    ${o.track||''}${o.actions?`<div class="row">${o.actions}</div>`:''}
+  </div>`;
+}
+V.board = () => {
+  const board = S.srv.board || {gaps:[]}, sg = board.gaps && board.gaps[0], g = demoGap(), done = S.m8==='done' || S.m3;
+  const open = (board.gaps || []).length;
+  const head = `<div class="ph"><div><div class="eyebrow">Northgate Build · Sites A, B</div><h1>Sync Board</h1><p>What fell out of sync, and what to do before each deadline passes.</p></div></div>
+  <div class="grid g3" style="margin-bottom:14px"><div class="card stat"><b>${open&&!done?1:2}</b><span>sites in sync</span></div><div class="card stat"><b style="color:${open&&!done?'var(--risk)':'var(--good)'}">${done?0:open}</b><span>open gaps</span></div><div class="card stat"><b>${['approved','sam','marcus'].includes(S.m8)?1:0}</b><span>syncs in flight</span></div></div>`;
+  if (!sg && !done) return head + `<div class="empty">No gaps in the next 20 working days.${S.pending?' A proposed change on Site A is waiting for confirmation.':''}</div>`;
+  if (!sg && done) return head + `<div class="banner good"><div class="txt"><b>In sync. ${board.days_protected || 3} days protected (${gbp((board.days_protected || 3)*DAY_VALUE)}).</b><span class="muted">Sparks S1 worked days 230–235 at Bow Wharf and is booked back on Site A from day 235.</span></div><button class="btn" data-view-go="report">See report</button></div>`;
+  const conf = sched('A','conf'), noAct = schedule('A', merge(S.conf.A, {K3:{lag:RETURN_LAG + ((S.conf.A.K3||{}).lag||0)}}));
+  const base = sched('A','base')._end;
+  const opt = m => (sg.options || []).find(o => o.mechanism === m) || {};
+  const m8s = opt('M8'), m3s = opt('M3'), m1s = opt('M1'), prot = m8s.days_protected ?? m3s.days_protected ?? (noAct._end - conf._end);
+  const m8 = {code:'M8', best:true, title:'Slot swap: offer S1’s idle days to a nearby project',
+    chip: S.link==='active' ? '<span class="chip good">Agreed with Riverside</span>' : S.link==='requested' ? '<span class="chip hot">Riverside asked for it</span>' : S.offer==='offered' ? '<span class="chip info">Offered</span>' : '<span class="chip">Not offered yet</span>',
+    desc: S.offer==='offered' ? `Offered anonymised to nearby projects: M&E, ${sg.workers} workers, days ${sg.start}–${sg.end}, ~1 km area. A project that needs M&E can ask for it; you set the terms, including S1’s return to A-K3 on day ${sg.end}.`
+      : `Share S1’s idle window anonymised (trade, crew size, days ${sg.start}–${sg.end}, ~1 km area) with nearby projects. Projects that need M&E can request it. Nothing is shared about your programme.`,
+    facts:[['Start by','day '+(m8s.start_by ?? sg.start-1)],['Setup',(m8s.setup_days ?? 1)+' day'],['Protects',prot+' days'],['Value',gbp(m8s.value_gbp ?? prot*DAY_VALUE + (sg.end-sg.start)*CREW_DAY)],['Reliability','medium']],
+    track: S.offer==='offered' ? TRK.offer(true) : '',
+    actions: S.m3 ? '' : S.offer==='none' ? `<span class="muted" style="font-size:.82rem">Nearby projects that need M&amp;E in that window will see it.</span><span class="sp"></span><button class="btn accent" data-act="offerCapacity">Offer to nearby projects</button>`
+      : S.link==='none' ? `<span class="muted" style="font-size:.82rem">Waiting for a nearby project to ask.</span>`
+      : S.link==='requested' ? `<span class="sp"></span><button class="btn accent" data-view-go="requests">Review Riverside’s request</button>`
+      : S.m8==='marcus' ? `<span class="sp"></span><button class="btn primary" data-view-go="approvals">Confirm your booking change</button>`
+      : S.m8==='done' ? '' : `<span class="muted" style="font-size:.82rem">Waiting for ${S.m8==='approved'?'Sparks':'Riverside'}.</span>`};
+  const m3 = {code:'M3', title:'Re-slot trades: hold Sparks S1 to the new dates', desc:'Move the S1 booking to the new dates so the crew is committed for the new start. Prevents the late return, but S1 sits idle at the sub’s cost.',
+    facts:[['Start by','day '+(m3s.start_by ?? sg.start)],['Setup','0 days'],['Protects',(m3s.days_protected ?? prot)+' days'],['Value',gbp(m3s.value_gbp ?? prot*DAY_VALUE)],['Idle kept',`${sg.end-sg.start} crew-days (${gbp((sg.end-sg.start)*CREW_DAY)}, sub)`],['Reliability','high']],
+    actions: S.m8==='none' && S.offer==='none' ? `<span class="sp"></span><button class="btn" data-act="approveM3">Approve re-slot</button>` : ''};
+  const m1 = {code:'M1', off:!m1s.feasible, title:'Resequence: pull forward other M&E work on Site A', chip: m1s.feasible ? '' : '<span class="chip bad">Not available</span>', desc: m1s.reason || 'No unstaffed, ready M&E work in the window.', facts:[['Setup','0 days']]};
+  const m10 = {code:'M10', off:true, title:'Agency top-up via your framework', chip:'<span class="chip">For shortages</span>', desc:'Applies when you’re short of a trade. CrewNow is approved at Northgate.', facts:[['Setup','1 day']]};
+  return head + `<div class="card fade">
+    <div class="row"><span class="chip surplus">${sg.type}</span><h3 style="margin:0">${tradeLabel(sg.trade)} · ${sg.crew} · ${sg.workers} workers · Site ${sg.site_id}</h3><span class="sp"></span><span class="chip">days ${sg.start}–${sg.end}</span><span class="chip hot">${sg.warning_days} days' warning</span></div>
+    <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Created by J1 Roof waterproofing +5 days (confirmed by Dan, approved by you). A-K3 now starts day ${conf.K3[0]}; S1 is booked from ${sg.start}.</p>
+    <div class="cmp"><div><div class="eyebrow">No action</div><b class="num">+${noAct._end-base} days</b><div class="muted" style="font-size:.85rem">S1 redeploys and returns ${RETURN_LAG} days late. Handover ${noAct._end}.</div></div>
+    <div><div class="eyebrow">With best action</div><b class="num">+${conf._end-base} days</b><div class="muted" style="font-size:.85rem">Crew back for day ${sg.end}. Handover ${conf._end} (weather only).</div></div></div>
+    <div class="protect"><b>${prot} days</b><span>protected × ${gbp(DAY_VALUE)} day value = <strong>${gbp(prot*DAY_VALUE)}</strong>. No-action snapshot locked when the gap opened.</span></div>
+    <div class="sep"></div><div class="eyebrow" style="margin-bottom:8px">Options, ranked by value then reliability</div>
+    <div class="grid">${[m8,m3,m1,m10].map(optionCard).join('')}</div></div>`;
+};
+V.city = () => {
+  const list = S.srv.city || [], u = U(), km = 110, ox = 40, oy = 30, P = (x,y) => [ox+x*km, oy+y*km];
+  const own = Object.keys(SITES).filter(x => SITES[x].org===u.org);
+  let g = `<svg viewBox="0 0 520 500" width="100%" role="img" aria-label="Schematic city map">`;
+  for (let i=0;i<=4;i++) g += `<line x1="${ox+i*km}" y1="${oy}" x2="${ox+i*km}" y2="${oy+4*km}" stroke="var(--line)"/><line x1="${ox}" y1="${oy+i*km}" x2="${ox+4*km}" y2="${oy+i*km}" stroke="var(--line)"/>`;
+  g += `<path d="M${ox} ${oy+1.9*km} C ${ox+1.2*km} ${oy+1.6*km}, ${ox+1.8*km} ${oy+2.9*km}, ${ox+2.6*km} ${oy+3.1*km} S ${ox+3.6*km} ${oy+3.4*km}, ${ox+4*km} ${oy+3.3*km}" stroke="var(--steel-soft)" stroke-width="14" fill="none"/>`;
+  const slots = [[1,2],[2,3],[3,1],[0,3]];
+  list.forEach((p,i) => { const [cx,cy] = slots[i % slots.length]; g += `<rect x="${ox+cx*km+2}" y="${oy+cy*km+2}" width="${km-4}" height="${km-4}" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-dasharray="4 3"/><text x="${ox+cx*km+km/2}" y="${oy+cy*km+km/2+5}" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">${p.anon_label || anonLabel(p.anon_id)}</text>`; });
+  own.forEach(x => { const [px,py] = P(SITES[x].x, SITES[x].y); g += `<circle cx="${px}" cy="${py}" r="9" fill="var(--fg)"/><text x="${px}" y="${py+4}" text-anchor="middle" font-family="Public Sans" font-size="10" font-weight="700" fill="var(--bg)">${x}</text><text x="${px+14}" y="${py+4}" font-family="Public Sans" font-size="11.5" fill="var(--fg)">${SITES[x].name}</text>`; });
+  g += `<text x="${ox}" y="${oy+4*km+22}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)">1 km grid · East London · schematic</text></svg>`;
+  return `<div class="ph"><div><div class="eyebrow">City network · East London</div><h1>City view</h1><p>Other companies' projects, anonymised to a ~1 km area and phase, with any capacity they offer. Trade windows are visible only if the owner shares an anonymised view.</p></div></div>
+  <div class="grid g2"><div class="card" style="padding:10px">${g}</div><div class="grid" style="align-content:start">
+  ${list.map(p => `<div class="card"><div class="row"><h3 style="margin:0">Project ${p.anon_label || anonLabel(p.anon_id)}</h3><span class="sp"></span><span class="chip">${p.distance_band || ''}</span></div>
+    <p class="muted" style="margin:4px 0 10px;font-size:.86rem">${p.area || 'East London'} · ${p.phase || ''} phase</p>
+    ${(p.offers || []).length ? (p.offers).map(o => `<div class="chip good">Offers ${tradeLabel(o.trade)} · ${o.workers} workers · days ${o.start}–${o.end}</div>`).join(' ') : '<span class="muted" style="font-size:.84rem">No open offers</span>'}</div>`).join('') || '<div class="empty">No other projects visible.</div>'}
+  <p class="muted" style="font-size:.8rem;margin:0">Minimum-crowd rule (≥3 projects per area and phase) is off for the 4-site demo. Confidential projects never appear.</p></div></div>`;
+};
+function reqCards(dir){ const r = S.srv[S.user==='priya'?'reqP':'reqM']; return r ? arr(r[dir]) : []; }
+V.requests = () => {
+  const u = U(), cards = [];
+  const mine = reqCards('incoming').filter(r => ['view','crew'].includes(String(r.kind))), inc = mine.filter(r => String(r.status).toUpperCase() === 'REQUESTED');
+  inc.forEach(r => { const k = String(r.kind).toLowerCase();
+    if (k.includes('view')) cards.push(`<div class="card review fade"><div class="row"><span class="chip hot">VIEW REQUEST</span><h3 style="margin:0">${r.title || `${r.counterparty} asks to see your project, anonymised`}</h3><span class="sp"></span><span class="mono muted" style="font-size:.78rem">${r.created_at||''}</span></div>
+      <p style="margin:8px 0">They would see it as <b>${SITES.A.anon}</b>: trade windows by week, phase, ~1 km area and the capacity you've offered. No name, codes, exact dates or people.</p>
+      <div class="row"><button class="btn ghost" data-act="denyView" data-id="${r.id}">Decline</button><span class="sp"></span><button class="btn primary" data-act="grantView" data-id="${r.id}">Share anonymised view</button></div></div>`);
+    else cards.push(`<div class="card review fade">
+      <div class="row"><span class="chip hot">CREW REQUEST</span><h3 style="margin:0">${r.title || `${r.counterparty} asks to borrow your offered crew`}</h3><span class="sp"></span><span class="mono muted" style="font-size:.78rem">${r.created_at||''}</span></div>
+      <p style="margin:8px 0">Sparks S1 (6), days 230–235, for first fix on one of their sites nearby. Sparks is already approved at both companies. Accepting creates a link and a pool; they learn it's Northgate when you accept.</p>
+      <div class="sep"></div><div class="eyebrow" style="margin-bottom:8px">Your terms</div>
+      <div class="grid g3">
+        <div class="field"><span class="muted" style="font-size:.78rem">Shared trades</span><div class="checks"><label><input id="pt-mep" type="checkbox" checked> M&amp;E</label><label><input id="pt-dry" type="checkbox"> Drylining</label></div></div>
+        <div class="field"><label for="pt-rc">Recharge</label><select id="pt-rc"><option>Sub's agreed day rate</option><option>At cost</option></select></div>
+        <div class="field"><label for="pt-rg">Return guarantee</label><input id="pt-rg" value="S1 back on Hackney Wick Yard by day 235"></div>
+        <div class="field"><label for="pt-pr">Priority rule</label><select id="pt-pr"><option>Critical path wins</option><option>Lender wins</option></select></div>
+        <div class="field"><label for="pt-nd">Notice (days)</label><input id="pt-nd" type="number" value="5" min="0"></div>
+      </div>
+      <div class="row" style="margin-top:14px"><button class="btn ghost" data-act="declineLink" data-id="${r.id}">Decline</button><span class="sp"></span><button class="btn primary" data-act="acceptLink" data-id="${r.id}">Accept and agree terms</button></div></div>`); });
+  const done = mine.filter(r => !inc.includes(r)).map(r => decided(r.title || r.kind, String(r.status).toUpperCase()==='DECLINED' ? 'You declined' : r.kind==='view' ? 'You shared' : 'You accepted', (arr(r.tracker).slice(-1)[0] || {}).at || '', r.kind==='crew' ? 'Link and pool active. Proposal sent to Sparks.' : 'They see it at week level. You can revoke it at any time.'));
+  return `<div class="ph"><div><div class="eyebrow">${ORGS[u.org]}</div><h1>Requests</h1><p>Requests to see your projects (anonymised) or borrow capacity you've offered, and requests you've sent.</p></div></div>
+  <div class="eyebrow" style="margin:4px 0 8px">Waiting for you</div>
+  ${cards.length?`<div class="grid">${cards.join('')}</div>`:`<div class="empty">No open requests.</div>`}
+  ${u.org==='R' && sentStrip() ? `<div style="margin-top:18px">${sentStrip()}</div>` : ''}
+  ${done.length?`<div class="eyebrow" style="margin:18px 0 8px">Decided</div><div class="grid">${done.join('')}</div>`:''}`;
+};
+V.links = () => {
+  const links = S.srv.links || [];
+  return `<div class="ph"><div><div class="eyebrow">${ORGS[U().org]}</div><h1>Links &amp; pools</h1><p>Partners you share capacity with. Linked partners see only the pool, never your full timelines.</p></div></div>
+  ${!links.length?`<div class="empty">No links yet. Offer idle capacity from the Sync Board; nearby projects can then ask for it.</div>`:
+  links.map(l => `<div class="card" style="margin-bottom:10px"><div class="row"><span class="chip ${l.status==='ACTIVE'?'good':'info'}">${l.status}</span><h3 style="margin:0">${l.counterparty}</h3></div>
+    <dl class="kv" style="margin-top:10px"><dt>Purpose</dt><dd>${l.purpose||''}</dd>${l.pool?`<dt>Pool</dt><dd>${Object.entries(l.pool).map(([k,v]) => `${k.replace(/_/g,' ')}: ${Array.isArray(v)?v.map(tradeLabel).join(', '):v}`).join(' · ')}</dd>`:''}</dl></div>`).join('')}`;
+};
+V.reviews = () => {
+  const p = S.srv.bookC;
+  const card = p && S.m8==='sam' ? `<div class="card review fade"><div class="row"><h3 style="margin:0">Slot swap: extra M&amp;E crew on C-K3</h3><span class="sp"></span><span class="chip good">✓ Sam (Sparks)</span></div>
+    <p style="margin:8px 0">Sparks S1 (6) joins first fix at Bow Wharf, days 230–235, alongside your crew S2. Recharge at Sparks' agreed rate. S1 leaves on day 235.</p>
+    <div class="row"><button class="btn ghost" data-act="declineCross">Decline</button><span class="sp"></span><button class="btn primary" data-act="marcusConfirm">Confirm booking change</button></div></div>`
+    : `<div class="empty">No changes waiting for review.</div>`;
+  const done = S.ts['m8.marcus'] ? decided('Sparks S1 on C-K3, days 230–235', 'You confirmed', S.ts['m8.marcus'].at, S.ts['m8.done'] ? 'Northgate confirmed its side. Sync complete.' : 'Waiting for Northgate to confirm its side.') : '';
+  return `<div class="ph"><div><div class="eyebrow">Riverside Construction</div><h1>Reviews</h1><p>Changes to your sites from partners. Your data changes only when you confirm.</p></div></div>
+  <div class="eyebrow" style="margin:4px 0 8px">Waiting for you</div>${card}${done?`<div class="eyebrow" style="margin:18px 0 8px">Decided</div>${done}`:''}`;
+};
+V.proposals = () => {
+  const card = S.m8==='approved' ? `<div class="card review fade"><div class="row"><span class="chip hot">NEW</span><h3 style="margin:0">Move S1 for 5 days, guaranteed back</h3><span class="sp"></span><span class="mono muted" style="font-size:.78rem">Northgate + Riverside agreed</span></div>
+    <div class="grid g2" style="margin-top:10px"><div><div class="eyebrow">Days 230–235</div><p style="margin:4px 0">S1 works at <b>Riverside, Bow Wharf</b> first fix (you already hold this contract).</p></div>
+    <div><div class="eyebrow">From day 235</div><p style="margin:4px 0">S1 returns to <b>Northgate, Hackney Wick Yard</b>, first fix now 235–255.</p></div></div>
+    <div class="protect"><b>${gbp(5*CREW_DAY)}</b><span>5 crew-days that would have been idle, billed at your agreed rate with Riverside.</span></div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" data-act="declineCross">Decline</button><span class="sp"></span><button class="btn primary" data-act="samAccept">Accept</button></div></div>`
+    : `<div class="empty">No proposals right now.</div>`;
+  const done = S.ts['m8.sam'] ? decided('S1 to Bow Wharf days 230–235, back day 235', 'You accepted', S.ts['m8.sam'].at, S.ts['m8.done'] ? 'Both GCs confirmed. Sync complete.' : 'Waiting for both GCs to confirm their bookings.') : '';
+  return `<div class="ph"><div><div class="eyebrow">Sparks Electrical</div><h1>Proposals</h1><p>Moves that involve your crews. Nothing changes unless you accept.</p></div></div>
+  <div class="eyebrow" style="margin:4px 0 8px">Waiting for you</div>${card}${done?`<div class="eyebrow" style="margin:18px 0 8px">Accepted</div>${done}`:''}`;
+};
+V.labour = () => {
+  const lanes = S.bookings.filter(b => b.site==='A' && T[b.step]), d0 = 215, d1 = 262, x0 = 220, W = 900, px = (W-x0-16)/(d1-d0), X = d => x0 + (Math.max(d0,Math.min(d1,d))-d0)*px;
+  const conf = sched('A','conf');
+  const shown = lanes.filter(b => { const [ss,se] = conf[b.step]; return (b.e > d0 && b.s < d1) || (se > d0 && ss < d1); });
+  let g = `<svg viewBox="0 0 ${W} ${shown.length*44+40}" width="100%" role="img" aria-label="Site A crew bookings against step activity">`;
+  for (let d=215; d<=260; d+=5) g += `<line x1="${X(d)}" y1="22" x2="${X(d)}" y2="${shown.length*44+28}" stroke="var(--line)"/><text x="${X(d)}" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)">${d}</text>`;
+  g += `<rect x="${X(220)}" y="22" width="${20*px}" height="${shown.length*44+6}" fill="var(--steel-soft)" opacity=".5"/>`;
+  shown.forEach((b,i) => { const y = 28 + i*44, [ss,se] = conf[b.step];
+    g += `<text x="0" y="${y+14}" font-family="Public Sans" font-size="12" font-weight="600" fill="var(--fg)">${b.crew} (${b.size})</text><text x="0" y="${y+29}" font-family="IBM Plex Mono" font-size="10" fill="var(--muted)">A-${b.step} ${T[b.step].trade}</text>`;
+    g += `<rect x="${X(ss)}" y="${y+4}" width="${Math.max(0,X(se)-X(ss))}" height="8" rx="2" fill="var(--steel)"/><rect x="${X(b.s)}" y="${y+16}" width="${Math.max(0,X(b.e)-X(b.s))}" height="12" rx="2" fill="none" stroke="var(--fg)" stroke-width="1.2"/>`;
+    if (b.s < ss) g += `<rect x="${X(b.s)}" y="${y+16}" width="${X(Math.min(ss,b.e))-X(b.s)}" height="12" fill="var(--risk)" opacity=".6"/>`; });
+  g += '</svg>';
+  const imb = S.srv.labA ? arr(S.srv.labA.imbalances) : [];
+  return `<div class="ph"><div><div class="eyebrow">Site A · lookahead days ${TODAY}–${TODAY+LOOK}</div><h1>Labour balance</h1><p>Each crew's booking (outline) against when its step is active (bar), from the confirmed timeline.</p></div></div>
+  <div class="tl" style="padding:12px">${g}</div>
+  <div class="card" style="margin-top:14px"><h3>Imbalances in the lookahead (server)</h3><div class="scroll"><table><thead><tr><th>Type</th><th>Step</th><th>Trade</th><th class="r">Workers</th><th class="r">Days</th></tr></thead><tbody>
+  ${imb.length ? imb.map(i => `<tr><td><span class="chip ${i.type==='SURPLUS'?'surplus':'bad'}">${i.type}</span></td><td class="mono">${i.step_id}</td><td>${tradeLabel(i.trade)}</td><td class="r">${i.workers}</td><td class="r mono">${i.start}–${i.end}</td></tr>`).join('') : '<tr><td colspan="5" class="muted">Balanced: no surplus, shortage or clash in the next 20 working days.</td></tr>'}
+  </tbody></table></div><p class="muted" style="font-size:.8rem;margin:8px 0 0">Demand = headcount per active day. Supply = crew size per booked day. Delayed steps assume their own booking is extended.</p></div>`;
+};
+V.report = () => {
+  const r = S.srv.report || {}, rows = arr(r.events || r.rows || r.outcomes);
+  const days = r.days_protected ?? (S.srv.board ? S.srv.board.days_protected : 0) ?? 0;
+  const value = r.value_gbp ?? days * (r.day_value || DAY_VALUE);
+  return `<div class="ph"><div><div class="eyebrow">Northgate Build · this month</div><h1>Days protected</h1><p>Locked no-action forecast versus outcome, times your own day value.</p></div></div>
+  <div class="grid g3"><div class="card stat"><b>${days||0}</b><span>days protected</span></div><div class="card stat"><b>${gbp(value||0)}</b><span>at ${gbp(DAY_VALUE)} per day (set at onboarding)</span></div><div class="card stat"><b>${r.idle_crew_days_used ?? 0}</b><span>idle crew-days put to work${r.idle_cost_avoided_gbp ? ` (${gbp(r.idle_cost_avoided_gbp)} idle cost avoided)` : ''}</span></div></div>
+  <div class="card scroll" style="margin-top:14px"><table><thead><tr><th>Event</th><th class="r">No action</th><th class="r">Outcome</th><th class="r">Protected</th><th>Mechanism</th><th>Evidence</th></tr></thead><tbody>
+  ${rows.length ? rows.map(o => `<tr><td>${o.event || 'Site A roof +5 (weather)'}</td><td class="r mono">${o.no_action_finish ?? 405}</td><td class="r mono">${o.outcome_finish ?? 402}</td><td class="r">${o.days_protected ?? o.protected_days} d</td><td>${o.mechanism || (String(o.option_id||'').endsWith('M3')?'M3 re-slot':'M8 slot swap')}</td><td class="mono" style="font-size:.78rem">${o.evidence || 'Plaud note · snapshot · acceptances'}</td></tr>`).join('') : `<tr><td colspan="6" class="muted">No completed syncs yet.</td></tr>`}</tbody></table></div>
+  <p class="muted" style="font-size:.8rem;margin-top:8px">Weather days are excusable and not counted. Only knock-on days prevented by an approved action count.</p>`;
+};
+V.activity = () => `<div class="ph"><div><div class="eyebrow">${ORGS[U().org]}</div><h1>Activity</h1><p>Every change is an event with its source (your company only).</p></div></div>
+  <div class="card scroll"><table><thead><tr><th>Time</th><th>Who</th><th>What</th><th>Source</th></tr></thead><tbody>
+  ${S.events.length ? S.events.map(e=>`<tr><td class="mono">${e.t}</td><td>${e.who}</td><td>${e.what}</td><td><span class="chip">${e.src}</span></td></tr>`).join('') : '<tr><td colspan="4" class="muted">No events yet.</td></tr>'}</tbody></table></div>`;
+
+/* ---------------- step popover ---------------- */
+let popAt = null;
+function closePop(){ el('pop').hidden = true; popAt = null; if (el('main').children.length) applyGuide(); }
+function placePop(){ const p = el('pop'); if (!popAt) return; const r = p.getBoundingClientRect(); let x = popAt.x + 12, y = popAt.y + 12;
+  if (x + r.width > innerWidth - 12) x = Math.max(12, popAt.x - r.width - 12); if (y + r.height > innerHeight - 12) y = Math.max(12, innerHeight - r.height - 12);
+  p.style.left = x + 'px'; p.style.top = y + 'px'; }
+function openStep(site, code, at, editing){
+  const t = T[code], base = sched(site,'base')[code], conf = sched(site,'conf')[code], can = U().edit.includes(site);
+  const bk = S.bookings.filter(b => b.site===site && b.step===code);
+  popAt = at || popAt || {x: innerWidth/2 - 180, y: 140};
+  const p = el('pop'); p.hidden = false; p.dataset.site = site; p.dataset.code = code;
+  p.innerHTML = `<button class="btn ghost x" data-act="closePop" aria-label="Close">✕</button>
+    <div class="eyebrow">${site}-${code} · ${t.trade || t.raw}${conf[3]?' · critical':''}${t.w?' · weather-sensitive':''}</div><h4>${t.n}</h4>
+    <dl class="kv" style="margin-top:8px"><dt>Baseline</dt><dd class="mono">${base[0]}–${base[1]}</dd><dt>Confirmed</dt><dd class="mono">${conf[0]}–${conf[1]} (${t.d} days)</dd><dt>Crew</dt><dd>${bk.length?bk.map(b=>`${b.crew} (${b.size}) booked ${b.s}–${b.e}`).join('<br>'):'None booked'}</dd></dl>
+    ${!editing ? `<div class="row" style="margin-top:10px">${can?`<button class="btn primary" data-act="editStep">Update</button>`:'<span class="muted" style="font-size:.82rem">Read-only for your role</span>'}</div>` : `
+    <div class="sep"></div>
+    <div class="row2"><div class="field"><label for="f-s">Start</label><input id="f-s" type="number" value="${conf[0]}"></div><div class="field"><label for="f-e">Finish</label><input id="f-e" type="number" value="${code==='J1'&&!(S.conf.A.J1||{}).delay?conf[1]+5:conf[1]}"></div></div>
+    <div class="field" style="margin-top:8px"><label for="f-r">Reason</label><select id="f-r"><option>Weather</option><option>Late predecessor</option><option>Labour shortage</option><option>Materials late</option><option>Design change</option><option>Progress faster</option><option>Other</option></select></div>
+    <div id="f-prev" class="preview" aria-live="polite"></div>
+    <div class="row" style="margin-top:10px"><button class="btn ghost" data-act="closePop">Cancel</button><span class="sp"></span><button class="btn primary" id="f-go" data-act="submitEdit">Propose update</button></div>`}`;
+  placePop();
+  if (editing) { previewEdit(); p.querySelector('#f-e').focus(); }
+  applyGuide();
+}
+function editValues(){
+  const p = el('pop'), site = p.dataset.site, code = p.dataset.code, t = T[code], c = sched(site,'conf')[code];
+  const ns = +el('f-s').value, ne = +el('f-e').value, cur = S.conf[site][code] || {};
+  if (!Number.isFinite(ns) || !Number.isFinite(ne)) return {err:'Enter whole working days.'};
+  if (ne < ns) return {err:'Finish can’t be before start.'};
+  if (ns < c[2]) return {err:`Start can’t be before its predecessors finish (day ${c[2]}).`};
+  const lag = ns - c[2], delay = (ne - ns) - t.d;
+  if (delay < -t.d) return {err:'Duration can’t be negative.'};
+  if (lag === (cur.lag||0) && delay === (cur.delay||0)) return {err:'No change yet. Edit the dates to see the knock-on.'};
+  return {site, code, lag, delay, start: ns, finish: ne, reason: el('f-r').value};
+}
+function previewEdit(){
+  const v = editValues(), box = el('f-prev'), btn = el('f-go');
+  if (v.err){ box.className = 'preview err'; box.textContent = v.err; btn.disabled = true; return; }
+  const keep = S.pending; S.pending = {site:v.site, code:v.code, lag:v.lag, delay:v.delay};
+  const k = knock(v.site); S.pending = keep;
+  const ng = k.created.filter(g => g.inLook && g.type!=='EXTEND').length;
+  box.className = 'preview'; btn.disabled = false;
+  box.innerHTML = `<b>${v.code} + ${k.moved.filter(c=>c!==v.code).length} downstream steps move</b> · handover <span class="mono">${k.from} → ${k.to}</span>${ng?` · <span style="color:var(--risk)">${ng} new crew gap${ng>1?'s':''}</span>`:''}`;
+}
+
+/* ---------------- update modal ---------------- */
+const PLAUD = {list:null, error:null, sel:null, text:null, busy:false};
+async function loadPlaud(){
+  PLAUD.error = null;
+  try { const r = await api('/api/plaud/recordings'); PLAUD.list = arr(r.recordings || r.ids ? (r.recordings || r.ids.map(id => ({id}))) : r); }
+  catch(e){ PLAUD.list = []; PLAUD.error = e.message; }
+  if (S.tab === 'plaud' && !el('modal').hidden) openUpdate('plaud');
+}
+async function pickRecording(id){
+  PLAUD.sel = id; PLAUD.text = 'Loading transcript…'; openUpdate('plaud');
+  const r = await tryApi(`/api/plaud/recordings/${encodeURIComponent(id)}/transcript`);
+  PLAUD.text = r ? (r.text || '') : '(Transcript preview isn’t available; propose to pull it directly.)'; openUpdate('plaud');
+}
+function openUpdate(tab){
+  S.tab = tab || S.tab || 'plaud';
+  const m = el('modal'); m.hidden = false; m.className = 'modal-bg';
+  const tabs = [['plaud','Plaud note'],['csv','CSV upload'],['photo','Labour plan photo'],['manual','Edit on timeline']];
+  let body = '';
+  if (S.tab==='plaud'){
+    if (PLAUD.list === null) { loadPlaud(); }
+    const recs = PLAUD.list || [];
+    body = `<div class="grid" style="gap:8px">
+    <div class="eyebrow">Recordings from your Plaud account</div>
+    ${PLAUD.list === null ? '<div class="muted">Loading recordings…</div>' : PLAUD.error ? `<div class="preview err">Plaud: ${PLAUD.error}. Paste the transcript below instead.</div>` : !recs.length ? '<div class="muted">No recordings today.</div>' :
+      recs.slice(0,5).map(r => `<button class="rec" aria-pressed="${PLAUD.sel===r.id}" data-act="pickRec" data-id="${r.id}"><svg class="wave" viewBox="0 0 44 28" aria-hidden="true">${[6,14,20,10,24,16,8,18,12,6].map((h,i)=>`<rect x="${i*4.4+1}" y="${14-h/2}" width="2.4" height="${h}" rx="1" fill="var(--muted)"/>`).join('')}</svg><span style="flex:1"><b style="font-weight:600">${r.title || r.name || 'Recording'}</b><br><span class="muted mono" style="font-size:.75rem">${r.created_at || r.id}</span></span><span class="chip">Plaud</span></button>`).join('')}
+    ${PLAUD.sel ? `<div class="quote" style="max-height:180px;overflow:auto">${PLAUD.text || ''}</div><div class="row"><span class="muted" style="font-size:.8rem">Audio stays with Northgate. Only the approved update is shared.</span><span class="sp"></span><button class="btn accent" data-act="plaudPropose" ${PLAUD.busy?'disabled':''}>${PLAUD.busy?'Reading note on Crusoe…':'Propose update'}</button></div>` : ''}
+    <div class="sep"></div>
+    <div class="eyebrow">Or paste a transcript</div>
+    <textarea id="pasteText">${DEMO_TRANSCRIPT}</textarea>
+    <div class="row"><span class="muted" style="font-size:.8rem">Extraction runs on Crusoe (gpt-oss-120b), with an offline fallback.</span><span class="sp"></span><button class="btn ${PLAUD.sel?'':'accent'}" data-act="${PLAUD.sel?'pasteProposeAlt':'plaudPropose'}" ${PLAUD.busy?'disabled':''}>${PLAUD.busy?'Reading…':'Propose from text'}</button></div></div>`;
+  }
+  else if (S.tab==='csv') body = `<div class="drop"><b>Upload a labour plan or programme CSV</b><span style="font-size:.84rem">Columns: crew, step, start, end, size. Rows are compared with current bookings; duplicates are ignored.</span>
+      <div class="row"><label class="btn" for="csvfile">Choose file</label><input id="csvfile" type="file" accept=".csv,text/csv" hidden><button class="btn" data-act="csvSample">Use sample: labour-plan-wk44.csv</button></div></div>
+      <div id="csvOut" style="margin-top:12px"></div>`;
+  else if (S.tab==='photo') body = `<div class="drop"><b>Photo of the whiteboard labour plan</b><span style="font-size:.84rem">A vision model reads rows with a confidence score. You review before anything becomes a booking.</span><div class="row"><label class="btn" for="photofile">Choose photo</label><input id="photofile" type="file" accept="image/*" hidden></div><span style="font-size:.78rem">Runs server-side on Crusoe (Kimi K2.6 vision). Should-have; not in this demo build.</span></div>`;
+  else body = `<p>Close this and click any bar on the timeline. Change its start or finish; the preview shows how many steps move and any crew gaps before you propose it.</p><div class="row"><span class="sp"></span><button class="btn primary" data-act="closeModal">Go to timeline</button></div>`;
+  m.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mh"><div class="row"><h2 id="mh">Update timeline</h2><span class="sp"></span><button class="btn ghost" data-act="closeModal" aria-label="Close">✕</button></div>
+    <p class="muted" style="margin:0 0 12px">Every source becomes the same proposed change, with the same checks and knock-on preview.</p>
+    <div class="tabs" role="tablist">${tabs.map(([id,l])=>`<button class="tab" role="tab" aria-selected="${S.tab===id}" data-utab="${id}">${l}</button>`).join('')}</div>${body}</div>`;
+  applyGuide();
+}
+function closeModal(){ const m = el('modal'); m.hidden = true; m.innerHTML = ''; applyGuide(); }
+function csvDiff(text){
+  const lines = text.trim().split(/\r?\n/).filter(Boolean); const head = lines.shift().toLowerCase().split(',').map(s=>s.trim());
+  const idx = k => head.indexOf(k); const rows = lines.map(l => l.split(',').map(s=>s.trim()));
+  if (['crew','step','start','end'].some(k => idx(k) < 0)) return `<div class="preview err">Missing columns. Expected: crew, step, start, end, size.</div>`;
+  const out = rows.map(r => { const crew = r[idx('crew')], step = (r[idx('step')]||'').replace(/^A-/,''), s = +r[idx('start')], e = +r[idx('end')], size = +(r[idx('size')]||4);
+    const ex = S.bookings.find(b => b.site==='A' && b.crew===crew && b.step===step);
+    const st = !T[step] ? 'unknown step' : ex && ex.s===s && ex.e===e ? 'unchanged' : ex ? 'changed' : 'new';
+    return {crew, step, s, e, size, st}; });
+  S.csvRows = out.filter(r => r.st==='new' || r.st==='changed');
+  return `<div class="scroll"><table><thead><tr><th>Crew</th><th>Step</th><th class="r">Window</th><th>Status</th></tr></thead><tbody>${out.map(r=>`<tr><td>${r.crew}</td><td class="mono">A-${r.step}</td><td class="r mono">${r.s}–${r.e}</td><td><span class="chip ${r.st==='new'?'info':r.st==='changed'?'hot':r.st==='unchanged'?'':'bad'}">${r.st}</span></td></tr>`).join('')}</tbody></table></div>
+    <div class="row" style="margin-top:10px"><span class="muted" style="font-size:.82rem">${S.csvRows.length} booking change${S.csvRows.length===1?'':'s'} to propose.</span><span class="sp"></span><button class="btn primary" data-act="csvApply" ${S.csvRows.length?'':'disabled'}>Propose booking changes</button></div>`;
+}
+
+/* ---------------- actions (all go to the server) ---------------- */
+async function proposeFromText(text, via){
+  PLAUD.busy = true; openUpdate(S.tab);
+  try {
+    const r = via === 'plaud' ? await api('/api/ingest/plaud', {body:{site_id:'A', file_id: PLAUD.sel}}) : await api('/api/ingest/text', {body:{site_id:'A', text}});
+    PLAUD.busy = false; closeModal(); S.view = 'timeline'; S.mode = 'steps'; await refresh();
+    const p = arr(r.proposals)[0];
+    toast(p ? `Update proposed from the ${via==='plaud'?'Plaud note':'transcript'}: ${p.changes[0].step_id} +${p.changes[0].to - (p.changes[0].from||0)} days.` : (r.message || 'No schedule change found in this note.'));
+  } catch(e){ PLAUD.busy = false; openUpdate(S.tab); toast(`Couldn’t read the note: ${e.message}`); }
+}
+function poolTerms(){
+  const trades = []; if (el('pt-mep') && el('pt-mep').checked) trades.push('mep'); if (el('pt-dry') && el('pt-dry').checked) trades.push('drylining');
+  return {trades, recharge: el('pt-rc') ? el('pt-rc').value : "Sub's agreed day rate", return_guarantee: el('pt-rg') ? el('pt-rg').value : 'S1 back by day 235',
+          priority_rule: el('pt-pr') ? el('pt-pr').value : 'Critical path wins', notice_days: el('pt-nd') ? +el('pt-nd').value : 5};
+}
+const ACT = {
+  closePop, closeModal: () => closeModal(),
+  markRead(){ act(() => api('/api/notifications/read', {method:'POST', body:{}})); },
+  noImpact(){ act(() => api('/api/signals/clear', {body:{site_id:'A', step_code:'J1'}}), 'Risk flag cleared.'); },
+  openUpdate(){ openUpdate(); },
+  openStep(b){ openStep(b.dataset.site, b.dataset.code, null, true); },
+  editStep(){ const p = el('pop'); openStep(p.dataset.site, p.dataset.code, null, true); },
+  pickRec(b){ pickRecording(b.dataset.id); },
+  async submitEdit(){ const v = editValues(); if (v.err) return toast(v.err); closePop();
+    try { await api('/api/proposals', {body:{site_id:v.site, step_id:`${v.site}-${v.code}`, start:v.start, finish:v.finish, reason:v.reason}}); }
+    catch(e){ if (e.status === 404 || e.status === 405) { if (v.lag) return toast('Start-date moves need the timeline-edit endpoint, which isn’t on the server yet.');
+        await tryApi('/api/ingest/text', {body:{site_id:v.site, text:`${T[v.code].n} delayed ${v.delay - ((S.conf[v.site][v.code]||{}).delay||0)} working days, ${v.reason.toLowerCase()}.`}}); }
+      else { await refresh(); return toast(`Couldn’t propose: ${e.message}`); } }
+    await refresh(); toast(S.user==='dan' ? 'Update proposed. Check the knock-on, then confirm the fact.' : 'Update proposed.'); },
+  plaudPropose(){ if (PLAUD.sel && S.tab==='plaud' && !el('pasteText')?.matches(':focus')) return proposeFromText(null, 'plaud'); return proposeFromText(el('pasteText') ? el('pasteText').value : DEMO_TRANSCRIPT, 'text'); },
+  pasteProposeAlt(){ return proposeFromText(el('pasteText').value, 'text'); },
+  confirmPending(){ const P = S.pending; if (!P) return; closePop();
+    act(() => api(`/api/proposals/${P.id}/decide`, {body:{accept:true}}), r => r && r.status==='SITE_CONFIRMED' ? 'Sent to Priya for approval. You’ll see it here when she decides.' : 'Timeline updated.'); },
+  approvePending(){ const P = S.pending; if (!P) return;
+    act(() => api(`/api/proposals/${P.id}/decide`, {body:{accept:true}}), () => { const g = S.srv.gap; return g ? `Approved. New gap: ${g.crew} idle days ${g.start}–${g.end}. See Sync Board.` : 'Approved. Timeline updated.'; }); },
+  discardPending(){ const P = S.pending; if (!P) return; act(() => api(`/api/proposals/${P.id}/decide`, {body:{accept:false}}), 'Proposal discarded; nothing moved.'); },
+  offerCapacity(){ const g = S.srv.gap; if (!g) return toast('No open gap to offer.');
+    act(() => api('/api/offers', {body:{gap_id:g.id}}), 'Offered. Nearby projects that need M&E will see it, anonymised.'); },
+  requestView(){ const anon = SITES.A.anonId || (S.srv.offerM && S.srv.offerM.anon_id); if (!anon) return toast('No offer visible yet.');
+    act(() => api('/api/view-requests', {body:{anon_id:anon}}), `Request sent. Waiting for ${SITES.A.anon}’s company.`); },
+  grantView(b){ const id = (b && b.dataset && b.dataset.id) || (S.srv.viewReq && S.srv.viewReq.id); if (!id) return;
+    act(() => api(`/api/view-requests/${id}/decide`, {body:{share:true}}), 'Shared. They have been notified.'); },
+  denyView(b){ const id = b && b.dataset && b.dataset.id; act(() => api(`/api/view-requests/${id}/decide`, {body:{share:false}}), 'Declined. Your project stays invisible to them.'); },
+  requestLink(){ const o = S.srv.offerM; if (!o) return toast('No offer visible.');
+    act(() => api('/api/links', {body:{offer_id:o.id || o.offer_id, purpose:'Borrow the offered M&E crew for first fix'}}), `Crew requested. Waiting for ${SITES.A.anon}’s company.`); },
+  acceptLink(b){ const id = (b && b.dataset && b.dataset.id) || (S.srv.linkReq && S.srv.linkReq.id);
+    act(() => api(`/api/links/${id}/decide`, {body:{accept:true, pool_terms: poolTerms()}}), 'Accepted. Riverside and Sparks have been notified.'); },
+  declineLink(b){ const id = (b && b.dataset && b.dataset.id) || (S.srv.linkReq && S.srv.linkReq.id);
+    act(() => api(`/api/links/${id}/decide`, {body:{accept:false}}), 'Declined. Riverside never learns who you are.'); },
+  approveM3(){ const g = S.srv.gap; act(() => api('/api/options/approve', {body:{gap_id:g.id, mechanism:'M3'}}), 'Re-slotted. Days protected; S1 idle at the sub’s cost.'); },
+  samAccept(){ const cp = S.srv.cp; act(() => api(`/api/cross-proposals/${cp.id}/decide`, {body:{accept:true}}), 'Accepted. Northgate and Riverside have been notified.'); },
+  declineCross(){ const cp = S.srv.cp; if (S.user==='sam' && cp) return act(() => api(`/api/cross-proposals/${cp.id}/decide`, {body:{accept:false}}), 'Declined.');
+    const p = S.srv.bookC; if (p) act(() => api(`/api/proposals/${p.id}/decide`, {body:{accept:false}}), 'Declined.'); },
+  marcusConfirm(){ const p = S.srv.bookC; act(() => api(`/api/proposals/${p.id}/decide`, {body:{accept:true}}), 'Confirmed. Northgate has been notified.'); },
+  async confirmBooking(){ const p = S.srv.bookA; await act(() => api(`/api/proposals/${p.id}/decide`, {body:{accept:true}}));
+    await go('priya','report'); toast('Sync done. 3 days protected, £24,000.'); },
+  csvSample(){ el('csvOut').innerHTML = csvDiff(`crew,step,start,end,size\nRoofing crew,A-J1,220,230,4\nGlazing crew,A-J3,220,230,4\nCladding crew,A-J4,206,231,5`); },
+  csvApply(){ closeModal(); toast('CSV preview only in this build: booking import isn’t wired to the server yet.'); }
+};
+
+/* ---------------- events ---------------- */
+document.addEventListener('click', e => {
+  const bar = e.target.closest('.bar'); if (bar) { openStep(bar.dataset.site, bar.dataset.code, {x:e.clientX, y:e.clientY}, false); return; }
+  const b = e.target.closest('button,[data-view-go]');
+  if (!e.target.closest('#notes') && !e.target.closest('#bell')) el('notes').hidden = true;
+  if (!b) { if (!e.target.closest('#pop')) closePop(); if (e.target.id==='modal') closeModal(); return; }
+  if (b.dataset.user) return go(b.dataset.user);
+  if (b.dataset.view) { S.view = b.dataset.view; closePop(); saveUI(); return refresh(); }
+  if (b.dataset.viewGo) { S.view = b.dataset.viewGo; saveUI(); return refresh(); }
+  if (b.dataset.sitePick) { S.site[S.user] = b.dataset.sitePick; if (S.overlay[S.user]===b.dataset.sitePick) S.overlay[S.user] = null; return render(); }
+  if (b.dataset.mode) { S.mode = b.dataset.mode; return render(); }
+  if (b.dataset.step !== undefined) return jumpTo(+b.dataset.step);
+  if (b.dataset.overlay !== undefined) { S.overlay[S.user] = b.dataset.overlay || null; if (b.dataset.overlay) S.mode = 'trades';
+    if (b.dataset.overlay && SITES[b.dataset.overlay].org !== U().org && SITES[b.dataset.overlay].anonId)
+      return tryApi(`/api/city/${SITES[b.dataset.overlay].anonId}/overlay`).then(o => { S.srv.overlay = o; if (!o) toast('The anonymised view hasn’t been shared yet.'); render(); });
+    return render(); }
+  if (b.dataset.utab) return openUpdate(b.dataset.utab);
+  if (b.dataset.act && ACT[b.dataset.act]) ACT[b.dataset.act](b);
+});
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape'){ closePop(); closeModal(); }
+  const bar = e.target.closest && e.target.closest('.bar');
+  if (bar && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); const r = bar.getBoundingClientRect(); openStep(bar.dataset.site, bar.dataset.code, {x:r.left+20, y:r.bottom}, false); }
+});
+document.addEventListener('input', e => { if (['f-s','f-e','f-r'].includes(e.target.id)) previewEdit(); });
+document.addEventListener('change', e => {
+  if (e.target.id==='csvfile' && e.target.files[0]){ const r = new FileReader(); r.onload = () => { el('csvOut').innerHTML = csvDiff(String(r.result)); }; r.readAsText(e.target.files[0]); }
+  if (e.target.id==='photofile' && e.target.files[0]) toast('Photo received. Vision parsing is a should-have and not in this demo build.');
+});
+el('bell').addEventListener('click', async e => { e.stopPropagation(); const n = el('notes'); if (!n.hidden) { n.hidden = true; return; }
+  const mine = S.notes;
+  n.innerHTML = `<div class="row" style="margin-bottom:6px"><b>Notifications</b><span class="sp"></span><span class="muted" style="font-size:.78rem">${U().full}</span></div>` + (mine.length ? mine.map(x => `<div class="note ${x.read?'':'unread'}"><span class="mono muted">${x.t}</span> ${x.text}</div>`).join('') : '<div class="muted" style="font-size:.86rem">Nothing yet.</div>');
+  n.hidden = false; await tryApi('/api/notifications/read', {method:'POST', body:{}}); S.notes.forEach(x => x.read = true); renderBell(); });
+el('showMe').addEventListener('click', () => { const p = progress(); if (p < SCRIPT.length){ el('drawer').open = false; applyGuide.last = null; go(SCRIPT[p][0], SCRIPT[p][1]); toast(SCRIPT[p][2]); } });
+el('reset').addEventListener('click', async () => { await tryApi('/api/demo/reset', {method:'POST', body:{}}); PLAUD.list = null; PLAUD.sel = null; S = fresh(); S.user = 'dan'; S.view = 'timeline'; S.overlay = {priya:null, marcus:null}; S.mode = 'steps'; closePop(); closeModal(); await refresh(); toast('Demo reset to the seed state.'); });
+// extra data for specific views, loaded on each refresh
+const _sync = sync;
+sync = async function(){
+  await _sync();
+  const extra = await Promise.all([
+    S.user === 'sam' ? tryApi('/api/sub/bookings', {}, 'sam') : null,
+    S.view === 'city' ? tryApi('/api/city') : null,
+    S.view === 'links' ? tryApi('/api/links') : null,
+    (S.user === 'marcus' && S.overlay.marcus === 'A' && SITES.A.anonId) ? tryApi(`/api/city/${SITES.A.anonId}/overlay`, {}, 'marcus') : null]);
+  const sb = extra[0] ? arr(extra[0].bookings || extra[0]) : null;
+  S.srv.subBookings = sb && sb.length ? sb.map(b => ({crew: b.crew, client: (b.org_name || '').split(' ')[0], site: b.site_name, step: b.step_name || b.step_code,
+      s: (b.booking||[])[0], e: (b.booking||[])[1], ss: (b.step_active||[])[0], se: (b.step_active||[])[1]})) : null;
+  S.srv.city = extra[1] ? arr(extra[1]) : S.srv.city;
+  S.srv.links = extra[2] ? arr(extra[2]) : S.srv.links;
+  if (extra[3]) S.srv.overlay = extra[3];
+};
+refresh();
+
+</script>
+</body></html>
