@@ -81,6 +81,25 @@ How M&E is paid (for completed work) decides who bears the **labour** cost of a 
 
 **Research:** developers' daily delay cost at different project sizes; how often liquidated damages are actually recovered.
 
+### B.3 "Why not just push the GC hard?" and who actually buys
+
+**Do developers pay to catch up?** Often. For excusable delays (weather, design changes, late information) the GC is entitled to extra time; keeping the original date means **instructing and paying for acceleration**. Refusing the extension while demanding the date leads to a claim that the developer forced acceleration. For GC-caused delays, the GC recovers at its own cost or pays damages, but passes pressure down to subs.
+
+**Why pressure alone fails:** (1) you can't pressure what you can't see (monthly reports arrive weeks late; by then catching up means paid acceleration); (2) pressure doesn't create crews (squeezed subs overbook more and deprioritise); (3) pressure without evidence becomes a dispute (weather vs GC fault).
+
+**Positioning:** not "software instead of pressure" but **"pressure earlier, on the specific cause, with evidence"**. E.g. "Your M&E sub is double-booked with another client days 230–250 and will return 3 days late. Fix it this week." Weather days documented as excusable, cascade days as the GC's.
+
+**Buyer (revised): whoever the developer already pays to do the pressuring.**
+
+| Buyer | Today | SiteSync value |
+|---|---|---|
+| Developer-side project managers / employer's agents (consultancies) | Monthly visits and reports, chasing GC | Earlier specific issues; more projects per person; better margins |
+| Monitoring surveyors (for lenders) | Monthly visits, drawdown sign-off | Continuous evidence between visits |
+| Claims and cost consultants | Reconstruct delay causes months later | Timestamped cause and effect as it happens |
+| Lenders and institutional developers (BTR operators, funds) | Portfolio risk | Early warning across projects |
+
+Developers themselves rarely want to operate software; they get the benefit through their consultants. **Research test:** would developer-side PM or monitoring-surveyor firms pay per project? Fallback buyer: GCs (avoid delay damages).
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
