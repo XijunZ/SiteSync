@@ -573,12 +573,12 @@ function knock(site){
 
 /* ---------------- script (progress derived from server state) ---------------- */
 const SCRIPT = [
-  ['marcus','board','Marcus: his C-K3 first fix is short 6 M&E workers. He requests capacity from nearby projects', () => S.need !== 'none'],
   ['dan','timeline','Dan updates J1: Sync from Plaud (or click the J1 bar)', () => !!S.pending || isDemoConfirmed()],
   ['dan','timeline','Dan checks the knock-on and confirms the fact', () => (S.pending && S.pending.status==='pm') || isDemoConfirmed()],
   ['priya','approvals','Priya approves. Sparks S1 is now idle days 230–235', () => isDemoConfirmed()],
-  ['priya','board','Priya sees the matching request and offers S1’s idle days (anonymised)', () => S.offer==='offered'],
-  ['marcus','board','Marcus sees his request matched on the Sync Board, overlays it and requests the crew', () => S.link!=='none'],
+  ['priya','board','Priya offers S1’s idle days to nearby projects (anonymised)', () => S.offer==='offered'],
+  ['marcus','board','Marcus: his C-K3 first fix is short 6 M&E workers. He requests capacity from nearby projects', () => S.need !== 'none'],
+  ['marcus','board','Marcus sees his request matched instantly, overlays it and requests the crew', () => S.link!=='none'],
   ['priya','requests','Priya accepts and sets terms: S1 back by day 235', () => S.link==='active'],
   ['sam','proposals','Sam (Sparks) accepts the move for crew S1', () => ['sam','marcus','done'].includes(S.m8)],
   ['marcus','reviews','Marcus confirms the booking on his site', () => ['marcus','done'].includes(S.m8)],
@@ -592,13 +592,13 @@ function guideTarget(){
   const pop = !el('pop').hidden, modal = !el('modal').hidden;
   const nav = x => S.view===x ? null : `.nav[data-view="${x}"]`;
   switch (p){
-    case 0: return nav('board') || '[data-act="postNeed"]';
-    case 1: if (modal) return S.tab==='plaud' ? '[data-act="plaudPropose"]' : '[data-utab="plaud"]';
+    case 0: if (modal) return S.tab==='plaud' ? '[data-act="plaudPropose"]' : '[data-utab="plaud"]';
             if (pop) return el('f-go') ? '#f-go' : '[data-act="editStep"]';
             return nav('timeline') || '[data-act="syncPlaud"]';
-    case 2: return nav('timeline') || '.review [data-act="confirmPending"]';
-    case 3: return nav('approvals') || '.review [data-act="approvePending"]';
-    case 4: return nav('board') || '[data-act="offerCapacity"]';
+    case 1: return nav('timeline') || '.review [data-act="confirmPending"]';
+    case 2: return nav('approvals') || '.review [data-act="approvePending"]';
+    case 3: return nav('board') || '[data-act="offerCapacity"]';
+    case 4: return nav('board') || '[data-act="postNeed"]';
     case 5: return S.overlay.marcus==='A' ? (nav('timeline') || '.banner [data-act="requestLink"]') : (nav('board') || '.banner [data-act="overlayOffer"]');
     case 6: return nav('requests') || '[data-act="acceptLink"]';
     case 7: return nav('proposals') || '[data-act="samAccept"]';
