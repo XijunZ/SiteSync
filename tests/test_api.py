@@ -100,12 +100,15 @@ def test_demo_story_end_to_end(monkeypatch):
     gap = get("priya", "/api/sync-board").json()["gaps"][0]
     m8 = next(o for o in gap["options"] if o["mechanism"] == "M8")
     assert m8["feasible"] and m8["offer_state"] == "none"
+    assert get("marcus", "/api/offers").json() == []                                # no request, no offer shown
+    mgap = get("marcus", "/api/sync-board").json()["gaps"][0]
+    assert post("marcus", "/api/needs", {"gap_id": mgap["id"]}).status_code == 200     # Marcus asks
     offer = post("priya", "/api/offers", {"gap_id": gap["id"]}).json()               # 4
     assert offer["status"] == "OPEN"
     seen = get("marcus", "/api/offers").json()                                        # 5
     assert len(seen) == 1 and seen[0]["fits"]["step_code"] == "K3"
     assert (seen[0]["workers"], seen[0]["start"], seen[0]["end"]) == (6, 230, 235)
-    assert any("M&E crew available near you" in n["text"] for n in get("marcus", "/api/notifications").json())
+    assert any("request matched" in n["text"] for n in get("marcus", "/api/notifications").json())
     mine = get("marcus", "/api/sites/C/trades").json()                               # 5: overlay = own windows + offer
     assert "mep" in mine["trades"]
     link = post("marcus", "/api/links", {"offer_id": offer["id"], "purpose": "Pool M&E capacity"}).json()
@@ -136,6 +139,7 @@ def test_demo_story_end_to_end(monkeypatch):
 def test_anonymity_handoffs(monkeypatch):
     """Spec §10: before Northgate accepts, nothing Riverside sees names Northgate, its sites, codes or people."""
     _delay_j1(monkeypatch)
+    post("marcus", "/api/needs", {"gap_id": get("marcus", "/api/sync-board").json()["gaps"][0]["id"]})
     gap = get("priya", "/api/sync-board").json()["gaps"][0]
     offer = post("priya", "/api/offers", {"gap_id": gap["id"]}).json()
     anon = get("marcus", "/api/offers").json()[0]["anon_id"]

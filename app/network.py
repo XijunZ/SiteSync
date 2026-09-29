@@ -63,6 +63,13 @@ def post_need(world: World, user: User, gap_id: str) -> Need:
               world.sites[gap.site_id].area, created_at=world.now())
     world.needs[nd.id] = nd
     world.log("NeedPosted", user.id, gap.site_id, {"need_id": nd.id})
+    for o in world.offers.values():
+        if o.status == "OPEN" and not o.need_id and o.trade == nd.trade and o.org_id != nd.org_id \
+                and min(o.end, nd.end) - max(o.start, nd.start) > 0:
+            o.need_id, nd.offer_id, nd.status = nd.id, o.id, "MATCHED"
+            world.notify(world.pms_of(nd.org_id), f"Your {trade_label(nd.trade)} request matched: {o.workers} workers "
+                         f"available days {o.start}–{o.end} from {anon_label(o.site_id)}", o.id)
+            break
     return nd
 
 
@@ -147,15 +154,7 @@ def publish_offer(world: World, user: User, gap_id: str) -> Offer:
                      f"{world.steps[nd.step_id].code} (existing subcontract) · {notice} working days' notice",
                      offer.id)
         return offer
-    for org in {s.org_id for s in world.sites.values() if s.org_id != user.org_id}:
-        fit = offer_fit(world, offer, org)
-        if fit:
-            world.notify(world.pms_of(org),
-                         f"{trade_label(offer.trade)} crew available near you: {offer.workers} workers, days "
-                         f"{offer.start}–{offer.end} · fits your {world.steps[fit['step_id']].site_id}-"
-                         f"{fit['step_code']} {short_name(fit['step_name'])} (from {anon_label(offer.site_id)})",
-                         offer.id)
-    return offer
+    return offer  # no broadcast: an offer only reaches a company that has posted a matching request
 
 
 def withdraw_offer(world: World, user: User, offer_id: str) -> Offer:

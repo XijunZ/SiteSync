@@ -77,5 +77,8 @@ def extract_updates(world: World, site_id: str, text: str) -> list[ExtractedUpda
                 if not u.candidates:
                     continue
             out.append(u)
+        if llm.CALL_LOG and llm.CALL_LOG[-1].get("ok"):
+            llm.CALL_LOG[-1]["purpose"] = "Plaud note → schedule change"
+            llm.CALL_LOG[-1]["result"] = ", ".join(f"{u.step_code or '?'} +{u.delay_days}d" for u in out) or "no change found"
         return out
     return _deterministic(world, site_id, text)

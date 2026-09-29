@@ -221,6 +221,8 @@ def offers_view(world: World, user: User) -> list[dict]:
             continue
         if o.status in ("WITHDRAWN", "EXPIRED"):
             continue
+        if not (o.need_id and o.need_id in world.needs and world.needs[o.need_id].org_id == user.org_id):
+            continue  # only companies that asked see an offer
         fit = offer_fit(world, o, user.org_id)
         if not fit or user.role not in ("PM", "OPS_DIRECTOR"):
             continue

@@ -239,6 +239,11 @@ li.wait .dotm{border-color:var(--steel);animation:blink 1.1s ease-in-out infinit
 .drawer[open] .chev{transform:rotate(180deg)}
 main{padding-bottom:160px}
 .drawer[open] ol{max-height:min(60vh,520px)}
+.cru{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;font-size:.72rem}
+.cru .hd{font:600 .72rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--accent);padding:0 6px 6px}
+.cru .op{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:6px 8px;margin:0 4px 6px}
+.cru .op b{font-size:.76rem}
+.cru .meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-family:var(--f-mono);margin-top:2px}
 .gact{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;font-size:.72rem}
 .gact summary{cursor:pointer;list-style:none;font:600 .72rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--steel);padding:0 6px 6px}
 .gact summary::-webkit-details-marker{display:none}
@@ -573,7 +578,7 @@ const SCRIPT = [
   ['dan','timeline','Dan checks the knock-on and confirms the fact', () => (S.pending && S.pending.status==='pm') || isDemoConfirmed()],
   ['priya','approvals','Priya approves. Sparks S1 is now idle days 230–235', () => isDemoConfirmed()],
   ['priya','board','Priya sees the matching request and offers S1’s idle days (anonymised)', () => S.offer==='offered'],
-  ['marcus','timeline','Marcus overlays the offer on his timeline and requests the crew', () => S.link!=='none'],
+  ['marcus','board','Marcus sees his request matched on the Sync Board, overlays it and requests the crew', () => S.link!=='none'],
   ['priya','requests','Priya accepts and sets terms: S1 back by day 235', () => S.link==='active'],
   ['sam','proposals','Sam (Sparks) accepts the move for crew S1', () => ['sam','marcus','done'].includes(S.m8)],
   ['marcus','reviews','Marcus confirms the booking on his site', () => ['marcus','done'].includes(S.m8)],
@@ -594,7 +599,7 @@ function guideTarget(){
     case 2: return nav('timeline') || '.review [data-act="confirmPending"]';
     case 3: return nav('approvals') || '.review [data-act="approvePending"]';
     case 4: return nav('board') || '[data-act="offerCapacity"]';
-    case 5: return nav('timeline') || (S.overlay.marcus==='A' ? '.banner [data-act="requestLink"]' : '.banner [data-act="overlayOffer"]');
+    case 5: return S.overlay.marcus==='A' ? (nav('timeline') || '.banner [data-act="requestLink"]') : (nav('board') || '.banner [data-act="overlayOffer"]');
     case 6: return nav('requests') || '[data-act="acceptLink"]';
     case 7: return nav('proposals') || '[data-act="samAccept"]';
     case 8: return nav('reviews') || '[data-act="marcusConfirm"]';
@@ -634,10 +639,18 @@ function renderRoles(){
 function renderRail(){
   const p = progress(), here = GUIDE && p < SCRIPT.length && SCRIPT[p][0]===S.user ? SCRIPT[p][1] : null;
   el('rail').innerHTML = `<div class="org">${ORGS[U().org]}</div>` + NAV[S.user].map(([id,label]) =>
-    `<button class="nav" data-view="${id}" ${S.view===id?'aria-current="page"':''}><span>${label}</span>${here===id?'<span class="badge">1</span>':''}</button>`).join('') + graphActivity();
+    `<button class="nav" data-view="${id}" ${S.view===id?'aria-current="page"':''}><span>${label}</span>${here===id?'<span class="badge">1</span>':''}</button>`).join('') + crusoeActivity() + graphActivity();
 }
 let GACT_OPEN = true; try { GACT_OPEN = localStorage.getItem('sitesync-gact') !== '0'; } catch(e) {}
 let GSEEN = 0;
+function crusoeActivity(){
+  const calls = (S.llm || []).slice(-4).reverse();
+  return `<div class="cru"><div class="hd">AI · Crusoe Cloud</div>
+    <div class="op"><b>Reads Plaud notes</b><div class="meta"><span>gpt-oss-120b</span><span>open-weight</span><span>${calls.length} call${calls.length===1?'':'s'}</span></div></div>
+    ${calls.map(c => `<div class="op"><b>${esc(c.purpose || 'Extraction')}</b>${c.result ? `<div style="margin-top:2px">→ <b style="color:var(--accent)">${esc(c.result)}</b></div>` : ''}
+      <div class="meta"><span>${c.provider === 'crusoe' ? 'Crusoe' : esc(c.provider || '')}</span><span>${c.latency_ms ?? '—'} ms</span>${c.prompt_tokens ? `<span>${c.prompt_tokens + (c.completion_tokens||0)} tok</span>` : ''}${c.ok === false ? '<span>failed → fallback</span>' : ''}</div></div>`).join('')}
+  </div>`;
+}
 function graphActivity(){
   const ops = (G.log || []).slice(0, 6), maxSeq = Math.max(0, ...ops.map(o => o.seq || 0)), prev = GSEEN; GSEEN = Math.max(GSEEN, maxSeq);
   return `<details class="gact" id="gact" ${GACT_OPEN?'open':''}><summary>Graph activity · Neo4j ${G.stats && G.stats.source==='neo4j' ? `<span class="muted" style="text-transform:none;font-weight:400">· ${G.stats.nodes} nodes</span>` : ''}</summary>
@@ -825,7 +838,7 @@ V.timeline = () => {
   return `${weatherBanner(site)}
   <div class="ph"><div><div class="eyebrow">${ORGS[SITES[site].org]} · ${SITES[site].name}</div><h1>Site ${site} timeline</h1><p>${canEdit?'Click any bar to see it and update it. Everything downstream moves automatically.':'Read-only for your role.'}</p></div>
     <div class="row">${canEdit?`${S.user==='dan'?'<button class="btn accent" data-act="syncPlaud">🎙 Sync from Plaud</button>':''}<button class="btn ${S.user==='dan'?'':'primary'}" data-act="openUpdate">Update timeline ▾</button>`:''}</div></div>
-  ${S.pending && S.pending.site===site ? reviewCard() : ''}${availBanner()}${sentStrip()}
+  ${S.pending && S.pending.site===site ? reviewCard() : ''}${S.overlay[S.user]==='A' ? availBanner() : ''}${sentStrip()}
   <div class="toolbar">
     ${u.sites.length>1?`<div class="seg" role="group" aria-label="Site">${u.sites.map(x=>`<button data-site-pick="${x}" aria-pressed="${site===x}">${x} · ${SITES[x].name}</button>`).join('')}</div>`:''}
     <div class="seg" role="group" aria-label="View"><button data-mode="steps" aria-pressed="${MODE()==='steps'}">Steps</button><button data-mode="trades" aria-pressed="${MODE()==='trades'}">Trades</button></div>
@@ -896,7 +909,7 @@ function sentStrip(){
   return `<div class="card" style="margin-bottom:12px"><div class="eyebrow" style="margin-bottom:8px">Your requests</div><div class="grid g2">${list.join('')}</div></div>`;
 }
 function availBanner(){
-  if (S.user!=='marcus' || S.offer!=='offered' || S.m8==='done' || (S.site.marcus||'C')!=='C') return '';
+  if (S.user!=='marcus' || !S.srv.offerM || S.srv.offerM.own || S.m8==='done' || (S.site.marcus||'C')!=='C') return '';
   const o = S.srv.offerM || {}, g = {s: o.start ?? 230, e: o.end ?? 235};
   const ov = S.overlay.marcus==='A';
   const fits = o.fits ? `Fits your ${o.fits.step_code ? 'C-' + o.fits.step_code : ''} ${o.fits.step_name || 'first fix'}${o.fits.start !== undefined ? ` (${o.fits.start}–${o.fits.end})` : ''}.` : 'Fits your C-K3 first fix (225–245).';
@@ -943,8 +956,9 @@ function serverTracker(r){ if (!r) return '';
 function marcusBoard(){
   const b = S.srv.boardM || {gaps:[]}, gs = arr(b.gaps).filter(g => g.type === 'SHORTAGE'), g = gs[0], nd = S.srv.need;
   const head = `<div class="ph"><div><div class="eyebrow">Riverside Construction · Sites C, D</div><h1>Sync Board</h1><p>What fell out of sync, and what to do before each deadline passes.</p></div></div>`;
+  const headM = head + availBanner();
   const covered = S.m8 === 'done' || S.m8 === 'marcus';
-  if (!g) return head + '<div class="empty">No gaps in the next 20 working days.</div>';
+  if (!g) return headM + '<div class="empty">No gaps in the next 20 working days.</div>';
   const opt = m => arr(g.options).find(o => o.mechanism === m) || {};
   const m13 = opt('M13'), m10 = opt('M10');
   const needCard = {code:'M13', best:true, title:`Request ${g.workers} M&E workers from nearby projects`,
@@ -954,7 +968,7 @@ function marcusBoard(){
     track: S.srv.needReq ? serverTracker(S.srv.needReq) : '',
     actions: S.need === 'none' ? `<span class="sp"></span><button class="btn accent" data-act="postNeed">Request M&amp;E capacity from nearby projects</button>` : S.need === 'matched' ? `<span class="sp"></span><button class="btn accent" data-view-go="timeline">See the match on your timeline</button>` : ''};
   const agency = {code:'M10', title: m10.title || 'Agency top-up via CrewNow', desc:'CrewNow is on your approved list. Agency labour costs a premium (~35–65%) and needs site induction.', facts:[['Setup',(m10.setup_days ?? 1)+' day'],['Start by','day '+(m10.start_by ?? 224)],['Reliability','medium']]};
-  return head + `<div class="card fade">
+  return headM + `<div class="card fade">
     <div class="row"><span class="chip shortage">SHORTAGE</span><h3 style="margin:0">M&amp;E · C-K3 first fix · short ${g.workers} workers · Bow Wharf</h3><span class="sp"></span><span class="chip">days ${nd ? nd.start : 225}–${nd ? nd.end : 245}</span><span class="chip hot">${g.warning_days} days' warning</span></div>
     <p class="muted" style="margin:6px 0 12px;font-size:.88rem">First fix on the lower floors needs 12 M&amp;E workers (large floor plate); only Sparks crew 2 (6) is booked.${covered ? ' <b style="color:var(--good)">Days 230–235 now covered by Sparks crew 1.</b>' : ''}</p>
     <div class="eyebrow" style="margin-bottom:8px">Options</div>
@@ -966,8 +980,8 @@ V.board = () => {
   const open = (board.gaps || []).length;
   const head = `<div class="ph"><div><div class="eyebrow">Northgate Build · Sites A, B</div><h1>Sync Board</h1><p>What fell out of sync, and what to do before each deadline passes.</p></div></div>
   <div class="grid g3" style="margin-bottom:14px"><div class="card stat"><b>${open&&!done?1:2}</b><span>sites in sync</span></div><div class="card stat"><b style="color:${open&&!done?'var(--risk)':'var(--good)'}">${done?0:open}</b><span>open gaps</span></div><div class="card stat"><b>${['approved','sam','marcus'].includes(S.m8)?1:0}</b><span>syncs in flight</span></div></div>`;
-  if (!sg && !done) return head + `<div class="empty">No gaps in the next 20 working days.${S.pending?' A proposed change on Site A is waiting for confirmation.':''}</div>`;
-  if (!sg && done) return head + `<div class="banner good"><div class="txt"><b>In sync. ${board.days_protected || 3} days protected (${gbp((board.days_protected || 3)*DAY_VALUE)}).</b><span class="muted">Sparks S1 worked days 230–235 at Bow Wharf and is booked back on Site A from day 235.</span></div><button class="btn" data-view-go="report">See report</button></div>`;
+  if (!sg && !done) return headM + `<div class="empty">No gaps in the next 20 working days.${S.pending?' A proposed change on Site A is waiting for confirmation.':''}</div>`;
+  if (!sg && done) return headM + `<div class="banner good"><div class="txt"><b>In sync. ${board.days_protected || 3} days protected (${gbp((board.days_protected || 3)*DAY_VALUE)}).</b><span class="muted">Sparks S1 worked days 230–235 at Bow Wharf and is booked back on Site A from day 235.</span></div><button class="btn" data-view-go="report">See report</button></div>`;
   const conf = sched('A','conf'), noAct = schedule('A', merge(S.conf.A, {K3:{lag:RETURN_LAG + ((S.conf.A.K3||{}).lag||0)}}));
   const base = sched('A','base')._end;
   const opt = m => (sg.options || []).find(o => o.mechanism === m) || {};
@@ -991,7 +1005,7 @@ V.board = () => {
     actions: S.m8==='none' && S.offer==='none' ? `<span class="sp"></span><button class="btn" data-act="approveM3">Approve re-slot</button>` : ''};
   const m1 = {code:'M1', off:!m1s.feasible, title:'Resequence: pull forward other M&E work on Site A', chip: m1s.feasible ? '' : '<span class="chip bad">Not available</span>', desc: m1s.reason || 'No unstaffed, ready M&E work in the window.', facts:[['Setup','0 days']]};
   const m10 = {code:'M10', off:true, title:'Agency top-up via your framework', chip:'<span class="chip">For shortages</span>', desc:'Applies when you’re short of a trade. CrewNow is approved at Northgate.', facts:[['Setup','1 day']]};
-  return head + `<div class="card fade">
+  return headM + `<div class="card fade">
     <div class="row"><span class="chip surplus">${sg.type}</span><h3 style="margin:0">${tradeLabel(sg.trade)} · ${sg.crew} · ${sg.workers} workers · Site ${sg.site_id}</h3><span class="sp"></span><span class="chip">days ${sg.start}–${sg.end}</span><span class="chip hot">${sg.warning_days} days' warning</span></div>
     <p class="muted" style="margin:6px 0 12px;font-size:.88rem">S1 idle ${sg.start}–${sg.end} because the roof now finishes day ${conf.J1[1]} (membrane batch 2 failed QA); back on A-K3 day ${sg.end} when first fix can start.</p>
     <div class="cmp"><div><div class="eyebrow">No action</div><b class="num">+${noAct._end-base} days</b><div class="muted" style="font-size:.85rem">S1 redeploys and returns ${RETURN_LAG} days late. Handover ${noAct._end}.</div></div>
