@@ -1,0 +1,31 @@
+from app.domain import Link
+from app.sync_engine import open_gaps, options_for
+from seed.seed import build_world
+
+def _delayed():
+    w = build_world()
+    w.steps["A-J1"].delay_days = 5
+    return w
+
+def test_one_gap_with_warning_days():
+    gaps = open_gaps(_delayed())
+    assert len(gaps) == 1
+    g = gaps[0]
+    assert (g.type, g.step_id, g.start, g.end, g.warning_days) == ("SURPLUS", "A-K3", 230, 235, 10)
+
+def test_options_before_link():
+    w = _delayed()
+    opts = {o.mechanism: o for o in options_for(w, open_gaps(w)[0])}
+    assert not opts["M1"].feasible and "K5" in opts["M1"].reason
+    assert opts["M3"].feasible and opts["M3"].days_protected == 3 and opts["M3"].start_by == 230
+    m8 = opts["M8"]
+    assert not m8.feasible and m8.needs_link_with == "RV"
+    assert m8.target_step_id == "C-K3" and round(m8.distance_km, 1) == 1.7
+    assert m8.days_protected == 3 and m8.idle_cost_avoided_gbp == 6000 and m8.start_by == 229
+
+def test_m8_feasible_and_ranked_first_after_link():
+    w = _delayed()
+    w.links["L1"] = Link("L1", "NG", "RV", "priya", "pool M&E", status="ACTIVE")
+    ranked = options_for(w, open_gaps(w)[0])
+    assert ranked[0].mechanism == "M8" and ranked[0].feasible
+    assert ranked[0].value_gbp == 3 * 8000 + 6000
