@@ -4,7 +4,15 @@
 
 **Constraints (tested):** only the replacement lead time is stated in days ("five working days"); every other time is a weekday. Nobody mentions M&E being affected: SiteSync finds that itself. Press the Plaud **highlight** button at *[highlight]*. Tap **Generate** in the Plaud app if no transcript appears.
 
-## Recording A: Supplier phone call (the input SiteSync pulls; ~50 s)
+## Recording A (solo, recommended): site manager memo after the supplier call (~45 s)
+
+One voice. The audience only sees the transcript and the extracted change in the app, so a solo memo is enough (and realistic: site managers record a memo right after a supplier call).
+
+> Site update, Hackney Wick Yard, Tuesday morning. Just got off the phone with Sarah at Apex Roofing. The first membrane batch on the roof is fine, so Kev's crew carries on through Monday. But the second batch, the one due to us next Tuesday, failed their quality check at the factory this morning, the seams won't bond, so they've scrapped it. The replacement batch will take five working days, *[highlight]* so the roof waterproofing pauses from Tuesday until it lands, then Kev's lads come back and finish off. I've told Sarah we'll extend Apex's booking to cover it. Everything else is on track: windows on the upper floors through to Friday, brick-slip panels land Wednesday morning, scaffold tags are all green.
+
+Tested live on Crusoe: 120 words, 0.8 s → J1 +5, reason "supplier: batch failed QA".
+
+## Recording A (two voices, alternative): Supplier phone call (the input SiteSync pulls; ~50 s)
 
 Plaud Note clipped to the phone (call recording), or two people reading. Sarah (contracts manager, Apex Roofing) calls Dan (site manager).
 
