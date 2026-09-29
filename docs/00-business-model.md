@@ -94,6 +94,33 @@ The fact that subcontractors bear idle cost does **not** by itself mean SiteSync
 
 **L2 changes the design:** the subcontractor is a user, not just a data point. A sub's planner sees "your M&E crew's booking at a GC slips 5 days from day 230", plus anonymised demand that fits the gap from other GCs it already works for (and, opt-in, ones it doesn't).
 
+### 4.1 Qualification lead time decides what's viable
+
+Typical ranges from general industry practice. Verify per city in market research.
+
+| Layer | What | Typical time |
+|---|---|---|
+| Company prequalification (once per sub per GC) | Insurance, H&S record, financial checks, references, licences and accreditations (vary by city); sometimes **client approval** of new subs | 1 to 4 weeks (faster via shared prequalification databases) |
+| Contract (per engagement) | New subcontract vs a new order or variation under an existing one | Days to weeks (new) vs hours to a day (existing) |
+| Project and worker onboarding (per site) | Method statements and risk assessments approved; per-worker site induction; worker cards and permits (e.g. site safety cards, worker registration; **Gulf work permits may be tied to the employer**) | 1 to 3 days |
+| Per-move overhead | Mobilise, induct, hand over, pack up | About 1 to 2 days of the window |
+
+**Viability of a short-notice move:**
+
+| Level | Time to working | 5-day gap, 10 days' notice |
+|---|---|---|
+| L1 same GC | Hours | Viable |
+| **L2 same sub, existing GC relationship** | Hours to 2 days | **Viable** |
+| L3 new relationship | 1 to 4+ weeks | **Not viable.** Only for longer windows with long notice. |
+
+**Legal framing, everywhere:** always "the subcontractor takes a short scope at GC B's site" (the sub directs its own crew). Never "GC A lends its crew" (labour supply is regulated as agency work in many countries; e.g. France prohibits lending staff for profit outside temp agencies).
+
+**Rules for the product:**
+- Propose a match only if **notice ≥ onboarding time for its level** and **window ≥ minimum** (e.g. 3 days at L1/L2, 10+ at L3). Show L3 opportunities that fail the rule as "worth pre-qualifying for next time".
+- **Stage 2 feature and moat: a pre-qualified bench.** SiteSync holds a portable prequalification profile per sub (documents, insurance expiry, worker cards). GCs pre-approve nearby subs before they're needed, which turns L3 into L2 over time.
+
+**Demo consequence:** the current demo match (Northgate's own M&E crew → Riverside, 10 days' notice, 5-day gap) is L3 and not realistic. Switch the idle crew to the shared M&E subcontractor (`IND-mep`) so the match is L2.
+
 ## 5. Density check (does a city have enough overlap?)
 
 Founder's estimate: a city with 80 to 100 active private projects has 3 to 5 at a similar stage.
