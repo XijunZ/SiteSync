@@ -32,6 +32,29 @@
 
 **Hack day demo change (pending approval):** add a **developer view** (all 4 sites, predicted vs contract completion, delay cost at a demo assumption such as £8k per site per day, shown on screen); the root cause and recommended lever are shown there. Keep GC views for neutrality.
 
+### B.1 Worked example: how money is actually saved (the product is "delay response", not a forecast)
+
+A forecast alone saves nothing. Money is saved by **actions taken early enough to matter**. For each predicted delay, the product shows actions in order: **prevent → resequence → redeploy → notify**, each with its conditions and a £ value for the party that benefits.
+
+**Scenario** (demo numbers; costs are illustrative assumptions): Site A (Northgate) roof slips 5 days due to rain, so M&E first fix moves from day 230 to 235. Sparks Ltd (M&E sub, 6-person crew) also works for Riverside, whose Site C first fix (days 225–245) is critical. Crew-day £1.2k; developer delay cost about £8k per site per day.
+
+**Without SiteSync** (Sparks learns on day 229): either (a) the crew waits, and Sparks eats £6k and prices the risk into future tenders; or, more commonly, (b) the crew goes elsewhere and returns on day 238, so **A finishes +8 days instead of +5**: about £24k extra for developer A, plus penalty or dispute exposure for Northgate. This is the overbooking hedge turning a 5-day delay into 8.
+
+**With SiteSync** (flagged on day 220): try to prevent it first (start the roof 2 days early, temporary cover); if not, offer Sparks' free days to Site C with a return guarantee for day 235, provided C has a separate floor for a second crew; tell A's downstream trades their new dates immediately.
+
+| Pot | Saving | Whose | Condition |
+|---|---|---|---|
+| Knock-on on A avoided (crew back on 235, not 238) | about £24k | Developer A | M&E on A's critical path (true in our programme) |
+| C sped up (5 extra crew-days on a 20-day task) | up to about £40k | Developer C | C's M&E critical, space for a second crew, early finish has value |
+| No idle crew | £6k | Sparks (and developers, through lower risk pricing) | — |
+| Delay prevented | whole cost | Developer A | Cover or resequencing feasible |
+
+**Pattern:** the developer's day of delay (£8k+) dwarfs the crew-day (£1.2k). The biggest reliable saving is stopping a small delay from cascading into a bigger one, via a reliable crew return. Selling idle capacity is secondary.
+
+**Limits:** the saving needs the work on the critical path, space at the receiving site, an existing sub relationship with both GCs (L2), and about a week's notice. The product must say "no action worth taking" when these fail. Savings are counterfactual, so charge a subscription and report "days protected" (calculated by the graph) as proof of value, not a success fee.
+
+**Demo money line:** "Weather: roof +5 days. No action: M&E return clash, A finishes +8 days (£64k). With action: +5 days (£40k), so £24k protected. Site C gains up to 5 days."
+
 ## A. The business in one page (v3)
 
 **SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
