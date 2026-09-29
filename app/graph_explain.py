@@ -14,6 +14,12 @@ from app.schedule import all_dates
 from app.sync_engine import _overlap_ok, link_active, open_gaps, swap_candidates_memory
 
 HANDOVER_CODE = "L7"
+GRAPH_LOG: list[dict] = []
+
+
+def _log(name: str, ms: float, source: str) -> None:
+    GRAPH_LOG.append({"name": name, "ms": ms, "source": source, "at": time.strftime("%H:%M:%S")})
+    del GRAPH_LOG[:-20]
 
 
 def _ms(t0: float) -> float:
@@ -65,11 +71,13 @@ def ripple(world: World, site_id: str, step_code: str) -> dict:
     if mirror:
         try:
             r = mirror.ripple(start_id, end_id)
-            return {**r, "cypher": cypher, "ms": _ms(t0), "source": "neo4j"}
+            ms = _ms(t0); _log("ripple (DEPENDS_ON path)", ms, "neo4j")
+            return {**r, "cypher": cypher, "ms": ms, "source": "neo4j"}
         except Exception:  # noqa: BLE001 - fall back to the in-memory answer
             t0 = time.perf_counter()
     r = _ripple_memory(world, start_id, end_id)
-    return {**r, "cypher": cypher, "ms": _ms(t0), "source": "memory"}
+    ms = _ms(t0); _log("ripple (DEPENDS_ON path)", ms, "memory")
+    return {**r, "cypher": cypher, "ms": ms, "source": "memory"}
 
 
 def swap_explain(world: World, user: User, gap_id: str) -> dict:
@@ -96,6 +104,7 @@ def swap_explain(world: World, user: User, gap_id: str) -> dict:
         rows = swap_candidates_memory(world, gap)
         pattern_matches = len(rows)
     ms = _ms(t0)
+    _log("swap match (EMPLOYS/APPROVED_AT + point.distance)", ms, source)
     out = []
     for step_id, crew_id, km in rows:
         st = world.steps[step_id]
@@ -117,7 +126,10 @@ def stats(world: World) -> dict:
     mirror = get_mirror()
     if mirror:
         try:
-            return {**mirror.stats(), "source": "neo4j"}
+            t0 = time.perf_counter()
+            r = mirror.stats()
+            _log("graph stats (count nodes/rels)", _ms(t0), "neo4j")
+            return {**r, "source": "neo4j"}
         except Exception:  # noqa: BLE001
             pass
     steps = list(world.steps.values())

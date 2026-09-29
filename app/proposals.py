@@ -6,7 +6,7 @@ from app.domain import Booking, User, World
 from app.labour import diff_imbalances, imbalances
 from app.schedule import all_dates, critical_steps, forward_pass, natural_start, site_finish
 
-FIELDS = {"delay_days", "lag_days"}
+FIELDS = {"delay_days", "lag_days", "pause_start", "pause_reason"}
 
 
 class StaleProposal(Exception):
@@ -31,6 +31,10 @@ def _validate(world: World, site_id: str, changes: list[dict]) -> None:
             raise ValueError("delay must be between 0 and 60 working days")
         if c["field"] == "lag_days" and not 0 <= c["to"] <= 60:
             raise ValueError("start can move at most 60 working days")
+        if c["field"] == "pause_start" and c["to"] is not None:
+            s, e = forward_pass(world, site_id, "confirmed")[st.id]
+            if not s <= c["to"] <= e:
+                raise ValueError(f"Blocked window must start within the step (days {s}–{e}).")
 
 
 def _extensions(world: World, changes: list[dict]) -> list[dict]:
@@ -85,8 +89,35 @@ def build_proposal(world: World, user: User, site_id: str, changes: list[dict], 
     return p
 
 
-def edit_to_changes(world: World, site_id: str, step_id: str, start: int | None, finish: int | None) -> list[dict]:
-    """Turn a timeline bar edit (new start and/or finish) into lag/delay changes. Raises ValueError."""
+def pause_changes(world: World, site_id: str, step_id: str, pause_start: int, pause_days: int,
+                  reason: str | None = None) -> list[dict]:
+    """A blocked window inside a step: work stops for `pause_days` from `pause_start`; finish moves by the same."""
+    st = world.steps.get(step_id)
+    if st is None or st.site_id != site_id:
+        raise ValueError(f"unknown step {step_id} for site {site_id}")
+    if pause_days <= 0:
+        raise ValueError("Blocked days must be at least 1.")
+    s, e = forward_pass(world, site_id, "confirmed")[step_id]
+    if not s <= int(pause_start) <= e:
+        raise ValueError(f"Blocked window must start within the step (days {s}–{e}).")
+    changes = [{"step_id": step_id, "field": "delay_days", "to": st.delay_days + int(pause_days)},
+               {"step_id": step_id, "field": "pause_start", "to": int(pause_start)}]
+    if reason:
+        changes.append({"step_id": step_id, "field": "pause_reason", "to": reason})
+    return changes
+
+
+def default_pause_start(world: World, site_id: str, step_id: str) -> int:
+    s, e = forward_pass(world, site_id, "confirmed")[step_id]
+    return max(s, min(TODAY + 5, e))
+
+
+def edit_to_changes(world: World, site_id: str, step_id: str, start: int | None, finish: int | None,
+                    pause_start: int | None = None, pause_days: int | None = None,
+                    reason: str | None = None) -> list[dict]:
+    """Turn a timeline bar edit (new start and/or finish, or a blocked window) into changes. Raises ValueError."""
+    if pause_start is not None and pause_days:
+        return pause_changes(world, site_id, step_id, pause_start, pause_days, reason)
     st = world.steps.get(step_id)
     if st is None or st.site_id != site_id:
         raise ValueError(f"unknown step {step_id} for site {site_id}")
@@ -109,11 +140,12 @@ def edit_to_changes(world: World, site_id: str, step_id: str, start: int | None,
     return changes
 
 
-def preview_edit(world: World, user: User, site_id: str, step_id: str, start, finish) -> dict:
+def preview_edit(world: World, user: User, site_id: str, step_id: str, start, finish,
+                 pause_start=None, pause_days=None) -> dict:
     from app.views import check_site
     check_site(world, user, site_id)
     try:
-        changes = edit_to_changes(world, site_id, step_id, start, finish)
+        changes = edit_to_changes(world, site_id, step_id, start, finish, pause_start, pause_days)
         _validate(world, site_id, changes)
     except ValueError as e:
         return {"moved_count": None, "finish_from": None, "finish_to": None, "new_gaps_in_lookahead": None,

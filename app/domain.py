@@ -49,6 +49,8 @@ class Step:
     delay_days: int = 0
     risk_days: int = 0
     lag_days: int = 0  # start shift: start = natural start + lag (timeline edits)
+    pause_start: int | None = None  # blocked window [pause_start, pause_start + delay_days) inside the step
+    pause_reason: str | None = None
 
 
 @dataclass

@@ -31,10 +31,10 @@ def test_chatter_gives_no_proposal(monkeypatch):
     assert r["proposals"] == [] and "No schedule change" in r["message"]
 
 
-def test_demo_opens_with_rain_signal_and_no_impact_clears_it():
+def test_demo_opens_with_supplier_signal_and_no_impact_clears_it():
     t = get("dan", "/api/sites/A/timeline").json()
     assert [r["step_code"] for r in t["risk_signals"]] == ["J1"]
-    assert "Rain forecast days 221–224" in t["risk_signals"][0]["detail"]
+    assert "membrane batch failed QA" in t["risk_signals"][0]["detail"]
     site = get("priya", "/api/sites").json()[0]
     assert (site["confirmed_finish"], site["risk_finish"]) == (397, 402)
     r = post("dan", "/api/signals/clear", {"site_id": "A", "step_code": "J1"}).json()
@@ -92,7 +92,7 @@ def _delay_j1(monkeypatch):
 
 
 def test_demo_story_end_to_end(monkeypatch):
-    """PRD §7: the 11 clicks."""
+    """PRD §7: the 9 clicks (offer → overlay → request crew → accept → confirms)."""
     pid = _delay_j1(monkeypatch)                                                     # 1–3
     r = post("priya", f"/api/proposals/{pid}/decide", {"accept": True})
     assert r.status_code == 409 and r.json()["error"] == "stale"
@@ -106,13 +106,8 @@ def test_demo_story_end_to_end(monkeypatch):
     assert len(seen) == 1 and seen[0]["fits"]["step_code"] == "K3"
     assert (seen[0]["workers"], seen[0]["start"], seen[0]["end"]) == (6, 230, 235)
     assert any("M&E crew available near you" in n["text"] for n in get("marcus", "/api/notifications").json())
-    assert get("marcus", f"/api/city/{seen[0]['anon_id']}/overlay").status_code == 403
-    vr = post("marcus", "/api/view-requests", {"anon_id": seen[0]["anon_id"]}).json()
-    inc = get("priya", "/api/requests").json()["incoming"]                           # 6
-    assert inc[0]["kind"] == "view" and "Riverside Construction" in inc[0]["title"]
-    post("priya", f"/api/view-requests/{vr['id']}/decide", {"share": True})
-    ov = get("marcus", f"/api/city/{seen[0]['anon_id']}/overlay").json()             # 7
-    assert ov["offered"] == [[230, 235]] and "mep" in ov["trades"]
+    mine = get("marcus", "/api/sites/C/trades").json()                               # 5: overlay = own windows + offer
+    assert "mep" in mine["trades"]
     link = post("marcus", "/api/links", {"offer_id": offer["id"], "purpose": "Pool M&E capacity"}).json()
     crew_req = next(i for i in get("priya", "/api/requests").json()["incoming"] if i["kind"] == "crew")
     assert crew_req["tracker"][1]["state"] == "wait"
@@ -144,13 +139,11 @@ def test_anonymity_handoffs(monkeypatch):
     gap = get("priya", "/api/sync-board").json()["gaps"][0]
     offer = post("priya", "/api/offers", {"gap_id": gap["id"]}).json()
     anon = get("marcus", "/api/offers").json()[0]["anon_id"]
-    assert get("marcus", f"/api/city/{anon}/overlay").status_code == 403
-    vr = post("marcus", "/api/view-requests", {"anon_id": anon}).json()
-    post("priya", f"/api/view-requests/{vr['id']}/decide", {"share": True})
+    assert get("marcus", f"/api/city/{anon}/overlay").status_code == 403   # lender's windows stay private
     post("marcus", "/api/links", {"offer_id": offer["id"], "purpose": "Pool M&E capacity"})
     blob = json.dumps([get("marcus", p).json() for p in (
         "/api/offers", "/api/requests", "/api/notifications", "/api/city", "/api/sync-board", "/api/events",
-        f"/api/city/{anon}/overlay", "/api/sites", "/api/links", "/api/cross-proposals")])
+        "/api/sites", "/api/links", "/api/cross-proposals")])
     for forbidden in ("Northgate", "Hackney Wick", "Stratford", '"A-', '"B-', "Priya", "Dan"):
         assert forbidden not in blob, forbidden
 
@@ -164,3 +157,20 @@ def test_reset_clears_everything(monkeypatch):
     assert get("marcus", "/api/notifications").json() == []
     assert [e["type"] for e in get("priya", "/api/events").json()] == ["RiskFlagRaised"]
     assert get("marcus", "/api/events").json() == []
+
+
+def test_pause_window_edit_and_ingest(monkeypatch):
+    pv = post("dan", "/api/proposals/preview", {"site_id": "A", "step_id": "A-J1", "pause_start": 225, "pause_days": 5}).json()
+    assert pv["error"] is None and pv["moved_count"] == 18 and (pv["finish_from"], pv["finish_to"]) == (397, 402)
+    bad = post("dan", "/api/proposals/preview", {"site_id": "A", "step_id": "A-J1", "pause_start": 250, "pause_days": 5}).json()
+    assert "within the step" in bad["error"]
+    from app import ingest
+    monkeypatch.setattr(ingest, "_llm_extract", lambda *a, **k: None)
+    r = post("dan", "/api/ingest/text", {"site_id": "A", "text": "Apex rang: the roof membrane batch failed their quality "
+             "check, replacement's due in five working days, so roof waterproofing is on hold until then."}).json()
+    p = r["proposals"][0]
+    assert {c["field"]: c["to"] for c in p["changes"]}["pause_start"] == 225
+    post("dan", f"/api/proposals/{p['id']}/decide", {"accept": True})
+    post("priya", f"/api/proposals/{p['id']}/decide", {"accept": True})
+    j1 = next(s for s in get("dan", "/api/sites/A/timeline").json()["steps"] if s["code"] == "J1")
+    assert j1["pause"]["start"] == 225 and j1["pause"]["end"] == 230 and j1["confirmed"] == [220, 235]

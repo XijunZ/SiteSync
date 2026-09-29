@@ -8,7 +8,8 @@ from app import graph_explain, ingest, llm, plaud, signals, views
 from app.graph_neo4j import mirror_sync
 from app.network import (decide_cross_proposal, decide_link, decide_view, publish_offer, request_link, request_view,
                          withdraw_offer)
-from app.proposals import StaleProposal, build_proposal, decide_proposal, edit_to_changes, preview_edit
+from app.proposals import (StaleProposal, build_proposal, decide_proposal, default_pause_start, edit_to_changes,
+                           pause_changes, preview_edit)
 from app.sync_engine import approve_option
 from seed.seed import build_world
 
@@ -97,6 +98,8 @@ class EditIn(BaseModel):
     step_id: str
     start: int | None = None
     finish: int | None = None
+    pause_start: int | None = None
+    pause_days: int | None = None
     reason: str | None = None
 
 
@@ -164,9 +167,9 @@ def _propose_from_text(u, site_id: str, text: str, source_kind: str, extra: dict
             candidates.append(up.model_dump())
             continue
         step_id = f"{site_id}-{up.step_code}"
-        cur = W().steps[step_id].delay_days
-        props.append(build_proposal(W(), u, site_id,
-                                    [{"step_id": step_id, "field": "delay_days", "to": cur + up.delay_days}],
+        changes = pause_changes(W(), site_id, step_id, default_pause_start(W(), site_id, step_id),
+                                up.delay_days, up.reason)
+        props.append(build_proposal(W(), u, site_id, changes,
                                     {"kind": source_kind, "excerpt": up.excerpt, "reason": up.reason,
                                      "confidence": up.confidence, **(extra or {})}))
     return {"proposals": props, "candidates": candidates, "text": text}
@@ -211,14 +214,16 @@ def ingest_plaud(body: PlaudIn, x_user_id: str | None = Header(None)):
 
 @app.post("/api/proposals/preview")
 def proposal_preview(body: EditIn, x_user_id: str | None = Header(None)):
-    return preview_edit(W(), user_of(x_user_id), body.site_id, body.step_id, body.start, body.finish)
+    return preview_edit(W(), user_of(x_user_id), body.site_id, body.step_id, body.start, body.finish,
+                        body.pause_start, body.pause_days)
 
 
 @app.post("/api/proposals")
 def proposal_create(body: EditIn, x_user_id: str | None = Header(None)):
     u = user_of(x_user_id)
     views.check_site(W(), u, body.site_id)
-    changes = edit_to_changes(W(), body.site_id, body.step_id, body.start, body.finish)
+    changes = edit_to_changes(W(), body.site_id, body.step_id, body.start, body.finish, body.pause_start,
+                              body.pause_days, body.reason)
     return build_proposal(W(), u, body.site_id, changes, {"kind": "timeline", "reason": body.reason or "update",
                                                          "excerpt": None})
 
@@ -391,6 +396,11 @@ def graph_swap_explain(gap_id: str, x_user_id: str | None = Header(None)):
 def graph_stats(x_user_id: str | None = Header(None)):
     user_of(x_user_id)
     return graph_explain.stats(W())
+
+
+@app.get("/api/graph/log")
+def graph_log():
+    return {"calls": graph_explain.GRAPH_LOG[-10:][::-1]}
 
 
 @app.get("/api/llm/log")

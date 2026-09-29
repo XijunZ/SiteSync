@@ -13,15 +13,12 @@ def _delayed():
 
 
 def test_link_flow_borrower_asks_lender_decides():
-    """Spec §10 test_link_flow: offer → view → share → crew request → accept (M8 + sub proposal) → confirms."""
+    """Spec §10 test_link_flow: offer → crew request → accept (M8 + sub proposal) → confirms."""
     w, priya, marcus, sam = _delayed()
     gap = open_gaps(w)[0]
     offer = publish_offer(w, priya, gap.id)
     assert offer.status == "OPEN"
-    g = request_view(w, marcus, anon_id("A"))
-    assert not view_granted(w, "A", "RV")
-    decide_view(w, priya, g.id, True)
-    assert view_granted(w, "A", "RV")
+    assert not view_granted(w, "A", "RV")  # no view grant needed to request the offered crew
     link = request_link(w, marcus, offer.id, "pool M&E")
     assert link.org_a == "RV" and link.org_b == "NG" and link.target_step_id == "C-K3" and offer.status == "REQUESTED"
     with pytest.raises(PermissionError):

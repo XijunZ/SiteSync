@@ -31,11 +31,11 @@ def clear_risk(world: World, site_id: str, step_code: str, user_id: str | None =
             "confirmed_finish": site_finish(forward_pass(world, site_id, "confirmed"))}
 
 
-DEMO_SIGNAL = ("A", "J1", 5, "weather", "Rain forecast days 221–224 (18 mm)")
+DEMO_SIGNAL = ("A", "J1", 5, "supplier", "Apex Roofing: membrane batch failed QA, replacement due in 5 working days")
 
 
 def seed_demo_signal(world: World) -> None:
-    """The demo opens with a rain signal over Site A's roof (spec: demo seed)."""
+    """The demo opens with a supplier notice on Site A's roof membrane (site-specific, not city-wide)."""
     raise_risk(world, *DEMO_SIGNAL)
 
 

@@ -46,7 +46,9 @@ def timeline_view(world: World, user: User, site_id: str) -> dict:
         steps.append({"id": st.id, "code": st.code, "name": st.name, "trade": st.trade, "kind": st.kind,
                       "phase": st.phase, "weather_sensitive": st.weather_sensitive, "risk_note": st.risk_note,
                       "base": list(b[st.id]), "confirmed": list(c[st.id]), "risk": list(r[st.id]),
-                      "critical": st.id in crit, "risk_flag": st.risk_days > 0, "crews": crews})
+                      "critical": st.id in crit, "risk_flag": st.risk_days > 0, "crews": crews,
+                      "pause": ({"start": st.pause_start, "end": st.pause_start + st.delay_days, "reason": st.pause_reason}
+                                if st.pause_start is not None and st.delay_days > 0 else None)})
     risks = [dict(r) for sid, r in world.risks.items() if world.steps[sid].site_id == site_id]
     return {"site_id": site_id, "site_name": world.sites[site_id].name, "today": TODAY, "steps": steps,
             "risk_signals": risks}

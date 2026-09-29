@@ -39,8 +39,10 @@ def _catalogue(world: World, site_id: str, text: str = "") -> str:
 def _llm_extract(world: World, site_id: str, text: str) -> list[ExtractedUpdate] | None:
     system = ("You turn construction site voice notes into schedule delay updates. Choose step_code ONLY from the "
               "catalogue. If unsure which step, set step_code null and list candidate codes. Only report work that "
-              "is delayed; ignore anything on track. If the note reports no delay, return an empty list. "
-              "delay_days is working days (a week = 5). excerpt is the exact phrase from the note.")
+              "is delayed or on hold (e.g. a failed delivery, supplier problem, access blocked); ignore anything on track. "
+              "If the note reports no delay, return an empty list. delay_days is the working days lost "
+              "(a week = 5; 'replacement due in five working days' = 5). reason is short, e.g. "
+              "'supplier: membrane failed QA'. excerpt is the exact phrase from the note.")
     user = f"Catalogue:\n{_catalogue(world, site_id, text)}\n\nVoice note:\n{text}\n\nReturn {{\"updates\": [...]}}"
     try:
         return llm.extract_json(system, user, ExtractedList).updates
@@ -52,9 +54,10 @@ def _deterministic(world: World, site_id: str, text: str) -> list[ExtractedUpdat
     days = words_to_days(text)
     steps = match_steps(world, site_id, text)
     t = text.lower()
-    if days is None or not steps or not any(w in t for w in ("delay", "late", "behind", "slip")):
+    if days is None or not steps or not any(w in t for w in ("delay", "late", "behind", "slip", "on hold", "failed", "stood down", "paused")):
         return []
-    reason = next((r for r in REASONS if r in t), "unspecified")
+    reason = ("supplier: membrane failed QA" if "membrane" in t and ("fail" in t or "qa" in t or "quality" in t)
+              else next((r for r in REASONS if r in t), "unspecified"))
     return [ExtractedUpdate(step_code=steps[0], candidates=steps[1:3], delay_days=days, reason=reason,
                             excerpt=text.strip(), confidence=0.6)]
 

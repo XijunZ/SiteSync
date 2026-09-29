@@ -53,7 +53,7 @@ class Neo4jMirror:
         from app.schedule import all_dates
         conf = all_dates(world, "confirmed")
         steps = [{"id": s.id, "site_id": s.site_id, "code": s.code, "name": s.name, "trade": s.trade, "days": s.days,
-                  "delay": s.delay_days, "risk": s.risk_days, "lag": s.lag_days, "deps": s.deps,
+                  "delay": s.delay_days, "risk": s.risk_days, "lag": s.lag_days, "pause": s.pause_start, "deps": s.deps,
                   "cs": conf[s.site_id][s.id][0], "ce": conf[s.site_id][s.id][1]} for s in world.steps.values()]
         crews = [{"id": c.id, "org_id": c.org_id, "trade": c.trade} for c in world.crews.values()]
         bookings = [{"id": b.id, "crew_id": b.crew_id, "step_id": b.step_id, "start": b.start, "end": b.end}
@@ -68,7 +68,7 @@ class Neo4jMirror:
                               loc: point({latitude:r.lat, longitude:r.lon})})""", rows=sites)
             tx.run("""UNWIND $rows AS r MATCH (si:Site {id:r.site_id})
                       CREATE (si)-[:HAS_STEP]->(:Step {id:r.id, site_id:r.site_id, code:r.code, name:r.name, trade:r.trade,
-                              days:r.days, delay:r.delay, risk:r.risk, lag:r.lag,
+                              days:r.days, delay:r.delay, risk:r.risk, lag:r.lag, pause_start:r.pause,
                               conf_start:r.cs, conf_end:r.ce})""", rows=steps)
             tx.run("""UNWIND $rows AS r UNWIND r.deps AS d MATCH (a:Step {id:r.id}), (b:Step {id:d})
                       CREATE (a)-[:DEPENDS_ON]->(b)""", rows=steps)
