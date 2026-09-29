@@ -1,0 +1,2050 @@
+{
+  "me": {
+    "id": "marcus",
+    "name": "Marcus",
+    "role": "PM",
+    "org": "Riverside Construction",
+    "sites": [
+      "C",
+      "D"
+    ]
+  },
+  "sites": [
+    {
+      "id": "C",
+      "name": "Bow Wharf",
+      "start": 7,
+      "baseline_finish": 392,
+      "confirmed_finish": 392,
+      "risk_finish": 392,
+      "variance": 0,
+      "day_value": 8000,
+      "version": 0
+    },
+    {
+      "id": "D",
+      "name": "Canning Town Works",
+      "start": 185,
+      "baseline_finish": 570,
+      "confirmed_finish": 570,
+      "risk_finish": 570,
+      "variance": 0,
+      "day_value": 8000,
+      "version": 0
+    }
+  ],
+  "sync_board": {
+    "gaps": [],
+    "outcomes": [],
+    "days_protected": 0,
+    "value_protected_gbp": 0
+  },
+  "city": [
+    {
+      "anon_id": "137ad60e",
+      "area": "East London",
+      "distance_band": "~2 km",
+      "phase": "Envelope",
+      "windows": [
+        {
+          "trade": "bricklaying",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 48
+        },
+        {
+          "trade": "cladding",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        },
+        {
+          "trade": "glazing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 45
+        },
+        {
+          "trade": "rc_frame",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 45
+        },
+        {
+          "trade": "roofing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 45
+        },
+        {
+          "trade": "mep",
+          "kind": "need",
+          "week_from": 46,
+          "week_to": 49
+        }
+      ]
+    },
+    {
+      "anon_id": "c66e9f08",
+      "area": "East London",
+      "distance_band": "~2 km",
+      "phase": "Substructure",
+      "windows": [
+        {
+          "trade": "groundworks",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        }
+      ]
+    }
+  ],
+  "links": [],
+  "cross": [],
+  "timeline": {
+    "site_id": "C",
+    "site_name": "Bow Wharf",
+    "today": 220,
+    "steps": [
+      {
+        "id": "C-F1",
+        "code": "F1",
+        "name": "Pre-demolition asbestos and structural surveys",
+        "trade": "surveyor",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": "Survey may find more asbestos than expected",
+        "base": [
+          7,
+          12
+        ],
+        "confirmed": [
+          7,
+          12
+        ],
+        "risk": [
+          7,
+          12
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-F3",
+        "code": "F3",
+        "name": "Disconnect existing gas, electricity, water",
+        "trade": "utilities",
+        "kind": "wait",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": "Utilities often miss dates",
+        "base": [
+          7,
+          37
+        ],
+        "confirmed": [
+          7,
+          37
+        ],
+        "risk": [
+          7,
+          37
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-F4",
+        "code": "F4",
+        "name": "Hoarding, welfare cabins, site set-up",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          7,
+          17
+        ],
+        "confirmed": [
+          7,
+          17
+        ],
+        "risk": [
+          7,
+          17
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction groundworks (C)"
+        ]
+      },
+      {
+        "id": "C-F2",
+        "code": "F2",
+        "name": "Section 80 demolition notice period (6 weeks)",
+        "trade": "council",
+        "kind": "wait",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          12,
+          42
+        ],
+        "confirmed": [
+          12,
+          42
+        ],
+        "risk": [
+          12,
+          42
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-F5",
+        "code": "F5",
+        "name": "Soft strip of fixtures and fittings",
+        "trade": "demolition",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          17,
+          27
+        ],
+        "confirmed": [
+          17,
+          27
+        ],
+        "risk": [
+          17,
+          27
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction demolition (C)"
+        ]
+      },
+      {
+        "id": "C-F6",
+        "code": "F6",
+        "name": "Licensed asbestos removal",
+        "trade": "asbestos",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          27,
+          37
+        ],
+        "confirmed": [
+          27,
+          37
+        ],
+        "risk": [
+          27,
+          37
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction asbestos (C)"
+        ]
+      },
+      {
+        "id": "C-F7",
+        "code": "F7",
+        "name": "Structural demolition",
+        "trade": "demolition",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          42,
+          62
+        ],
+        "confirmed": [
+          42,
+          62
+        ],
+        "risk": [
+          42,
+          62
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction demolition (C)"
+        ]
+      },
+      {
+        "id": "C-F8",
+        "code": "F8",
+        "name": "Crush, sort and clear rubble, grub out old foundations",
+        "trade": "demolition",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          62,
+          72
+        ],
+        "confirmed": [
+          62,
+          72
+        ],
+        "risk": [
+          62,
+          72
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction demolition (C)"
+        ]
+      },
+      {
+        "id": "C-G1",
+        "code": "G1",
+        "name": "Ground investigation boreholes and any contamination remediation",
+        "trade": "ground_investigation",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": "Contamination can add weeks",
+        "base": [
+          72,
+          87
+        ],
+        "confirmed": [
+          72,
+          87
+        ],
+        "risk": [
+          72,
+          87
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction ground_investigation (C)"
+        ]
+      },
+      {
+        "id": "C-G2",
+        "code": "G2",
+        "name": "Piling mat and piling",
+        "trade": "piling",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": "Rig availability, obstructions in ground",
+        "base": [
+          87,
+          112
+        ],
+        "confirmed": [
+          87,
+          112
+        ],
+        "risk": [
+          87,
+          112
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction piling (C)"
+        ]
+      },
+      {
+        "id": "C-G3",
+        "code": "G3",
+        "name": "Pile integrity testing",
+        "trade": "piling",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          112,
+          117
+        ],
+        "confirmed": [
+          112,
+          117
+        ],
+        "risk": [
+          112,
+          117
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction piling (C)"
+        ]
+      },
+      {
+        "id": "C-G4",
+        "code": "G4",
+        "name": "Excavate and cut down piles",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          117,
+          127
+        ],
+        "confirmed": [
+          117,
+          127
+        ],
+        "risk": [
+          117,
+          127
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction groundworks (C)"
+        ]
+      },
+      {
+        "id": "C-G5",
+        "code": "G5",
+        "name": "Pile caps and ground beams",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          127,
+          147
+        ],
+        "confirmed": [
+          127,
+          147
+        ],
+        "risk": [
+          127,
+          147
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction groundworks (C)"
+        ]
+      },
+      {
+        "id": "C-G6",
+        "code": "G6",
+        "name": "Below-ground drainage and service ducts",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          147,
+          157
+        ],
+        "confirmed": [
+          147,
+          157
+        ],
+        "risk": [
+          147,
+          157
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction groundworks (C)"
+        ]
+      },
+      {
+        "id": "C-G7",
+        "code": "G7",
+        "name": "Ground floor slab",
+        "trade": "concrete",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": "Pours need dry, frost-free weather",
+        "base": [
+          157,
+          167
+        ],
+        "confirmed": [
+          157,
+          167
+        ],
+        "risk": [
+          157,
+          167
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction concrete (C)"
+        ]
+      },
+      {
+        "id": "C-H1",
+        "code": "H1",
+        "name": "RC frame: level 1 columns, core and slab",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": "Target cycle 7 to 8 days per floor",
+        "base": [
+          167,
+          175
+        ],
+        "confirmed": [
+          167,
+          175
+        ],
+        "risk": [
+          167,
+          175
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-H2",
+        "code": "H2",
+        "name": "RC frame: level 2",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          175,
+          183
+        ],
+        "confirmed": [
+          175,
+          183
+        ],
+        "risk": [
+          175,
+          183
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-H3",
+        "code": "H3",
+        "name": "RC frame: level 3",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          183,
+          191
+        ],
+        "confirmed": [
+          183,
+          191
+        ],
+        "risk": [
+          183,
+          191
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-H4",
+        "code": "H4",
+        "name": "RC frame: level 4",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          191,
+          199
+        ],
+        "confirmed": [
+          191,
+          199
+        ],
+        "risk": [
+          191,
+          199
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-J2",
+        "code": "J2",
+        "name": "Windows, lower floors (ground to level 2)",
+        "trade": "glazing",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": false,
+        "risk_note": "Window lead times 8 to 12 weeks",
+        "base": [
+          191,
+          201
+        ],
+        "confirmed": [
+          191,
+          201
+        ],
+        "risk": [
+          191,
+          201
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction glazing (C)"
+        ]
+      },
+      {
+        "id": "C-H5",
+        "code": "H5",
+        "name": "RC frame: level 5",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          199,
+          207
+        ],
+        "confirmed": [
+          199,
+          207
+        ],
+        "risk": [
+          199,
+          207
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-J4",
+        "code": "J4",
+        "name": "Brick-slip or rainscreen cladding, lower floors",
+        "trade": "cladding",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          201,
+          226
+        ],
+        "confirmed": [
+          201,
+          226
+        ],
+        "risk": [
+          201,
+          226
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction cladding (C)"
+        ]
+      },
+      {
+        "id": "C-K1",
+        "code": "K1",
+        "name": "Blockwork party walls and cores, lower floors",
+        "trade": "bricklaying",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          201,
+          216
+        ],
+        "confirmed": [
+          201,
+          216
+        ],
+        "risk": [
+          201,
+          216
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction bricklaying (C)"
+        ]
+      },
+      {
+        "id": "C-H6",
+        "code": "H6",
+        "name": "RC frame: roof slab",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": "High wind stops crane lifts",
+        "base": [
+          207,
+          215
+        ],
+        "confirmed": [
+          207,
+          215
+        ],
+        "risk": [
+          207,
+          215
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-H7",
+        "code": "H7",
+        "name": "Strike props and back-propping",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": false,
+        "risk_note": "Props stay until slabs gain strength",
+        "base": [
+          215,
+          225
+        ],
+        "confirmed": [
+          215,
+          225
+        ],
+        "risk": [
+          215,
+          225
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction rc_frame (C)"
+        ]
+      },
+      {
+        "id": "C-J1",
+        "code": "J1",
+        "name": "Roof waterproofing (single-ply membrane)",
+        "trade": "roofing",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": "Membranes cannot be laid in rain",
+        "base": [
+          215,
+          225
+        ],
+        "confirmed": [
+          215,
+          225
+        ],
+        "risk": [
+          215,
+          225
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction roofing (C)"
+        ]
+      },
+      {
+        "id": "C-J3",
+        "code": "J3",
+        "name": "Windows, upper floors (level 3 to 5)",
+        "trade": "glazing",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          215,
+          225
+        ],
+        "confirmed": [
+          215,
+          225
+        ],
+        "risk": [
+          215,
+          225
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction glazing (C)"
+        ]
+      },
+      {
+        "id": "C-J6",
+        "code": "J6",
+        "name": "Building weathertight",
+        "trade": "milestone",
+        "kind": "milestone",
+        "phase": "Envelope",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          225,
+          225
+        ],
+        "confirmed": [
+          225,
+          225
+        ],
+        "risk": [
+          225,
+          225
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-K2",
+        "code": "K2",
+        "name": "Blockwork, upper floors",
+        "trade": "bricklaying",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          225,
+          240
+        ],
+        "confirmed": [
+          225,
+          240
+        ],
+        "risk": [
+          225,
+          240
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction bricklaying (C)"
+        ]
+      },
+      {
+        "id": "C-K3",
+        "code": "K3",
+        "name": "MEP first fix (pipes, cables, ducts), lower floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          225,
+          245
+        ],
+        "confirmed": [
+          225,
+          245
+        ],
+        "risk": [
+          225,
+          245
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 2"
+        ]
+      },
+      {
+        "id": "C-K5",
+        "code": "K5",
+        "name": "Risers and plant room",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          225,
+          245
+        ],
+        "confirmed": [
+          225,
+          245
+        ],
+        "risk": [
+          225,
+          245
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Voltline crew C"
+        ]
+      },
+      {
+        "id": "C-J5",
+        "code": "J5",
+        "name": "Cladding, upper floors",
+        "trade": "cladding",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          226,
+          251
+        ],
+        "confirmed": [
+          226,
+          251
+        ],
+        "risk": [
+          226,
+          251
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction cladding (C)"
+        ]
+      },
+      {
+        "id": "C-K4",
+        "code": "K4",
+        "name": "MEP first fix, upper floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          245,
+          265
+        ],
+        "confirmed": [
+          245,
+          265
+        ],
+        "risk": [
+          245,
+          265
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 2"
+        ]
+      },
+      {
+        "id": "C-K6",
+        "code": "K6",
+        "name": "First fix inspection, lower floors",
+        "trade": "building_control",
+        "kind": "approval",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Late inspector stalls drylining",
+        "base": [
+          245,
+          247
+        ],
+        "confirmed": [
+          245,
+          247
+        ],
+        "risk": [
+          245,
+          247
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-K16",
+        "code": "K16",
+        "name": "Lift installation",
+        "trade": "lifts",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Lift lead times are long",
+        "base": [
+          245,
+          275
+        ],
+        "confirmed": [
+          245,
+          275
+        ],
+        "risk": [
+          245,
+          275
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction lifts (C)"
+        ]
+      },
+      {
+        "id": "C-L1",
+        "code": "L1",
+        "name": "Permanent power and water energised",
+        "trade": "utilities",
+        "kind": "approval",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": "Late connection blocks commissioning",
+        "base": [
+          245,
+          250
+        ],
+        "confirmed": [
+          245,
+          250
+        ],
+        "risk": [
+          245,
+          250
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-K8",
+        "code": "K8",
+        "name": "Drylining, plastering and screed, lower floors",
+        "trade": "drylining",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Screed and plaster need drying time",
+        "base": [
+          247,
+          267
+        ],
+        "confirmed": [
+          247,
+          267
+        ],
+        "risk": [
+          247,
+          267
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction drylining (C)"
+        ]
+      },
+      {
+        "id": "C-J7",
+        "code": "J7",
+        "name": "Strike scaffold, fit balconies",
+        "trade": "scaffolding",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          251,
+          261
+        ],
+        "confirmed": [
+          251,
+          261
+        ],
+        "risk": [
+          251,
+          261
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction scaffolding (C)"
+        ]
+      },
+      {
+        "id": "C-L3",
+        "code": "L3",
+        "name": "External works, paving and landscaping",
+        "trade": "landscaping",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          261,
+          286
+        ],
+        "confirmed": [
+          261,
+          286
+        ],
+        "risk": [
+          261,
+          286
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction landscaping (C)"
+        ]
+      },
+      {
+        "id": "C-K7",
+        "code": "K7",
+        "name": "First fix inspection, upper floors",
+        "trade": "building_control",
+        "kind": "approval",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          265,
+          267
+        ],
+        "confirmed": [
+          265,
+          267
+        ],
+        "risk": [
+          265,
+          267
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-K9",
+        "code": "K9",
+        "name": "Drylining, plastering and screed, upper floors",
+        "trade": "drylining",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          267,
+          287
+        ],
+        "confirmed": [
+          267,
+          287
+        ],
+        "risk": [
+          267,
+          287
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction drylining (C)"
+        ]
+      },
+      {
+        "id": "C-K10",
+        "code": "K10",
+        "name": "Kitchens, bathrooms, doors and joinery, lower floors",
+        "trade": "carpentry",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Kitchen and worktop lead times",
+        "base": [
+          267,
+          287
+        ],
+        "confirmed": [
+          267,
+          287
+        ],
+        "risk": [
+          267,
+          287
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction carpentry (C)"
+        ]
+      },
+      {
+        "id": "C-K11",
+        "code": "K11",
+        "name": "Kitchens, bathrooms, doors and joinery, upper floors",
+        "trade": "carpentry",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          287,
+          307
+        ],
+        "confirmed": [
+          287,
+          307
+        ],
+        "risk": [
+          287,
+          307
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction carpentry (C)"
+        ]
+      },
+      {
+        "id": "C-K12",
+        "code": "K12",
+        "name": "Decoration and flooring, lower floors",
+        "trade": "finishes",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          287,
+          302
+        ],
+        "confirmed": [
+          287,
+          302
+        ],
+        "risk": [
+          287,
+          302
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction finishes (C)"
+        ]
+      },
+      {
+        "id": "C-K14",
+        "code": "K14",
+        "name": "MEP second fix (sockets, taps, heat pumps), lower floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          302,
+          312
+        ],
+        "confirmed": [
+          302,
+          312
+        ],
+        "risk": [
+          302,
+          312
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 2"
+        ]
+      },
+      {
+        "id": "C-K13",
+        "code": "K13",
+        "name": "Decoration and flooring, upper floors",
+        "trade": "finishes",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          307,
+          322
+        ],
+        "confirmed": [
+          307,
+          322
+        ],
+        "risk": [
+          307,
+          322
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Riverside Construction finishes (C)"
+        ]
+      },
+      {
+        "id": "C-K15",
+        "code": "K15",
+        "name": "MEP second fix, upper floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          322,
+          332
+        ],
+        "confirmed": [
+          322,
+          332
+        ],
+        "risk": [
+          322,
+          332
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 2"
+        ]
+      },
+      {
+        "id": "C-L2",
+        "code": "L2",
+        "name": "Test and commission fire alarm, smoke vents, ventilation, electrics",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          332,
+          352
+        ],
+        "confirmed": [
+          332,
+          352
+        ],
+        "risk": [
+          332,
+          352
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 2"
+        ]
+      },
+      {
+        "id": "C-L4",
+        "code": "L4",
+        "name": "Snagging and defect fixes",
+        "trade": "general_contractor",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          352,
+          367
+        ],
+        "confirmed": [
+          352,
+          367
+        ],
+        "risk": [
+          352,
+          367
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-L5",
+        "code": "L5",
+        "name": "Building control completion certificate",
+        "trade": "building_control",
+        "kind": "approval",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          352,
+          362
+        ],
+        "confirmed": [
+          352,
+          362
+        ],
+        "risk": [
+          352,
+          362
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-L6",
+        "code": "L6",
+        "name": "Practical completion and handover to developer",
+        "trade": "developer",
+        "kind": "milestone",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          367,
+          372
+        ],
+        "confirmed": [
+          367,
+          372
+        ],
+        "risk": [
+          367,
+          372
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "C-L7",
+        "code": "L7",
+        "name": "Sales completions and first occupation",
+        "trade": "developer",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          372,
+          392
+        ],
+        "confirmed": [
+          372,
+          392
+        ],
+        "risk": [
+          372,
+          392
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      }
+    ]
+  },
+  "labour": {
+    "site_id": "C",
+    "demand": {
+      "rc_frame": [
+        [
+          220,
+          8
+        ],
+        [
+          221,
+          8
+        ],
+        [
+          222,
+          8
+        ],
+        [
+          223,
+          8
+        ],
+        [
+          224,
+          8
+        ]
+      ],
+      "roofing": [
+        [
+          220,
+          4
+        ],
+        [
+          221,
+          4
+        ],
+        [
+          222,
+          4
+        ],
+        [
+          223,
+          4
+        ],
+        [
+          224,
+          4
+        ]
+      ],
+      "glazing": [
+        [
+          220,
+          4
+        ],
+        [
+          221,
+          4
+        ],
+        [
+          222,
+          4
+        ],
+        [
+          223,
+          4
+        ],
+        [
+          224,
+          4
+        ]
+      ],
+      "cladding": [
+        [
+          220,
+          5
+        ],
+        [
+          221,
+          5
+        ],
+        [
+          222,
+          5
+        ],
+        [
+          223,
+          5
+        ],
+        [
+          224,
+          5
+        ],
+        [
+          225,
+          5
+        ],
+        [
+          226,
+          5
+        ],
+        [
+          227,
+          5
+        ],
+        [
+          228,
+          5
+        ],
+        [
+          229,
+          5
+        ],
+        [
+          230,
+          5
+        ],
+        [
+          231,
+          5
+        ],
+        [
+          232,
+          5
+        ],
+        [
+          233,
+          5
+        ],
+        [
+          234,
+          5
+        ],
+        [
+          235,
+          5
+        ],
+        [
+          236,
+          5
+        ],
+        [
+          237,
+          5
+        ],
+        [
+          238,
+          5
+        ],
+        [
+          239,
+          5
+        ],
+        [
+          240,
+          5
+        ],
+        [
+          241,
+          5
+        ],
+        [
+          242,
+          5
+        ],
+        [
+          243,
+          5
+        ],
+        [
+          244,
+          5
+        ],
+        [
+          245,
+          5
+        ],
+        [
+          246,
+          5
+        ],
+        [
+          247,
+          5
+        ],
+        [
+          248,
+          5
+        ],
+        [
+          249,
+          5
+        ],
+        [
+          250,
+          5
+        ]
+      ],
+      "scaffolding": [
+        [
+          251,
+          4
+        ],
+        [
+          252,
+          4
+        ],
+        [
+          253,
+          4
+        ],
+        [
+          254,
+          4
+        ],
+        [
+          255,
+          4
+        ],
+        [
+          256,
+          4
+        ],
+        [
+          257,
+          4
+        ],
+        [
+          258,
+          4
+        ],
+        [
+          259,
+          4
+        ]
+      ],
+      "bricklaying": [
+        [
+          225,
+          5
+        ],
+        [
+          226,
+          5
+        ],
+        [
+          227,
+          5
+        ],
+        [
+          228,
+          5
+        ],
+        [
+          229,
+          5
+        ],
+        [
+          230,
+          5
+        ],
+        [
+          231,
+          5
+        ],
+        [
+          232,
+          5
+        ],
+        [
+          233,
+          5
+        ],
+        [
+          234,
+          5
+        ],
+        [
+          235,
+          5
+        ],
+        [
+          236,
+          5
+        ],
+        [
+          237,
+          5
+        ],
+        [
+          238,
+          5
+        ],
+        [
+          239,
+          5
+        ]
+      ],
+      "mep": [
+        [
+          225,
+          12
+        ],
+        [
+          226,
+          12
+        ],
+        [
+          227,
+          12
+        ],
+        [
+          228,
+          12
+        ],
+        [
+          229,
+          12
+        ],
+        [
+          230,
+          12
+        ],
+        [
+          231,
+          12
+        ],
+        [
+          232,
+          12
+        ],
+        [
+          233,
+          12
+        ],
+        [
+          234,
+          12
+        ],
+        [
+          235,
+          12
+        ],
+        [
+          236,
+          12
+        ],
+        [
+          237,
+          12
+        ],
+        [
+          238,
+          12
+        ],
+        [
+          239,
+          12
+        ],
+        [
+          240,
+          12
+        ],
+        [
+          241,
+          12
+        ],
+        [
+          242,
+          12
+        ],
+        [
+          243,
+          12
+        ],
+        [
+          244,
+          12
+        ],
+        [
+          245,
+          6
+        ],
+        [
+          246,
+          6
+        ],
+        [
+          247,
+          6
+        ],
+        [
+          248,
+          6
+        ],
+        [
+          249,
+          6
+        ],
+        [
+          250,
+          6
+        ],
+        [
+          251,
+          6
+        ],
+        [
+          252,
+          6
+        ],
+        [
+          253,
+          6
+        ],
+        [
+          254,
+          6
+        ],
+        [
+          255,
+          6
+        ],
+        [
+          256,
+          6
+        ],
+        [
+          257,
+          6
+        ],
+        [
+          258,
+          6
+        ],
+        [
+          259,
+          6
+        ]
+      ],
+      "drylining": [
+        [
+          247,
+          5
+        ],
+        [
+          248,
+          5
+        ],
+        [
+          249,
+          5
+        ],
+        [
+          250,
+          5
+        ],
+        [
+          251,
+          5
+        ],
+        [
+          252,
+          5
+        ],
+        [
+          253,
+          5
+        ],
+        [
+          254,
+          5
+        ],
+        [
+          255,
+          5
+        ],
+        [
+          256,
+          5
+        ],
+        [
+          257,
+          5
+        ],
+        [
+          258,
+          5
+        ],
+        [
+          259,
+          5
+        ]
+      ],
+      "lifts": [
+        [
+          245,
+          3
+        ],
+        [
+          246,
+          3
+        ],
+        [
+          247,
+          3
+        ],
+        [
+          248,
+          3
+        ],
+        [
+          249,
+          3
+        ],
+        [
+          250,
+          3
+        ],
+        [
+          251,
+          3
+        ],
+        [
+          252,
+          3
+        ],
+        [
+          253,
+          3
+        ],
+        [
+          254,
+          3
+        ],
+        [
+          255,
+          3
+        ],
+        [
+          256,
+          3
+        ],
+        [
+          257,
+          3
+        ],
+        [
+          258,
+          3
+        ],
+        [
+          259,
+          3
+        ]
+      ]
+    },
+    "imbalances": []
+  },
+  "proposals": []
+}

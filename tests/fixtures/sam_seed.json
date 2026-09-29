@@ -1,0 +1,148 @@
+{
+  "me": {
+    "id": "sam",
+    "name": "Sam",
+    "role": "SUB_PLANNER",
+    "org": "Sparks Electrical",
+    "sites": []
+  },
+  "sites": [],
+  "sync_board": {
+    "gaps": [],
+    "outcomes": [],
+    "days_protected": 0,
+    "value_protected_gbp": 0
+  },
+  "city": [
+    {
+      "anon_id": "137ad60e",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "phase": "Envelope",
+      "windows": [
+        {
+          "trade": "bricklaying",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 48
+        },
+        {
+          "trade": "cladding",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        },
+        {
+          "trade": "glazing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 45
+        },
+        {
+          "trade": "rc_frame",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 45
+        },
+        {
+          "trade": "roofing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 45
+        },
+        {
+          "trade": "mep",
+          "kind": "need",
+          "week_from": 46,
+          "week_to": 49
+        }
+      ]
+    },
+    {
+      "anon_id": "c66e9f08",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "phase": "Substructure",
+      "windows": [
+        {
+          "trade": "groundworks",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        }
+      ]
+    },
+    {
+      "anon_id": "d41dca08",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "phase": "Envelope",
+      "windows": [
+        {
+          "trade": "cladding",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        },
+        {
+          "trade": "glazing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 44
+        },
+        {
+          "trade": "rc_frame",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 44
+        },
+        {
+          "trade": "roofing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 44
+        },
+        {
+          "trade": "bricklaying",
+          "kind": "need",
+          "week_from": 45,
+          "week_to": 47
+        },
+        {
+          "trade": "mep",
+          "kind": "need",
+          "week_from": 45,
+          "week_to": 49
+        },
+        {
+          "trade": "drylining",
+          "kind": "need",
+          "week_from": 49,
+          "week_to": 49
+        },
+        {
+          "trade": "lifts",
+          "kind": "need",
+          "week_from": 49,
+          "week_to": 49
+        }
+      ]
+    },
+    {
+      "anon_id": "4ecf711c",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "phase": "Demolition and enabling",
+      "windows": [
+        {
+          "trade": "demolition",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        }
+      ]
+    }
+  ],
+  "links": [],
+  "cross": []
+}

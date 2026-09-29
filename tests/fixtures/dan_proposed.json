@@ -1,0 +1,2327 @@
+{
+  "me": {
+    "id": "dan",
+    "name": "Dan",
+    "role": "SITE_MANAGER",
+    "org": "Northgate Build",
+    "sites": [
+      "A"
+    ]
+  },
+  "sites": [
+    {
+      "id": "A",
+      "name": "Hackney Wick Yard",
+      "start": 12,
+      "baseline_finish": 397,
+      "confirmed_finish": 397,
+      "risk_finish": 397,
+      "variance": 0,
+      "day_value": 8000,
+      "version": 0
+    }
+  ],
+  "sync_board": {
+    "gaps": [],
+    "outcomes": [],
+    "days_protected": 0,
+    "value_protected_gbp": 0
+  },
+  "city": [
+    {
+      "anon_id": "d41dca08",
+      "area": "East London",
+      "distance_band": "~2 km",
+      "phase": "Envelope",
+      "windows": [
+        {
+          "trade": "cladding",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        },
+        {
+          "trade": "glazing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 44
+        },
+        {
+          "trade": "rc_frame",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 44
+        },
+        {
+          "trade": "roofing",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 44
+        },
+        {
+          "trade": "bricklaying",
+          "kind": "need",
+          "week_from": 45,
+          "week_to": 47
+        },
+        {
+          "trade": "mep",
+          "kind": "need",
+          "week_from": 45,
+          "week_to": 49
+        },
+        {
+          "trade": "drylining",
+          "kind": "need",
+          "week_from": 49,
+          "week_to": 49
+        },
+        {
+          "trade": "lifts",
+          "kind": "need",
+          "week_from": 49,
+          "week_to": 49
+        }
+      ]
+    },
+    {
+      "anon_id": "4ecf711c",
+      "area": "East London",
+      "distance_band": "~4 km",
+      "phase": "Demolition and enabling",
+      "windows": [
+        {
+          "trade": "demolition",
+          "kind": "need",
+          "week_from": 44,
+          "week_to": 49
+        }
+      ]
+    }
+  ],
+  "links": [],
+  "cross": [],
+  "timeline": {
+    "site_id": "A",
+    "site_name": "Hackney Wick Yard",
+    "today": 220,
+    "steps": [
+      {
+        "id": "A-F1",
+        "code": "F1",
+        "name": "Pre-demolition asbestos and structural surveys",
+        "trade": "surveyor",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": "Survey may find more asbestos than expected",
+        "base": [
+          12,
+          17
+        ],
+        "confirmed": [
+          12,
+          17
+        ],
+        "risk": [
+          12,
+          17
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-F3",
+        "code": "F3",
+        "name": "Disconnect existing gas, electricity, water",
+        "trade": "utilities",
+        "kind": "wait",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": "Utilities often miss dates",
+        "base": [
+          12,
+          42
+        ],
+        "confirmed": [
+          12,
+          42
+        ],
+        "risk": [
+          12,
+          42
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-F4",
+        "code": "F4",
+        "name": "Hoarding, welfare cabins, site set-up",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          12,
+          22
+        ],
+        "confirmed": [
+          12,
+          22
+        ],
+        "risk": [
+          12,
+          22
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build groundworks (A)"
+        ]
+      },
+      {
+        "id": "A-F2",
+        "code": "F2",
+        "name": "Section 80 demolition notice period (6 weeks)",
+        "trade": "council",
+        "kind": "wait",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          17,
+          47
+        ],
+        "confirmed": [
+          17,
+          47
+        ],
+        "risk": [
+          17,
+          47
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-F5",
+        "code": "F5",
+        "name": "Soft strip of fixtures and fittings",
+        "trade": "demolition",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          22,
+          32
+        ],
+        "confirmed": [
+          22,
+          32
+        ],
+        "risk": [
+          22,
+          32
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build demolition (A)"
+        ]
+      },
+      {
+        "id": "A-F6",
+        "code": "F6",
+        "name": "Licensed asbestos removal",
+        "trade": "asbestos",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          32,
+          42
+        ],
+        "confirmed": [
+          32,
+          42
+        ],
+        "risk": [
+          32,
+          42
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build asbestos (A)"
+        ]
+      },
+      {
+        "id": "A-F7",
+        "code": "F7",
+        "name": "Structural demolition",
+        "trade": "demolition",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          47,
+          67
+        ],
+        "confirmed": [
+          47,
+          67
+        ],
+        "risk": [
+          47,
+          67
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build demolition (A)"
+        ]
+      },
+      {
+        "id": "A-F8",
+        "code": "F8",
+        "name": "Crush, sort and clear rubble, grub out old foundations",
+        "trade": "demolition",
+        "kind": "task",
+        "phase": "Demolition and enabling",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          67,
+          77
+        ],
+        "confirmed": [
+          67,
+          77
+        ],
+        "risk": [
+          67,
+          77
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build demolition (A)"
+        ]
+      },
+      {
+        "id": "A-G1",
+        "code": "G1",
+        "name": "Ground investigation boreholes and any contamination remediation",
+        "trade": "ground_investigation",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": "Contamination can add weeks",
+        "base": [
+          77,
+          92
+        ],
+        "confirmed": [
+          77,
+          92
+        ],
+        "risk": [
+          77,
+          92
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build ground_investigation (A)"
+        ]
+      },
+      {
+        "id": "A-G2",
+        "code": "G2",
+        "name": "Piling mat and piling",
+        "trade": "piling",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": "Rig availability, obstructions in ground",
+        "base": [
+          92,
+          117
+        ],
+        "confirmed": [
+          92,
+          117
+        ],
+        "risk": [
+          92,
+          117
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build piling (A)"
+        ]
+      },
+      {
+        "id": "A-G3",
+        "code": "G3",
+        "name": "Pile integrity testing",
+        "trade": "piling",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          117,
+          122
+        ],
+        "confirmed": [
+          117,
+          122
+        ],
+        "risk": [
+          117,
+          122
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build piling (A)"
+        ]
+      },
+      {
+        "id": "A-G4",
+        "code": "G4",
+        "name": "Excavate and cut down piles",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          122,
+          132
+        ],
+        "confirmed": [
+          122,
+          132
+        ],
+        "risk": [
+          122,
+          132
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build groundworks (A)"
+        ]
+      },
+      {
+        "id": "A-G5",
+        "code": "G5",
+        "name": "Pile caps and ground beams",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          132,
+          152
+        ],
+        "confirmed": [
+          132,
+          152
+        ],
+        "risk": [
+          132,
+          152
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build groundworks (A)"
+        ]
+      },
+      {
+        "id": "A-G6",
+        "code": "G6",
+        "name": "Below-ground drainage and service ducts",
+        "trade": "groundworks",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          152,
+          162
+        ],
+        "confirmed": [
+          152,
+          162
+        ],
+        "risk": [
+          152,
+          162
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build groundworks (A)"
+        ]
+      },
+      {
+        "id": "A-G7",
+        "code": "G7",
+        "name": "Ground floor slab",
+        "trade": "concrete",
+        "kind": "task",
+        "phase": "Substructure",
+        "weather_sensitive": true,
+        "risk_note": "Pours need dry, frost-free weather",
+        "base": [
+          162,
+          172
+        ],
+        "confirmed": [
+          162,
+          172
+        ],
+        "risk": [
+          162,
+          172
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build concrete (A)"
+        ]
+      },
+      {
+        "id": "A-H1",
+        "code": "H1",
+        "name": "RC frame: level 1 columns, core and slab",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": "Target cycle 7 to 8 days per floor",
+        "base": [
+          172,
+          180
+        ],
+        "confirmed": [
+          172,
+          180
+        ],
+        "risk": [
+          172,
+          180
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-H2",
+        "code": "H2",
+        "name": "RC frame: level 2",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          180,
+          188
+        ],
+        "confirmed": [
+          180,
+          188
+        ],
+        "risk": [
+          180,
+          188
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-H3",
+        "code": "H3",
+        "name": "RC frame: level 3",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          188,
+          196
+        ],
+        "confirmed": [
+          188,
+          196
+        ],
+        "risk": [
+          188,
+          196
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-H4",
+        "code": "H4",
+        "name": "RC frame: level 4",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          196,
+          204
+        ],
+        "confirmed": [
+          196,
+          204
+        ],
+        "risk": [
+          196,
+          204
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-J2",
+        "code": "J2",
+        "name": "Windows, lower floors (ground to level 2)",
+        "trade": "glazing",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": false,
+        "risk_note": "Window lead times 8 to 12 weeks",
+        "base": [
+          196,
+          206
+        ],
+        "confirmed": [
+          196,
+          206
+        ],
+        "risk": [
+          196,
+          206
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build glazing (A)"
+        ]
+      },
+      {
+        "id": "A-H5",
+        "code": "H5",
+        "name": "RC frame: level 5",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          204,
+          212
+        ],
+        "confirmed": [
+          204,
+          212
+        ],
+        "risk": [
+          204,
+          212
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-J4",
+        "code": "J4",
+        "name": "Brick-slip or rainscreen cladding, lower floors",
+        "trade": "cladding",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          206,
+          231
+        ],
+        "confirmed": [
+          206,
+          231
+        ],
+        "risk": [
+          206,
+          231
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build cladding (A)"
+        ]
+      },
+      {
+        "id": "A-K1",
+        "code": "K1",
+        "name": "Blockwork party walls and cores, lower floors",
+        "trade": "bricklaying",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          206,
+          221
+        ],
+        "confirmed": [
+          206,
+          221
+        ],
+        "risk": [
+          206,
+          221
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build bricklaying (A)"
+        ]
+      },
+      {
+        "id": "A-H6",
+        "code": "H6",
+        "name": "RC frame: roof slab",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": true,
+        "risk_note": "High wind stops crane lifts",
+        "base": [
+          212,
+          220
+        ],
+        "confirmed": [
+          212,
+          220
+        ],
+        "risk": [
+          212,
+          220
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-H7",
+        "code": "H7",
+        "name": "Strike props and back-propping",
+        "trade": "rc_frame",
+        "kind": "task",
+        "phase": "Superstructure",
+        "weather_sensitive": false,
+        "risk_note": "Props stay until slabs gain strength",
+        "base": [
+          220,
+          230
+        ],
+        "confirmed": [
+          220,
+          230
+        ],
+        "risk": [
+          220,
+          230
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build rc_frame (A)"
+        ]
+      },
+      {
+        "id": "A-J1",
+        "code": "J1",
+        "name": "Roof waterproofing (single-ply membrane)",
+        "trade": "roofing",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": "Membranes cannot be laid in rain",
+        "base": [
+          220,
+          230
+        ],
+        "confirmed": [
+          220,
+          230
+        ],
+        "risk": [
+          220,
+          230
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build roofing (A)"
+        ]
+      },
+      {
+        "id": "A-J3",
+        "code": "J3",
+        "name": "Windows, upper floors (level 3 to 5)",
+        "trade": "glazing",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          220,
+          230
+        ],
+        "confirmed": [
+          220,
+          230
+        ],
+        "risk": [
+          220,
+          230
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build glazing (A)"
+        ]
+      },
+      {
+        "id": "A-J6",
+        "code": "J6",
+        "name": "Building weathertight",
+        "trade": "milestone",
+        "kind": "milestone",
+        "phase": "Envelope",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          230,
+          230
+        ],
+        "confirmed": [
+          230,
+          230
+        ],
+        "risk": [
+          230,
+          230
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-K2",
+        "code": "K2",
+        "name": "Blockwork, upper floors",
+        "trade": "bricklaying",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          230,
+          245
+        ],
+        "confirmed": [
+          230,
+          245
+        ],
+        "risk": [
+          230,
+          245
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build bricklaying (A)"
+        ]
+      },
+      {
+        "id": "A-K3",
+        "code": "K3",
+        "name": "MEP first fix (pipes, cables, ducts), lower floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          230,
+          250
+        ],
+        "confirmed": [
+          230,
+          250
+        ],
+        "risk": [
+          230,
+          250
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 1"
+        ]
+      },
+      {
+        "id": "A-K5",
+        "code": "K5",
+        "name": "Risers and plant room",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          230,
+          250
+        ],
+        "confirmed": [
+          230,
+          250
+        ],
+        "risk": [
+          230,
+          250
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Voltline crew A"
+        ]
+      },
+      {
+        "id": "A-J5",
+        "code": "J5",
+        "name": "Cladding, upper floors",
+        "trade": "cladding",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          231,
+          256
+        ],
+        "confirmed": [
+          231,
+          256
+        ],
+        "risk": [
+          231,
+          256
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build cladding (A)"
+        ]
+      },
+      {
+        "id": "A-K4",
+        "code": "K4",
+        "name": "MEP first fix, upper floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          250,
+          270
+        ],
+        "confirmed": [
+          250,
+          270
+        ],
+        "risk": [
+          250,
+          270
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 1"
+        ]
+      },
+      {
+        "id": "A-K6",
+        "code": "K6",
+        "name": "First fix inspection, lower floors",
+        "trade": "building_control",
+        "kind": "approval",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Late inspector stalls drylining",
+        "base": [
+          250,
+          252
+        ],
+        "confirmed": [
+          250,
+          252
+        ],
+        "risk": [
+          250,
+          252
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-K16",
+        "code": "K16",
+        "name": "Lift installation",
+        "trade": "lifts",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Lift lead times are long",
+        "base": [
+          250,
+          280
+        ],
+        "confirmed": [
+          250,
+          280
+        ],
+        "risk": [
+          250,
+          280
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build lifts (A)"
+        ]
+      },
+      {
+        "id": "A-L1",
+        "code": "L1",
+        "name": "Permanent power and water energised",
+        "trade": "utilities",
+        "kind": "approval",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": "Late connection blocks commissioning",
+        "base": [
+          250,
+          255
+        ],
+        "confirmed": [
+          250,
+          255
+        ],
+        "risk": [
+          250,
+          255
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-K8",
+        "code": "K8",
+        "name": "Drylining, plastering and screed, lower floors",
+        "trade": "drylining",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Screed and plaster need drying time",
+        "base": [
+          252,
+          272
+        ],
+        "confirmed": [
+          252,
+          272
+        ],
+        "risk": [
+          252,
+          272
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build drylining (A)"
+        ]
+      },
+      {
+        "id": "A-J7",
+        "code": "J7",
+        "name": "Strike scaffold, fit balconies",
+        "trade": "scaffolding",
+        "kind": "task",
+        "phase": "Envelope",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          256,
+          266
+        ],
+        "confirmed": [
+          256,
+          266
+        ],
+        "risk": [
+          256,
+          266
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build scaffolding (A)"
+        ]
+      },
+      {
+        "id": "A-L3",
+        "code": "L3",
+        "name": "External works, paving and landscaping",
+        "trade": "landscaping",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": true,
+        "risk_note": null,
+        "base": [
+          266,
+          291
+        ],
+        "confirmed": [
+          266,
+          291
+        ],
+        "risk": [
+          266,
+          291
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build landscaping (A)"
+        ]
+      },
+      {
+        "id": "A-K7",
+        "code": "K7",
+        "name": "First fix inspection, upper floors",
+        "trade": "building_control",
+        "kind": "approval",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          270,
+          272
+        ],
+        "confirmed": [
+          270,
+          272
+        ],
+        "risk": [
+          270,
+          272
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-K9",
+        "code": "K9",
+        "name": "Drylining, plastering and screed, upper floors",
+        "trade": "drylining",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          272,
+          292
+        ],
+        "confirmed": [
+          272,
+          292
+        ],
+        "risk": [
+          272,
+          292
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build drylining (A)"
+        ]
+      },
+      {
+        "id": "A-K10",
+        "code": "K10",
+        "name": "Kitchens, bathrooms, doors and joinery, lower floors",
+        "trade": "carpentry",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": "Kitchen and worktop lead times",
+        "base": [
+          272,
+          292
+        ],
+        "confirmed": [
+          272,
+          292
+        ],
+        "risk": [
+          272,
+          292
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build carpentry (A)"
+        ]
+      },
+      {
+        "id": "A-K11",
+        "code": "K11",
+        "name": "Kitchens, bathrooms, doors and joinery, upper floors",
+        "trade": "carpentry",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          292,
+          312
+        ],
+        "confirmed": [
+          292,
+          312
+        ],
+        "risk": [
+          292,
+          312
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build carpentry (A)"
+        ]
+      },
+      {
+        "id": "A-K12",
+        "code": "K12",
+        "name": "Decoration and flooring, lower floors",
+        "trade": "finishes",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          292,
+          307
+        ],
+        "confirmed": [
+          292,
+          307
+        ],
+        "risk": [
+          292,
+          307
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build finishes (A)"
+        ]
+      },
+      {
+        "id": "A-K14",
+        "code": "K14",
+        "name": "MEP second fix (sockets, taps, heat pumps), lower floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          307,
+          317
+        ],
+        "confirmed": [
+          307,
+          317
+        ],
+        "risk": [
+          307,
+          317
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 1"
+        ]
+      },
+      {
+        "id": "A-K13",
+        "code": "K13",
+        "name": "Decoration and flooring, upper floors",
+        "trade": "finishes",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          312,
+          327
+        ],
+        "confirmed": [
+          312,
+          327
+        ],
+        "risk": [
+          312,
+          327
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Northgate Build finishes (A)"
+        ]
+      },
+      {
+        "id": "A-K15",
+        "code": "K15",
+        "name": "MEP second fix, upper floors",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Services and fit-out",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          327,
+          337
+        ],
+        "confirmed": [
+          327,
+          337
+        ],
+        "risk": [
+          327,
+          337
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 1"
+        ]
+      },
+      {
+        "id": "A-L2",
+        "code": "L2",
+        "name": "Test and commission fire alarm, smoke vents, ventilation, electrics",
+        "trade": "mep",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          337,
+          357
+        ],
+        "confirmed": [
+          337,
+          357
+        ],
+        "risk": [
+          337,
+          357
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": [
+          "Sparks crew 1"
+        ]
+      },
+      {
+        "id": "A-L4",
+        "code": "L4",
+        "name": "Snagging and defect fixes",
+        "trade": "general_contractor",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          357,
+          372
+        ],
+        "confirmed": [
+          357,
+          372
+        ],
+        "risk": [
+          357,
+          372
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-L5",
+        "code": "L5",
+        "name": "Building control completion certificate",
+        "trade": "building_control",
+        "kind": "approval",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          357,
+          367
+        ],
+        "confirmed": [
+          357,
+          367
+        ],
+        "risk": [
+          357,
+          367
+        ],
+        "critical": false,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-L6",
+        "code": "L6",
+        "name": "Practical completion and handover to developer",
+        "trade": "developer",
+        "kind": "milestone",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          372,
+          377
+        ],
+        "confirmed": [
+          372,
+          377
+        ],
+        "risk": [
+          372,
+          377
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      },
+      {
+        "id": "A-L7",
+        "code": "L7",
+        "name": "Sales completions and first occupation",
+        "trade": "developer",
+        "kind": "task",
+        "phase": "Commissioning and handover",
+        "weather_sensitive": false,
+        "risk_note": null,
+        "base": [
+          377,
+          397
+        ],
+        "confirmed": [
+          377,
+          397
+        ],
+        "risk": [
+          377,
+          397
+        ],
+        "critical": true,
+        "risk_flag": false,
+        "crews": []
+      }
+    ]
+  },
+  "labour": {
+    "site_id": "A",
+    "demand": {
+      "rc_frame": [
+        [
+          220,
+          8
+        ],
+        [
+          221,
+          8
+        ],
+        [
+          222,
+          8
+        ],
+        [
+          223,
+          8
+        ],
+        [
+          224,
+          8
+        ],
+        [
+          225,
+          8
+        ],
+        [
+          226,
+          8
+        ],
+        [
+          227,
+          8
+        ],
+        [
+          228,
+          8
+        ],
+        [
+          229,
+          8
+        ]
+      ],
+      "roofing": [
+        [
+          220,
+          4
+        ],
+        [
+          221,
+          4
+        ],
+        [
+          222,
+          4
+        ],
+        [
+          223,
+          4
+        ],
+        [
+          224,
+          4
+        ],
+        [
+          225,
+          4
+        ],
+        [
+          226,
+          4
+        ],
+        [
+          227,
+          4
+        ],
+        [
+          228,
+          4
+        ],
+        [
+          229,
+          4
+        ]
+      ],
+      "glazing": [
+        [
+          220,
+          4
+        ],
+        [
+          221,
+          4
+        ],
+        [
+          222,
+          4
+        ],
+        [
+          223,
+          4
+        ],
+        [
+          224,
+          4
+        ],
+        [
+          225,
+          4
+        ],
+        [
+          226,
+          4
+        ],
+        [
+          227,
+          4
+        ],
+        [
+          228,
+          4
+        ],
+        [
+          229,
+          4
+        ]
+      ],
+      "cladding": [
+        [
+          220,
+          5
+        ],
+        [
+          221,
+          5
+        ],
+        [
+          222,
+          5
+        ],
+        [
+          223,
+          5
+        ],
+        [
+          224,
+          5
+        ],
+        [
+          225,
+          5
+        ],
+        [
+          226,
+          5
+        ],
+        [
+          227,
+          5
+        ],
+        [
+          228,
+          5
+        ],
+        [
+          229,
+          5
+        ],
+        [
+          230,
+          5
+        ],
+        [
+          231,
+          5
+        ],
+        [
+          232,
+          5
+        ],
+        [
+          233,
+          5
+        ],
+        [
+          234,
+          5
+        ],
+        [
+          235,
+          5
+        ],
+        [
+          236,
+          5
+        ],
+        [
+          237,
+          5
+        ],
+        [
+          238,
+          5
+        ],
+        [
+          239,
+          5
+        ],
+        [
+          240,
+          5
+        ],
+        [
+          241,
+          5
+        ],
+        [
+          242,
+          5
+        ],
+        [
+          243,
+          5
+        ],
+        [
+          244,
+          5
+        ],
+        [
+          245,
+          5
+        ],
+        [
+          246,
+          5
+        ],
+        [
+          247,
+          5
+        ],
+        [
+          248,
+          5
+        ],
+        [
+          249,
+          5
+        ],
+        [
+          250,
+          5
+        ],
+        [
+          251,
+          5
+        ],
+        [
+          252,
+          5
+        ],
+        [
+          253,
+          5
+        ],
+        [
+          254,
+          5
+        ],
+        [
+          255,
+          5
+        ]
+      ],
+      "scaffolding": [
+        [
+          256,
+          4
+        ],
+        [
+          257,
+          4
+        ],
+        [
+          258,
+          4
+        ],
+        [
+          259,
+          4
+        ]
+      ],
+      "bricklaying": [
+        [
+          220,
+          5
+        ],
+        [
+          230,
+          5
+        ],
+        [
+          231,
+          5
+        ],
+        [
+          232,
+          5
+        ],
+        [
+          233,
+          5
+        ],
+        [
+          234,
+          5
+        ],
+        [
+          235,
+          5
+        ],
+        [
+          236,
+          5
+        ],
+        [
+          237,
+          5
+        ],
+        [
+          238,
+          5
+        ],
+        [
+          239,
+          5
+        ],
+        [
+          240,
+          5
+        ],
+        [
+          241,
+          5
+        ],
+        [
+          242,
+          5
+        ],
+        [
+          243,
+          5
+        ],
+        [
+          244,
+          5
+        ]
+      ],
+      "mep": [
+        [
+          230,
+          12
+        ],
+        [
+          231,
+          12
+        ],
+        [
+          232,
+          12
+        ],
+        [
+          233,
+          12
+        ],
+        [
+          234,
+          12
+        ],
+        [
+          235,
+          12
+        ],
+        [
+          236,
+          12
+        ],
+        [
+          237,
+          12
+        ],
+        [
+          238,
+          12
+        ],
+        [
+          239,
+          12
+        ],
+        [
+          240,
+          12
+        ],
+        [
+          241,
+          12
+        ],
+        [
+          242,
+          12
+        ],
+        [
+          243,
+          12
+        ],
+        [
+          244,
+          12
+        ],
+        [
+          245,
+          12
+        ],
+        [
+          246,
+          12
+        ],
+        [
+          247,
+          12
+        ],
+        [
+          248,
+          12
+        ],
+        [
+          249,
+          12
+        ],
+        [
+          250,
+          6
+        ],
+        [
+          251,
+          6
+        ],
+        [
+          252,
+          6
+        ],
+        [
+          253,
+          6
+        ],
+        [
+          254,
+          6
+        ],
+        [
+          255,
+          6
+        ],
+        [
+          256,
+          6
+        ],
+        [
+          257,
+          6
+        ],
+        [
+          258,
+          6
+        ],
+        [
+          259,
+          6
+        ]
+      ],
+      "drylining": [
+        [
+          252,
+          5
+        ],
+        [
+          253,
+          5
+        ],
+        [
+          254,
+          5
+        ],
+        [
+          255,
+          5
+        ],
+        [
+          256,
+          5
+        ],
+        [
+          257,
+          5
+        ],
+        [
+          258,
+          5
+        ],
+        [
+          259,
+          5
+        ]
+      ],
+      "lifts": [
+        [
+          250,
+          3
+        ],
+        [
+          251,
+          3
+        ],
+        [
+          252,
+          3
+        ],
+        [
+          253,
+          3
+        ],
+        [
+          254,
+          3
+        ],
+        [
+          255,
+          3
+        ],
+        [
+          256,
+          3
+        ],
+        [
+          257,
+          3
+        ],
+        [
+          258,
+          3
+        ],
+        [
+          259,
+          3
+        ]
+      ]
+    },
+    "imbalances": []
+  },
+  "proposals": [
+    {
+      "id": "prop-165",
+      "site_id": "A",
+      "org_id": "NG",
+      "created_by": "dan",
+      "based_on_version": 0,
+      "changes": [
+        {
+          "step_id": "A-J1",
+          "field": "delay_days",
+          "to": 5,
+          "from": 0
+        }
+      ],
+      "source": {
+        "kind": "typed",
+        "excerpt": "Roofing delayed, heavy rain, about five days.",
+        "reason": "rain",
+        "confidence": 0.6
+      },
+      "status": "PENDING",
+      "needs_pm": true,
+      "knock_on": {
+        "moved": [
+          {
+            "step_id": "A-J1",
+            "code": "J1",
+            "from": [
+              220,
+              230
+            ],
+            "to": [
+              220,
+              235
+            ]
+          },
+          {
+            "step_id": "A-J6",
+            "code": "J6",
+            "from": [
+              230,
+              230
+            ],
+            "to": [
+              235,
+              235
+            ]
+          },
+          {
+            "step_id": "A-K3",
+            "code": "K3",
+            "from": [
+              230,
+              250
+            ],
+            "to": [
+              235,
+              255
+            ]
+          },
+          {
+            "step_id": "A-K4",
+            "code": "K4",
+            "from": [
+              250,
+              270
+            ],
+            "to": [
+              255,
+              275
+            ]
+          },
+          {
+            "step_id": "A-K6",
+            "code": "K6",
+            "from": [
+              250,
+              252
+            ],
+            "to": [
+              255,
+              257
+            ]
+          },
+          {
+            "step_id": "A-K7",
+            "code": "K7",
+            "from": [
+              270,
+              272
+            ],
+            "to": [
+              275,
+              277
+            ]
+          },
+          {
+            "step_id": "A-K8",
+            "code": "K8",
+            "from": [
+              252,
+              272
+            ],
+            "to": [
+              257,
+              277
+            ]
+          },
+          {
+            "step_id": "A-K9",
+            "code": "K9",
+            "from": [
+              272,
+              292
+            ],
+            "to": [
+              277,
+              297
+            ]
+          },
+          {
+            "step_id": "A-K10",
+            "code": "K10",
+            "from": [
+              272,
+              292
+            ],
+            "to": [
+              277,
+              297
+            ]
+          },
+          {
+            "step_id": "A-K11",
+            "code": "K11",
+            "from": [
+              292,
+              312
+            ],
+            "to": [
+              297,
+              317
+            ]
+          },
+          {
+            "step_id": "A-K12",
+            "code": "K12",
+            "from": [
+              292,
+              307
+            ],
+            "to": [
+              297,
+              312
+            ]
+          },
+          {
+            "step_id": "A-K13",
+            "code": "K13",
+            "from": [
+              312,
+              327
+            ],
+            "to": [
+              317,
+              332
+            ]
+          },
+          {
+            "step_id": "A-K14",
+            "code": "K14",
+            "from": [
+              307,
+              317
+            ],
+            "to": [
+              312,
+              322
+            ]
+          },
+          {
+            "step_id": "A-K15",
+            "code": "K15",
+            "from": [
+              327,
+              337
+            ],
+            "to": [
+              332,
+              342
+            ]
+          },
+          {
+            "step_id": "A-L2",
+            "code": "L2",
+            "from": [
+              337,
+              357
+            ],
+            "to": [
+              342,
+              362
+            ]
+          },
+          {
+            "step_id": "A-L4",
+            "code": "L4",
+            "from": [
+              357,
+              372
+            ],
+            "to": [
+              362,
+              377
+            ]
+          },
+          {
+            "step_id": "A-L5",
+            "code": "L5",
+            "from": [
+              357,
+              367
+            ],
+            "to": [
+              362,
+              372
+            ]
+          },
+          {
+            "step_id": "A-L6",
+            "code": "L6",
+            "from": [
+              372,
+              377
+            ],
+            "to": [
+              377,
+              382
+            ]
+          },
+          {
+            "step_id": "A-L7",
+            "code": "L7",
+            "from": [
+              377,
+              397
+            ],
+            "to": [
+              382,
+              402
+            ]
+          }
+        ],
+        "finish_from": 397,
+        "finish_to": 402,
+        "labour": {
+          "created": [
+            {
+              "type": "SURPLUS",
+              "site_id": "A",
+              "step_id": "A-K3",
+              "crew_id": "SPARKS-S1",
+              "trade": "mep",
+              "start": 230,
+              "end": 235,
+              "workers": 6
+            }
+          ],
+          "resolved": []
+        }
+      }
+    }
+  ]
+}
