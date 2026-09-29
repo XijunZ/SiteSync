@@ -49,6 +49,38 @@ Standard contract families differ by region (for example JCT/NEC in the UK, FIDI
 - The **GC** loses when the delay is its fault (claims), and when a critical trade is unavailable (its site overheads keep running).
 - The **developer** loses when completion slips (finance costs, delayed sales or rent).
 
+### 3.1 Value by party (why each would actually use it)
+
+The fact that subcontractors bear idle cost does **not** by itself mean SiteSync helps them. Subs already hedge by overbooking across GCs. The question is what they still lose despite that hedge.
+
+**Subcontractor: what the hedge doesn't fix, and what SiteSync adds**
+
+| Still losing | Why | SiteSync gives |
+|---|---|---|
+| Unfillable gaps | Slips are learned with about 1 to 2 days' notice, too late to redeploy | A 2 to 4-week forecast of when each GC will *actually* need them |
+| Clashes | Overbooking backfires when two GCs' dates line up, so a crew gets pulled, with penalties and lost goodwill | Early clash warnings, so less overbooking is needed |
+| Unrecovered cost | Idle cost is the sub's unless they can prove GC fault, and they rarely have evidence | A timestamped delay record: who flagged what, when, and why |
+| Planner time | Hours phoning sites to find out what's really ready | One view across all their GCs |
+
+**Limitation:** subs only get this if their GCs use SiteSync, because the forecast comes from GC data. Subs are **beneficiaries and the network, not stage 1 buyers.**
+
+**GC: the mirror image of sub overbooking.** The GC's pain is not mainly idle cost (under lump-sum terms that's the sub's). It is: **when my site is ready, the crew isn't there**, because the sub moved them after losing trust in my dates.
+
+| GC value | How |
+|---|---|
+| Crews turn up when the site is ready | Reliable forecasts shared with subs; return guarantee ("back on site A by day 235") keeps subs committed |
+| Being the GC subs prioritise | Reliable GCs get the best crews and better prices |
+| Fewer disputes | A shared delay record reduces idle-cost claims arguments |
+| Planner time | Programme updated from voice notes and photos |
+
+**Developer:** fewer critical-path delays, which means earlier completion and lower finance costs.
+
+**Pitch, corrected:** coordination, not idle-cost savings. *"SiteSync gives GCs and their subcontractors one shared, predicted schedule, so crews are there when sites are ready and aren't wasted when they're not."* Cross-company introductions resolve the idle side.
+
+**Demo implications:**
+1. Label £ on the GC alert as "idle cost at risk (borne by your subcontractor under lump-sum terms)". The GC's headline is the return guarantee.
+2. Add a third view, "M&E subcontractor", showing its bookings at both GCs, the new gap and the lead that fills it. The idle crew becomes the shared `IND-mep` (L2 story). *Pending approval.*
+
 ## 4. Matching levels (what "match" means)
 
 | Level | Match | Trust / paperwork needed | Already done today? | Stage 1 |
