@@ -1,0 +1,76 @@
+id,phase,riba_stage,name,owner_or_trade,duration_working_days,depends_on,weather_sensitive,kind,delay_risk
+A1,Acquisition and feasibility,0,Site identification and financial appraisal,Developer,20,,0,task,
+A2,Acquisition and feasibility,1,"Due diligence: title, planning history, topographic and desk-study surveys","Surveyors, solicitor",30,A1,0,task,Ground or title issues can kill the deal
+A3,Acquisition and feasibility,1,Pre-application advice meetings with the council,Planning consultant,40,B2,0,approval,Council slots can take weeks to book
+A4,Acquisition and feasibility,1,"Conditional exchange on land, subject to planning",Solicitor,20,A2,0,task,
+B1,Design and planning,1,"Appoint design team (architect, structural, MEP, planning consultant, QS)",Developer,15,A1,0,task,
+B2,Design and planning,2,Concept design and outline cost plan,Architect,40,B1;A2,0,task,
+B3,Design and planning,3,"Spatial coordination: coordinated architecture, structure, services",Design team,40,B2,0,task,
+B4,Design and planning,3,"Planning reports: daylight, transport, ecology, energy, flood, noise, fire statement",Specialist consultants,40,B2,0,task,"Ecology surveys are seasonal (bats, nesting birds)"
+B5,Design and planning,3,Submit planning application,Planning consultant,10,B3;B4;A3,0,task,
+C1,Design and planning,3,Council validates application,Council,10,B5,0,approval,Invalid applications restart the clock
+C2,Design and planning,3,Consultation (21 days) and determination to committee resolution,Council,65,C1,0,approval,"Statutory 13 weeks for major schemes, often much longer"
+C3,Design and planning,3,"Negotiate and sign Section 106, decision notice issued","Solicitors, council",40,C2,0,approval,S106 negotiations frequently drag
+C4,Design and planning,3,Judicial review challenge window (6 weeks),None (waiting),30,C3,0,wait,Lenders often wait for this to close
+C5,Design and planning,4,Discharge pre-commencement planning conditions,Planning consultant,40,C3,0,approval,Council response times vary
+C6,Acquisition and feasibility,4,Land purchase completes (unconditional),Solicitor,10,C4;A4,0,task,
+E1,Technical design and procurement,4,Technical design and specification,Design team,60,C2,0,task,
+E2,Technical design and procurement,4,Building regulations full plans approval,Building control,25,E1,0,approval,Higher-risk buildings need Gateway 2 instead (12 weeks statutory)
+E3,Technical design and procurement,4,Tender to main contractors (design and build),Quantity surveyor,30,E1,0,task,
+E4,Technical design and procurement,4,Evaluate tenders and award main contract,"Developer, QS",15,E3,0,task,
+E5,Technical design and procurement,4,Construction finance agreed and first drawdown,Lender,20,C6;E4,0,approval,
+E6,Technical design and procurement,5,Contractor mobilisation and subcontract packages let,General contractor,20,E4,0,task,Key trades may be booked elsewhere
+E7,Technical design and procurement,4,Party wall notices and awards with neighbours,Party wall surveyor,45,E1,0,approval,Disputes need surveyor awards
+E8,Technical design and procurement,4,"Apply for new utility connections (power, water, telecoms)",Utility companies,120,E1,0,wait,"Classic long-lead item, often late"
+F1,Demolition and enabling,5,Pre-demolition asbestos and structural surveys,Surveyor,5,C6,0,task,Survey may find more asbestos than expected
+F2,Demolition and enabling,5,Section 80 demolition notice period (6 weeks),Council,30,F1,0,wait,
+F3,Demolition and enabling,5,"Disconnect existing gas, electricity, water",Utility companies,30,C6,0,wait,Utilities often miss dates
+F4,Demolition and enabling,5,"Hoarding, welfare cabins, site set-up",Groundworks,10,E6;C6,1,task,
+F5,Demolition and enabling,5,Soft strip of fixtures and fittings,Demolition,10,F4;F1,0,task,
+F6,Demolition and enabling,5,Licensed asbestos removal,Licensed asbestos contractor,10,F5,0,task,
+F7,Demolition and enabling,5,Structural demolition,Demolition,20,F2;F3;F6;E5;C5,1,task,
+F8,Demolition and enabling,5,"Crush, sort and clear rubble, grub out old foundations","Demolition, haulage",10,F7,1,task,
+G1,Substructure,5,Ground investigation boreholes and any contamination remediation,Specialist contractor,15,F8,1,task,Contamination can add weeks
+G2,Substructure,5,Piling mat and piling,Piling contractor,25,G1;E7,1,task,"Rig availability, obstructions in ground"
+G3,Substructure,5,Pile integrity testing,Piling contractor,5,G2,0,task,
+G4,Substructure,5,Excavate and cut down piles,Groundworks,10,G3,1,task,
+G5,Substructure,5,Pile caps and ground beams,"Groundworks, concrete",20,G4,1,task,
+G6,Substructure,5,Below-ground drainage and service ducts,Groundworks,10,G5,1,task,
+G7,Substructure,5,Ground floor slab,Concrete,10,G6,1,task,"Pours need dry, frost-free weather"
+H1,Superstructure,5,"RC frame: level 1 columns, core and slab",RC frame,8,G7,1,task,Target cycle 7 to 8 days per floor
+H2,Superstructure,5,RC frame: level 2,RC frame,8,H1,1,task,
+H3,Superstructure,5,RC frame: level 3,RC frame,8,H2,1,task,
+H4,Superstructure,5,RC frame: level 4,RC frame,8,H3,1,task,
+H5,Superstructure,5,RC frame: level 5,RC frame,8,H4,1,task,
+H6,Superstructure,5,RC frame: roof slab,RC frame,8,H5,1,task,High wind stops crane lifts
+H7,Superstructure,5,Strike props and back-propping,RC frame,10,H6,0,task,Props stay until slabs gain strength
+J1,Envelope,5,Roof waterproofing (single-ply membrane),Roofing,10,H6,1,task,Membranes cannot be laid in rain
+J2,Envelope,5,"Windows, lower floors (ground to level 2)",Glazing,10,H3,0,task,Window lead times 8 to 12 weeks
+J3,Envelope,5,"Windows, upper floors (level 3 to 5)",Glazing,10,H6;J2,0,task,
+J4,Envelope,5,"Brick-slip or rainscreen cladding, lower floors",Cladding,25,J2,1,task,
+J5,Envelope,5,"Cladding, upper floors",Cladding,25,J3;J4,1,task,
+J6,Envelope,5,Building weathertight,Milestone,0,J1;J3,0,milestone,
+J7,Envelope,5,"Strike scaffold, fit balconies",Scaffolding,10,J5,1,task,
+K1,Services and fit-out,5,"Blockwork party walls and cores, lower floors",Bricklaying,15,J2,0,task,
+K2,Services and fit-out,5,"Blockwork, upper floors",Bricklaying,15,J3;K1,0,task,
+K3,Services and fit-out,5,"MEP first fix (pipes, cables, ducts), lower floors",Mechanical and electrical,20,K1,0,task,
+K4,Services and fit-out,5,"MEP first fix, upper floors",Mechanical and electrical,20,K2;K3,0,task,
+K5,Services and fit-out,5,Risers and plant room,Mechanical and electrical,20,H7,0,task,
+K6,Services and fit-out,5,"First fix inspection, lower floors",Building control,2,K3,0,approval,Late inspector stalls drylining
+K7,Services and fit-out,5,"First fix inspection, upper floors",Building control,2,K4,0,approval,
+K8,Services and fit-out,5,"Drylining, plastering and screed, lower floors",Drylining,20,K6;J6,0,task,Screed and plaster need drying time
+K9,Services and fit-out,5,"Drylining, plastering and screed, upper floors",Drylining,20,K7;K8,0,task,
+K10,Services and fit-out,5,"Kitchens, bathrooms, doors and joinery, lower floors",Fit-out carpentry,20,K8,0,task,Kitchen and worktop lead times
+K11,Services and fit-out,5,"Kitchens, bathrooms, doors and joinery, upper floors",Fit-out carpentry,20,K9;K10,0,task,
+K12,Services and fit-out,5,"Decoration and flooring, lower floors","Painting, flooring",15,K10,0,task,
+K13,Services and fit-out,5,"Decoration and flooring, upper floors","Painting, flooring",15,K11;K12,0,task,
+K14,Services and fit-out,5,"MEP second fix (sockets, taps, heat pumps), lower floors",Mechanical and electrical,10,K12,0,task,
+K15,Services and fit-out,5,"MEP second fix, upper floors",Mechanical and electrical,10,K13;K14,0,task,
+K16,Services and fit-out,5,Lift installation,Lift contractor,30,K5,0,task,Lift lead times are long
+L1,Commissioning and handover,6,Permanent power and water energised,Utility companies,5,E8;K5,0,approval,Late connection blocks commissioning
+L2,Commissioning and handover,6,"Test and commission fire alarm, smoke vents, ventilation, electrics",Mechanical and electrical,20,L1;K15;K16,0,task,
+L3,Commissioning and handover,6,"External works, paving and landscaping",Landscaping,25,J7,1,task,
+L4,Commissioning and handover,6,Snagging and defect fixes,General contractor,15,L2,0,task,
+L5,Commissioning and handover,6,Building control completion certificate,Building control,10,L2;L3,0,approval,
+L6,Commissioning and handover,6,Practical completion and handover to developer,Developer,5,L4;L5,0,milestone,
+L7,Commissioning and handover,7,Sales completions and first occupation,Developer,20,L6,0,task,
