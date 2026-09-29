@@ -10,6 +10,7 @@ def raise_risk(world: World, site_id: str, step_code: str, days: int, kind: str,
     if st is None:
         raise ValueError(f"unknown step {step_code} on site {site_id}")
     st.risk_days = days
+    world.risks[st.id] = {"step_id": st.id, "step_code": st.code, "days": days, "kind": kind, "detail": detail}
     world.log("RiskFlagRaised", None, site_id, {"step_id": st.id, "days": days, "kind": kind, "detail": detail},
               {"kind": "signal", "excerpt": detail})
     return {"site_id": site_id, "step_code": st.code,
@@ -18,10 +19,24 @@ def raise_risk(world: World, site_id: str, step_code: str, days: int, kind: str,
             "confirmed_finish": site_finish(forward_pass(world, site_id, "confirmed"))}
 
 
-def clear_risk(world: World, site_id: str, step_code: str) -> None:
-    st = world.steps[f"{site_id}-{step_code}"]
+def clear_risk(world: World, site_id: str, step_code: str, user_id: str | None = None) -> dict:
+    st = world.steps.get(f"{site_id}-{step_code}")
+    if st is None:
+        raise ValueError(f"unknown step {step_code} on site {site_id}")
     st.risk_days = 0
-    world.log("RiskFlagCleared", None, site_id, {"step_id": st.id})
+    world.risks.pop(st.id, None)
+    world.log("RiskFlagCleared", user_id, site_id, {"step_id": st.id, "by": "no impact"})
+    return {"ok": True, "site_id": site_id, "step_code": st.code,
+            "risk_finish": site_finish(forward_pass(world, site_id, "risk")),
+            "confirmed_finish": site_finish(forward_pass(world, site_id, "confirmed"))}
+
+
+DEMO_SIGNAL = ("A", "J1", 5, "weather", "Rain forecast days 221–224 (18 mm)")
+
+
+def seed_demo_signal(world: World) -> None:
+    """The demo opens with a rain signal over Site A's roof (spec: demo seed)."""
+    raise_risk(world, *DEMO_SIGNAL)
 
 
 def wet_days(daily_precip_mm: list[float], threshold: float = 2.0) -> list[int]:

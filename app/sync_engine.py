@@ -166,9 +166,9 @@ def _m8(world, gap, dp) -> Option | None:
     home_start = forward_pass(world, gap.site_id, "confirmed")[gap.step_id][0]
     returns_ok = gap.end <= home_start
     linked = link_active(world, home_gc, target_gc)
-    feasible = linked and returns_ok
-    reason = None if feasible else ("Needs a link with a nearby project's company" if not linked
-                                    else "Crew would not return in time")
+    # Offering idle days needs no link: the borrower's crew request creates it (spec §5.7).
+    feasible = returns_ok
+    reason = None if feasible else "Crew would not return in time"
     sub = world.orgs[world.crews[gap.crew_id].org_id].name
     return _base(world, gap, "M8",
                  f"Slot swap: {sub} crew works a nearby project days {gap.start}–{gap.end}, "
@@ -204,7 +204,22 @@ def options_for(world: World, gap: Gap) -> list[Option]:
                                        o.setup_days))
 
 
-def approve_option(world: World, user: User, gap_id_: str, mechanism: str) -> dict:
+def offer_state(world: World, gap_id_: str) -> str:
+    """none | offered | requested | agreed | done for the M8 offer of a gap."""
+    offers = [o for o in world.offers.values() if o.gap_id == gap_id_ and o.status not in ("WITHDRAWN", "EXPIRED")]
+    if not offers:
+        return "none"
+    o = offers[-1]
+    if o.status == "OPEN":
+        return "offered"
+    if o.status == "REQUESTED":
+        return "requested"
+    cps = [c for c in world.cross_proposals.values() if c["gap_id"] == gap_id_]
+    return "done" if cps and cps[-1]["status"] == "DONE" else "agreed"
+
+
+def approve_option(world: World, user: User, gap_id_: str, mechanism: str,
+                   target_step_id: str | None = None) -> dict:
     gap = next((g for g in open_gaps(world) if g.id == gap_id_), None)
     if gap is None:
         raise ValueError("gap no longer open")
@@ -219,13 +234,25 @@ def approve_option(world: World, user: User, gap_id_: str, mechanism: str) -> di
             if b.step_id == gap.step_id and b.crew_id == gap.crew_id:
                 b.start, b.end = home_start, home_end - world.steps[gap.step_id].delay_days
         world.option_states[opt.id] = "DONE"
-        world.outcomes.append({"option_id": opt.id, "org_id": user.org_id, "days_protected": opt.days_protected,
-                               "value_gbp": opt.value_gbp})
+        from app.network import _latest_cause
+        cause = _latest_cause(world, gap.site_id)
+        world.outcomes.append({"option_id": opt.id, "org_id": user.org_id, "mechanism": "M3 re-slot",
+                               "days_protected": opt.days_protected,
+                               "value_gbp": opt.days_protected * world.sites[gap.site_id].day_value,
+                               "idle_cost_avoided_gbp": 0, "idle_crew_days_used": 0,
+                               "no_action_finish": site_finish(forward_pass(world, gap.site_id, "confirmed"))
+                               + opt.days_protected,
+                               "outcome_finish": site_finish(forward_pass(world, gap.site_id, "confirmed")),
+                               "event": cause["event"], "evidence": cause["evidence"]})
         world.log("BookingChanged", user.id, gap.site_id, {"crew_id": gap.crew_id, "step_id": gap.step_id})
         return {"status": "DONE", "option": opt.to_dict()}
     if mechanism == "M8":
         from app.network import send_cross_proposal
-        cp = send_cross_proposal(world, user, gap, opt)
+        target_gc = world.sites[world.steps[target_step_id or opt.target_step_id].site_id].org_id
+        if not link_active(world, user.org_id, target_gc):
+            world.option_states.pop(opt.id, None)
+            raise ValueError("Offer the idle days first; the borrower's crew request creates the link")
+        cp = send_cross_proposal(world, user, gap, opt, target_step_id=target_step_id)
         world.option_states[opt.id] = "IN_PROGRESS"
         return {"status": "IN_PROGRESS", "cross_proposal_id": cp["id"], "option": opt.to_dict()}
     return {"status": "APPROVED", "option": opt.to_dict()}

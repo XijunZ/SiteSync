@@ -1,5 +1,5 @@
 {
-  "me": {
+  "/api/me": {
     "id": "dan",
     "name": "Dan",
     "role": "SITE_MANAGER",
@@ -8,100 +8,105 @@
       "A"
     ]
   },
-  "sites": [
+  "/api/sites": [
     {
       "id": "A",
       "name": "Hackney Wick Yard",
       "start": 12,
       "baseline_finish": 397,
       "confirmed_finish": 397,
-      "risk_finish": 397,
+      "risk_finish": 402,
       "variance": 0,
       "day_value": 8000,
       "version": 0
     }
   ],
-  "sync_board": {
+  "/api/sync-board": {
     "gaps": [],
     "outcomes": [],
     "days_protected": 0,
     "value_protected_gbp": 0
   },
-  "city": [
+  "/api/city": [
     {
       "anon_id": "d41dca08",
+      "anon_label": "#D41",
       "area": "East London",
       "distance_band": "~2 km",
+      "km": 1.7,
       "phase": "Envelope",
-      "windows": [
-        {
-          "trade": "cladding",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 49
-        },
-        {
-          "trade": "glazing",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 44
-        },
-        {
-          "trade": "rc_frame",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 44
-        },
-        {
-          "trade": "roofing",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 44
-        },
-        {
-          "trade": "bricklaying",
-          "kind": "need",
-          "week_from": 45,
-          "week_to": 47
-        },
-        {
-          "trade": "mep",
-          "kind": "need",
-          "week_from": 45,
-          "week_to": 49
-        },
-        {
-          "trade": "drylining",
-          "kind": "need",
-          "week_from": 49,
-          "week_to": 49
-        },
-        {
-          "trade": "lifts",
-          "kind": "need",
-          "week_from": 49,
-          "week_to": 49
-        }
-      ]
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
     },
     {
       "anon_id": "4ecf711c",
+      "anon_label": "#4EC",
       "area": "East London",
       "distance_band": "~4 km",
+      "km": 3.9,
       "phase": "Demolition and enabling",
-      "windows": [
-        {
-          "trade": "demolition",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 49
-        }
-      ]
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
     }
   ],
-  "links": [],
-  "cross": [],
-  "timeline": {
+  "/api/offers": [],
+  "/api/requests": {
+    "incoming": [],
+    "outgoing": []
+  },
+  "/api/notifications": [],
+  "/api/links": [],
+  "/api/report": {
+    "days_protected": 0,
+    "value_gbp": 0,
+    "idle_crew_days_used": 0,
+    "day_value": 8000,
+    "rows": []
+  },
+  "/api/events": [
+    {
+      "id": "ev-165",
+      "type": "RiskFlagRaised",
+      "user_id": null,
+      "site_id": "A",
+      "org_id": "NG",
+      "at": "07:43",
+      "payload": {
+        "step_id": "A-J1",
+        "days": 5,
+        "kind": "weather",
+        "detail": "Rain forecast days 221\u2013224 (18 mm)"
+      },
+      "source": {
+        "kind": "signal",
+        "excerpt": "Rain forecast days 221\u2013224 (18 mm)"
+      },
+      "version": 0
+    },
+    {
+      "id": "ev-167",
+      "type": "ProposalCreated",
+      "user_id": "dan",
+      "site_id": "A",
+      "org_id": "NG",
+      "at": "07:46",
+      "payload": {
+        "proposal_id": "prop-166"
+      },
+      "source": {
+        "kind": "typed",
+        "excerpt": "Roofing delayed, heavy rain, about five days.",
+        "reason": "rain",
+        "confidence": 0.6
+      },
+      "version": 0
+    }
+  ],
+  "/api/sites/A/timeline": {
     "site_id": "A",
     "site_name": "Hackney Wick Yard",
     "today": 220,
@@ -794,10 +799,10 @@
         ],
         "risk": [
           220,
-          230
+          235
         ],
         "critical": true,
-        "risk_flag": false,
+        "risk_flag": true,
         "crews": [
           "Northgate Build roofing (A)"
         ]
@@ -847,8 +852,8 @@
           230
         ],
         "risk": [
-          230,
-          230
+          235,
+          235
         ],
         "critical": true,
         "risk_flag": false,
@@ -899,8 +904,8 @@
           250
         ],
         "risk": [
-          230,
-          250
+          235,
+          255
         ],
         "critical": true,
         "risk_flag": false,
@@ -980,8 +985,8 @@
           270
         ],
         "risk": [
-          250,
-          270
+          255,
+          275
         ],
         "critical": true,
         "risk_flag": false,
@@ -1007,8 +1012,8 @@
           252
         ],
         "risk": [
-          250,
-          252
+          255,
+          257
         ],
         "critical": true,
         "risk_flag": false,
@@ -1084,8 +1089,8 @@
           272
         ],
         "risk": [
-          252,
-          272
+          257,
+          277
         ],
         "critical": true,
         "risk_flag": false,
@@ -1165,8 +1170,8 @@
           272
         ],
         "risk": [
-          270,
-          272
+          275,
+          277
         ],
         "critical": true,
         "risk_flag": false,
@@ -1190,8 +1195,8 @@
           292
         ],
         "risk": [
-          272,
-          292
+          277,
+          297
         ],
         "critical": true,
         "risk_flag": false,
@@ -1217,8 +1222,8 @@
           292
         ],
         "risk": [
-          272,
-          292
+          277,
+          297
         ],
         "critical": true,
         "risk_flag": false,
@@ -1244,8 +1249,8 @@
           312
         ],
         "risk": [
-          292,
-          312
+          297,
+          317
         ],
         "critical": true,
         "risk_flag": false,
@@ -1271,8 +1276,8 @@
           307
         ],
         "risk": [
-          292,
-          307
+          297,
+          312
         ],
         "critical": false,
         "risk_flag": false,
@@ -1298,8 +1303,8 @@
           317
         ],
         "risk": [
-          307,
-          317
+          312,
+          322
         ],
         "critical": false,
         "risk_flag": false,
@@ -1325,8 +1330,8 @@
           327
         ],
         "risk": [
-          312,
-          327
+          317,
+          332
         ],
         "critical": true,
         "risk_flag": false,
@@ -1352,8 +1357,8 @@
           337
         ],
         "risk": [
-          327,
-          337
+          332,
+          342
         ],
         "critical": true,
         "risk_flag": false,
@@ -1379,8 +1384,8 @@
           357
         ],
         "risk": [
-          337,
-          357
+          342,
+          362
         ],
         "critical": true,
         "risk_flag": false,
@@ -1406,8 +1411,8 @@
           372
         ],
         "risk": [
-          357,
-          372
+          362,
+          377
         ],
         "critical": true,
         "risk_flag": false,
@@ -1431,8 +1436,8 @@
           367
         ],
         "risk": [
-          357,
-          367
+          362,
+          372
         ],
         "critical": false,
         "risk_flag": false,
@@ -1456,8 +1461,8 @@
           377
         ],
         "risk": [
-          372,
-          377
+          377,
+          382
         ],
         "critical": true,
         "risk_flag": false,
@@ -1481,16 +1486,25 @@
           397
         ],
         "risk": [
-          377,
-          397
+          382,
+          402
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       }
+    ],
+    "risk_signals": [
+      {
+        "step_id": "A-J1",
+        "step_code": "J1",
+        "days": 5,
+        "kind": "weather",
+        "detail": "Rain forecast days 221\u2013224 (18 mm)"
+      }
     ]
   },
-  "labour": {
+  "/api/sites/A/labour": {
     "site_id": "A",
     "demand": {
       "rc_frame": [
@@ -2048,7 +2062,658 @@
         ]
       ]
     },
-    "imbalances": []
+    "imbalances": [],
+    "bookings": [
+      {
+        "crew": "Northgate Build cladding (A)",
+        "size": 5,
+        "step_code": "J4",
+        "trade": "cladding",
+        "booking": [
+          206,
+          231
+        ],
+        "step_active": [
+          206,
+          231
+        ]
+      },
+      {
+        "crew": "Northgate Build bricklaying (A)",
+        "size": 5,
+        "step_code": "K1",
+        "trade": "bricklaying",
+        "booking": [
+          206,
+          221
+        ],
+        "step_active": [
+          206,
+          221
+        ]
+      },
+      {
+        "crew": "Northgate Build rc_frame (A)",
+        "size": 8,
+        "step_code": "H6",
+        "trade": "rc_frame",
+        "booking": [
+          212,
+          220
+        ],
+        "step_active": [
+          212,
+          220
+        ]
+      },
+      {
+        "crew": "Northgate Build rc_frame (A)",
+        "size": 8,
+        "step_code": "H7",
+        "trade": "rc_frame",
+        "booking": [
+          220,
+          230
+        ],
+        "step_active": [
+          220,
+          230
+        ]
+      },
+      {
+        "crew": "Northgate Build roofing (A)",
+        "size": 4,
+        "step_code": "J1",
+        "trade": "roofing",
+        "booking": [
+          220,
+          230
+        ],
+        "step_active": [
+          220,
+          230
+        ]
+      },
+      {
+        "crew": "Northgate Build glazing (A)",
+        "size": 4,
+        "step_code": "J3",
+        "trade": "glazing",
+        "booking": [
+          220,
+          230
+        ],
+        "step_active": [
+          220,
+          230
+        ]
+      },
+      {
+        "crew": "Northgate Build bricklaying (A)",
+        "size": 5,
+        "step_code": "K2",
+        "trade": "bricklaying",
+        "booking": [
+          230,
+          245
+        ],
+        "step_active": [
+          230,
+          245
+        ]
+      },
+      {
+        "crew": "Sparks crew 1",
+        "size": 6,
+        "step_code": "K3",
+        "trade": "mep",
+        "booking": [
+          230,
+          250
+        ],
+        "step_active": [
+          230,
+          250
+        ]
+      },
+      {
+        "crew": "Voltline crew A",
+        "size": 6,
+        "step_code": "K5",
+        "trade": "mep",
+        "booking": [
+          230,
+          250
+        ],
+        "step_active": [
+          230,
+          250
+        ]
+      },
+      {
+        "crew": "Northgate Build cladding (A)",
+        "size": 5,
+        "step_code": "J5",
+        "trade": "cladding",
+        "booking": [
+          231,
+          256
+        ],
+        "step_active": [
+          231,
+          256
+        ]
+      },
+      {
+        "crew": "Northgate Build lifts (A)",
+        "size": 3,
+        "step_code": "K16",
+        "trade": "lifts",
+        "booking": [
+          250,
+          280
+        ],
+        "step_active": [
+          250,
+          280
+        ]
+      },
+      {
+        "crew": "Sparks crew 1",
+        "size": 6,
+        "step_code": "K4",
+        "trade": "mep",
+        "booking": [
+          250,
+          270
+        ],
+        "step_active": [
+          250,
+          270
+        ]
+      },
+      {
+        "crew": "Northgate Build drylining (A)",
+        "size": 5,
+        "step_code": "K8",
+        "trade": "drylining",
+        "booking": [
+          252,
+          272
+        ],
+        "step_active": [
+          252,
+          272
+        ]
+      },
+      {
+        "crew": "Northgate Build scaffolding (A)",
+        "size": 4,
+        "step_code": "J7",
+        "trade": "scaffolding",
+        "booking": [
+          256,
+          266
+        ],
+        "step_active": [
+          256,
+          266
+        ]
+      }
+    ]
   },
-  "proposals": []
+  "/api/sites/A/trades": {
+    "site_id": "A",
+    "trades": {
+      "groundworks": [
+        [
+          12,
+          22
+        ],
+        [
+          122,
+          162
+        ]
+      ],
+      "demolition": [
+        [
+          22,
+          32
+        ],
+        [
+          47,
+          77
+        ]
+      ],
+      "asbestos": [
+        [
+          32,
+          42
+        ]
+      ],
+      "ground_investigation": [
+        [
+          77,
+          92
+        ]
+      ],
+      "piling": [
+        [
+          92,
+          122
+        ]
+      ],
+      "concrete": [
+        [
+          162,
+          172
+        ]
+      ],
+      "rc_frame": [
+        [
+          172,
+          230
+        ]
+      ],
+      "roofing": [
+        [
+          220,
+          230
+        ]
+      ],
+      "glazing": [
+        [
+          196,
+          206
+        ],
+        [
+          220,
+          230
+        ]
+      ],
+      "cladding": [
+        [
+          206,
+          256
+        ]
+      ],
+      "scaffolding": [
+        [
+          256,
+          266
+        ]
+      ],
+      "bricklaying": [
+        [
+          206,
+          221
+        ],
+        [
+          230,
+          245
+        ]
+      ],
+      "mep": [
+        [
+          230,
+          270
+        ],
+        [
+          307,
+          317
+        ],
+        [
+          327,
+          357
+        ]
+      ],
+      "drylining": [
+        [
+          252,
+          292
+        ]
+      ],
+      "carpentry": [
+        [
+          272,
+          312
+        ]
+      ],
+      "finishes": [
+        [
+          292,
+          307
+        ],
+        [
+          312,
+          327
+        ]
+      ],
+      "lifts": [
+        [
+          250,
+          280
+        ]
+      ],
+      "landscaping": [
+        [
+          266,
+          291
+        ]
+      ]
+    },
+    "idle": [],
+    "trade_labels": {
+      "roofing": "Roofing",
+      "general_contractor": "General contractor",
+      "bricklaying": "Bricklaying",
+      "asbestos": "Asbestos",
+      "cladding": "Cladding",
+      "council": "Council",
+      "concrete": "Concrete",
+      "ground_investigation": "Ground investigation",
+      "piling": "Piling",
+      "building_control": "Building control",
+      "mep": "M&E",
+      "surveyor": "Surveyor",
+      "drylining": "Drylining",
+      "carpentry": "Carpentry",
+      "rc_frame": "RC frame",
+      "milestone": "Milestone",
+      "utilities": "Utilities",
+      "finishes": "Finishes",
+      "lifts": "Lifts",
+      "scaffolding": "Scaffolding",
+      "groundworks": "Groundworks",
+      "glazing": "Glazing",
+      "landscaping": "Landscaping",
+      "demolition": "Demolition",
+      "developer": "Developer"
+    }
+  },
+  "/api/proposals?site_id=A": [
+    {
+      "id": "prop-166",
+      "site_id": "A",
+      "org_id": "NG",
+      "created_by": "dan",
+      "created_at": "07:43",
+      "based_on_version": 0,
+      "changes": [
+        {
+          "step_id": "A-J1",
+          "field": "delay_days",
+          "to": 5,
+          "from": 0
+        }
+      ],
+      "source": {
+        "kind": "typed",
+        "excerpt": "Roofing delayed, heavy rain, about five days.",
+        "reason": "rain",
+        "confidence": 0.6
+      },
+      "status": "PENDING",
+      "needs_pm": true,
+      "knock_on": {
+        "moved": [
+          {
+            "step_id": "A-J1",
+            "code": "J1",
+            "from": [
+              220,
+              230
+            ],
+            "to": [
+              220,
+              235
+            ]
+          },
+          {
+            "step_id": "A-J6",
+            "code": "J6",
+            "from": [
+              230,
+              230
+            ],
+            "to": [
+              235,
+              235
+            ]
+          },
+          {
+            "step_id": "A-K3",
+            "code": "K3",
+            "from": [
+              230,
+              250
+            ],
+            "to": [
+              235,
+              255
+            ]
+          },
+          {
+            "step_id": "A-K4",
+            "code": "K4",
+            "from": [
+              250,
+              270
+            ],
+            "to": [
+              255,
+              275
+            ]
+          },
+          {
+            "step_id": "A-K6",
+            "code": "K6",
+            "from": [
+              250,
+              252
+            ],
+            "to": [
+              255,
+              257
+            ]
+          },
+          {
+            "step_id": "A-K7",
+            "code": "K7",
+            "from": [
+              270,
+              272
+            ],
+            "to": [
+              275,
+              277
+            ]
+          },
+          {
+            "step_id": "A-K8",
+            "code": "K8",
+            "from": [
+              252,
+              272
+            ],
+            "to": [
+              257,
+              277
+            ]
+          },
+          {
+            "step_id": "A-K9",
+            "code": "K9",
+            "from": [
+              272,
+              292
+            ],
+            "to": [
+              277,
+              297
+            ]
+          },
+          {
+            "step_id": "A-K10",
+            "code": "K10",
+            "from": [
+              272,
+              292
+            ],
+            "to": [
+              277,
+              297
+            ]
+          },
+          {
+            "step_id": "A-K11",
+            "code": "K11",
+            "from": [
+              292,
+              312
+            ],
+            "to": [
+              297,
+              317
+            ]
+          },
+          {
+            "step_id": "A-K12",
+            "code": "K12",
+            "from": [
+              292,
+              307
+            ],
+            "to": [
+              297,
+              312
+            ]
+          },
+          {
+            "step_id": "A-K13",
+            "code": "K13",
+            "from": [
+              312,
+              327
+            ],
+            "to": [
+              317,
+              332
+            ]
+          },
+          {
+            "step_id": "A-K14",
+            "code": "K14",
+            "from": [
+              307,
+              317
+            ],
+            "to": [
+              312,
+              322
+            ]
+          },
+          {
+            "step_id": "A-K15",
+            "code": "K15",
+            "from": [
+              327,
+              337
+            ],
+            "to": [
+              332,
+              342
+            ]
+          },
+          {
+            "step_id": "A-L2",
+            "code": "L2",
+            "from": [
+              337,
+              357
+            ],
+            "to": [
+              342,
+              362
+            ]
+          },
+          {
+            "step_id": "A-L4",
+            "code": "L4",
+            "from": [
+              357,
+              372
+            ],
+            "to": [
+              362,
+              377
+            ]
+          },
+          {
+            "step_id": "A-L5",
+            "code": "L5",
+            "from": [
+              357,
+              367
+            ],
+            "to": [
+              362,
+              372
+            ]
+          },
+          {
+            "step_id": "A-L6",
+            "code": "L6",
+            "from": [
+              372,
+              377
+            ],
+            "to": [
+              377,
+              382
+            ]
+          },
+          {
+            "step_id": "A-L7",
+            "code": "L7",
+            "from": [
+              377,
+              397
+            ],
+            "to": [
+              382,
+              402
+            ]
+          }
+        ],
+        "finish_from": 397,
+        "finish_to": 402,
+        "labour": {
+          "created": [
+            {
+              "type": "SURPLUS",
+              "site_id": "A",
+              "step_id": "A-K3",
+              "crew_id": "SPARKS-S1",
+              "trade": "mep",
+              "start": 230,
+              "end": 235,
+              "workers": 6
+            },
+            {
+              "type": "EXTEND",
+              "site_id": "A",
+              "step_id": "A-J1",
+              "crew_id": "NG-roofing-A",
+              "trade": "roofing",
+              "start": 230,
+              "end": 235,
+              "workers": 4
+            }
+          ],
+          "resolved": []
+        }
+      }
+    }
+  ]
 }

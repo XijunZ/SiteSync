@@ -27,7 +27,9 @@ def test_city_view_is_anonymised():
     w = build_world()
     cv = city_view(w, w.users["priya"])
     assert len(cv) == 2
-    assert all(set(p) == {"anon_id", "area", "distance_band", "phase", "windows"} for p in cv)
+    # Spec v2.1: area, phase and open offers only; trade windows need a shared view.
+    assert all({"anon_id", "anon_label", "area", "distance_band", "phase", "offers"} <= set(p) for p in cv)
+    assert all("windows" not in p and "trades" not in p for p in cv)
 
 def test_sync_board_shows_gap_and_needs_link():
     w = _delayed()

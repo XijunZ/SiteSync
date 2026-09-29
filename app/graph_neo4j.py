@@ -28,7 +28,7 @@ class Neo4jMirror:
         sites = [{"id": s.id, "name": s.name, "org_id": s.org_id, "lat": s.lat, "lon": s.lon, "offset": s.offset}
                  for s in world.sites.values()]
         steps = [{"id": s.id, "site_id": s.site_id, "code": s.code, "trade": s.trade, "days": s.days,
-                  "delay": s.delay_days, "risk": s.risk_days, "deps": s.deps} for s in world.steps.values()]
+                  "delay": s.delay_days, "risk": s.risk_days, "lag": s.lag_days, "deps": s.deps} for s in world.steps.values()]
         crews = [{"id": c.id, "org_id": c.org_id, "trade": c.trade} for c in world.crews.values()]
         bookings = [{"id": b.id, "crew_id": b.crew_id, "step_id": b.step_id, "start": b.start, "end": b.end}
                     for b in world.bookings.values()]
@@ -42,7 +42,7 @@ class Neo4jMirror:
                               loc: point({latitude:r.lat, longitude:r.lon})})""", rows=sites)
             tx.run("""UNWIND $rows AS r MATCH (si:Site {id:r.site_id})
                       CREATE (si)-[:HAS_STEP]->(:Step {id:r.id, site_id:r.site_id, code:r.code, trade:r.trade,
-                              days:r.days, delay:r.delay, risk:r.risk})""", rows=steps)
+                              days:r.days, delay:r.delay, risk:r.risk, lag:r.lag})""", rows=steps)
             tx.run("""UNWIND $rows AS r UNWIND r.deps AS d MATCH (a:Step {id:r.id}), (b:Step {id:d})
                       CREATE (a)-[:DEPENDS_ON]->(b)""", rows=steps)
             tx.run("""UNWIND $rows AS r MATCH (o:Org {id:r.org_id})
@@ -58,15 +58,16 @@ class Neo4jMirror:
 
     def propagate(self, site_id: str, mode: str = "confirmed") -> dict[str, tuple[int, int]]:
         extra = {"baseline": "0", "confirmed": "s.delay", "risk": "s.delay + s.risk"}[mode]
+        lag = "0" if mode == "baseline" else "s.lag"
 
         def work(tx):
             tx.run(f"""MATCH (si:Site {{id:$site}})-[:HAS_STEP]->(s:Step)
-                       SET s.p_start = si.offset, s.p_end = si.offset + s.days + {extra}""", site=site_id)
+                       SET s.p_start = si.offset + {lag}, s.p_end = si.offset + {lag} + s.days + {extra}""", site=site_id)
             for _ in range(60):
                 shifted = tx.run(f"""MATCH (s:Step {{site_id:$site}})-[:DEPENDS_ON]->(d:Step)
                                      WITH s, max(d.p_end) AS ready
-                                     WHERE ready > s.p_start
-                                     SET s.p_start = ready, s.p_end = ready + s.days + {extra}
+                                     WHERE ready + {lag} > s.p_start
+                                     SET s.p_start = ready + {lag}, s.p_end = ready + {lag} + s.days + {extra}
                                      RETURN count(s) AS n""", site=site_id).single()["n"]
                 if shifted == 0:
                     break

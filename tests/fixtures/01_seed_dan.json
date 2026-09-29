@@ -1,119 +1,100 @@
 {
-  "me": {
-    "id": "marcus",
-    "name": "Marcus",
-    "role": "PM",
-    "org": "Riverside Construction",
+  "/api/me": {
+    "id": "dan",
+    "name": "Dan",
+    "role": "SITE_MANAGER",
+    "org": "Northgate Build",
     "sites": [
-      "C",
-      "D"
+      "A"
     ]
   },
-  "sites": [
+  "/api/sites": [
     {
-      "id": "C",
-      "name": "Bow Wharf",
-      "start": 7,
-      "baseline_finish": 392,
-      "confirmed_finish": 392,
-      "risk_finish": 392,
-      "variance": 0,
-      "day_value": 8000,
-      "version": 0
-    },
-    {
-      "id": "D",
-      "name": "Canning Town Works",
-      "start": 185,
-      "baseline_finish": 570,
-      "confirmed_finish": 570,
-      "risk_finish": 570,
+      "id": "A",
+      "name": "Hackney Wick Yard",
+      "start": 12,
+      "baseline_finish": 397,
+      "confirmed_finish": 397,
+      "risk_finish": 402,
       "variance": 0,
       "day_value": 8000,
       "version": 0
     }
   ],
-  "sync_board": {
+  "/api/sync-board": {
     "gaps": [],
     "outcomes": [],
     "days_protected": 0,
     "value_protected_gbp": 0
   },
-  "city": [
+  "/api/city": [
     {
-      "anon_id": "137ad60e",
+      "anon_id": "d41dca08",
+      "anon_label": "#D41",
       "area": "East London",
       "distance_band": "~2 km",
+      "km": 1.7,
       "phase": "Envelope",
-      "windows": [
-        {
-          "trade": "bricklaying",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 48
-        },
-        {
-          "trade": "cladding",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 49
-        },
-        {
-          "trade": "glazing",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 45
-        },
-        {
-          "trade": "rc_frame",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 45
-        },
-        {
-          "trade": "roofing",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 46
-        },
-        {
-          "trade": "mep",
-          "kind": "need",
-          "week_from": 46,
-          "week_to": 49
-        },
-        {
-          "trade": "mep",
-          "kind": "surplus",
-          "week_from": 46,
-          "week_to": 46
-        }
-      ]
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
     },
     {
-      "anon_id": "c66e9f08",
+      "anon_id": "4ecf711c",
+      "anon_label": "#4EC",
       "area": "East London",
-      "distance_band": "~2 km",
-      "phase": "Substructure",
-      "windows": [
-        {
-          "trade": "groundworks",
-          "kind": "need",
-          "week_from": 44,
-          "week_to": 49
-        }
-      ]
+      "distance_band": "~4 km",
+      "km": 3.9,
+      "phase": "Demolition and enabling",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
     }
   ],
-  "links": [],
-  "cross": [],
-  "timeline": {
-    "site_id": "C",
-    "site_name": "Bow Wharf",
+  "/api/offers": [],
+  "/api/requests": {
+    "incoming": [],
+    "outgoing": []
+  },
+  "/api/notifications": [],
+  "/api/links": [],
+  "/api/report": {
+    "days_protected": 0,
+    "value_gbp": 0,
+    "idle_crew_days_used": 0,
+    "day_value": 8000,
+    "rows": []
+  },
+  "/api/events": [
+    {
+      "id": "ev-165",
+      "type": "RiskFlagRaised",
+      "user_id": null,
+      "site_id": "A",
+      "org_id": "NG",
+      "at": "07:43",
+      "payload": {
+        "step_id": "A-J1",
+        "days": 5,
+        "kind": "weather",
+        "detail": "Rain forecast days 221\u2013224 (18 mm)"
+      },
+      "source": {
+        "kind": "signal",
+        "excerpt": "Rain forecast days 221\u2013224 (18 mm)"
+      },
+      "version": 0
+    }
+  ],
+  "/api/sites/A/timeline": {
+    "site_id": "A",
+    "site_name": "Hackney Wick Yard",
     "today": 220,
     "steps": [
       {
-        "id": "C-F1",
+        "id": "A-F1",
         "code": "F1",
         "name": "Pre-demolition asbestos and structural surveys",
         "trade": "surveyor",
@@ -122,23 +103,23 @@
         "weather_sensitive": false,
         "risk_note": "Survey may find more asbestos than expected",
         "base": [
-          7,
-          12
+          12,
+          17
         ],
         "confirmed": [
-          7,
-          12
+          12,
+          17
         ],
         "risk": [
-          7,
-          12
+          12,
+          17
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-F3",
+        "id": "A-F3",
         "code": "F3",
         "name": "Disconnect existing gas, electricity, water",
         "trade": "utilities",
@@ -147,23 +128,23 @@
         "weather_sensitive": false,
         "risk_note": "Utilities often miss dates",
         "base": [
-          7,
-          37
+          12,
+          42
         ],
         "confirmed": [
-          7,
-          37
+          12,
+          42
         ],
         "risk": [
-          7,
-          37
+          12,
+          42
         ],
         "critical": false,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-F4",
+        "id": "A-F4",
         "code": "F4",
         "name": "Hoarding, welfare cabins, site set-up",
         "trade": "groundworks",
@@ -172,25 +153,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          7,
-          17
+          12,
+          22
         ],
         "confirmed": [
-          7,
-          17
+          12,
+          22
         ],
         "risk": [
-          7,
-          17
+          12,
+          22
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction groundworks (C)"
+          "Northgate Build groundworks (A)"
         ]
       },
       {
-        "id": "C-F2",
+        "id": "A-F2",
         "code": "F2",
         "name": "Section 80 demolition notice period (6 weeks)",
         "trade": "council",
@@ -199,23 +180,23 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          12,
-          42
+          17,
+          47
         ],
         "confirmed": [
-          12,
-          42
+          17,
+          47
         ],
         "risk": [
-          12,
-          42
+          17,
+          47
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-F5",
+        "id": "A-F5",
         "code": "F5",
         "name": "Soft strip of fixtures and fittings",
         "trade": "demolition",
@@ -224,25 +205,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          17,
-          27
+          22,
+          32
         ],
         "confirmed": [
-          17,
-          27
+          22,
+          32
         ],
         "risk": [
-          17,
-          27
+          22,
+          32
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction demolition (C)"
+          "Northgate Build demolition (A)"
         ]
       },
       {
-        "id": "C-F6",
+        "id": "A-F6",
         "code": "F6",
         "name": "Licensed asbestos removal",
         "trade": "asbestos",
@@ -251,25 +232,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          27,
-          37
+          32,
+          42
         ],
         "confirmed": [
-          27,
-          37
+          32,
+          42
         ],
         "risk": [
-          27,
-          37
+          32,
+          42
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction asbestos (C)"
+          "Northgate Build asbestos (A)"
         ]
       },
       {
-        "id": "C-F7",
+        "id": "A-F7",
         "code": "F7",
         "name": "Structural demolition",
         "trade": "demolition",
@@ -278,25 +259,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          42,
-          62
+          47,
+          67
         ],
         "confirmed": [
-          42,
-          62
+          47,
+          67
         ],
         "risk": [
-          42,
-          62
+          47,
+          67
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction demolition (C)"
+          "Northgate Build demolition (A)"
         ]
       },
       {
-        "id": "C-F8",
+        "id": "A-F8",
         "code": "F8",
         "name": "Crush, sort and clear rubble, grub out old foundations",
         "trade": "demolition",
@@ -305,25 +286,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          62,
-          72
+          67,
+          77
         ],
         "confirmed": [
-          62,
-          72
+          67,
+          77
         ],
         "risk": [
-          62,
-          72
+          67,
+          77
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction demolition (C)"
+          "Northgate Build demolition (A)"
         ]
       },
       {
-        "id": "C-G1",
+        "id": "A-G1",
         "code": "G1",
         "name": "Ground investigation boreholes and any contamination remediation",
         "trade": "ground_investigation",
@@ -332,25 +313,25 @@
         "weather_sensitive": true,
         "risk_note": "Contamination can add weeks",
         "base": [
-          72,
-          87
+          77,
+          92
         ],
         "confirmed": [
-          72,
-          87
+          77,
+          92
         ],
         "risk": [
-          72,
-          87
+          77,
+          92
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction ground_investigation (C)"
+          "Northgate Build ground_investigation (A)"
         ]
       },
       {
-        "id": "C-G2",
+        "id": "A-G2",
         "code": "G2",
         "name": "Piling mat and piling",
         "trade": "piling",
@@ -359,25 +340,25 @@
         "weather_sensitive": true,
         "risk_note": "Rig availability, obstructions in ground",
         "base": [
-          87,
-          112
+          92,
+          117
         ],
         "confirmed": [
-          87,
-          112
+          92,
+          117
         ],
         "risk": [
-          87,
-          112
+          92,
+          117
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction piling (C)"
+          "Northgate Build piling (A)"
         ]
       },
       {
-        "id": "C-G3",
+        "id": "A-G3",
         "code": "G3",
         "name": "Pile integrity testing",
         "trade": "piling",
@@ -386,25 +367,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          112,
-          117
+          117,
+          122
         ],
         "confirmed": [
-          112,
-          117
+          117,
+          122
         ],
         "risk": [
-          112,
-          117
+          117,
+          122
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction piling (C)"
+          "Northgate Build piling (A)"
         ]
       },
       {
-        "id": "C-G4",
+        "id": "A-G4",
         "code": "G4",
         "name": "Excavate and cut down piles",
         "trade": "groundworks",
@@ -413,25 +394,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          117,
-          127
+          122,
+          132
         ],
         "confirmed": [
-          117,
-          127
+          122,
+          132
         ],
         "risk": [
-          117,
-          127
+          122,
+          132
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction groundworks (C)"
+          "Northgate Build groundworks (A)"
         ]
       },
       {
-        "id": "C-G5",
+        "id": "A-G5",
         "code": "G5",
         "name": "Pile caps and ground beams",
         "trade": "groundworks",
@@ -440,25 +421,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          127,
-          147
+          132,
+          152
         ],
         "confirmed": [
-          127,
-          147
+          132,
+          152
         ],
         "risk": [
-          127,
-          147
+          132,
+          152
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction groundworks (C)"
+          "Northgate Build groundworks (A)"
         ]
       },
       {
-        "id": "C-G6",
+        "id": "A-G6",
         "code": "G6",
         "name": "Below-ground drainage and service ducts",
         "trade": "groundworks",
@@ -467,25 +448,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          147,
-          157
+          152,
+          162
         ],
         "confirmed": [
-          147,
-          157
+          152,
+          162
         ],
         "risk": [
-          147,
-          157
+          152,
+          162
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction groundworks (C)"
+          "Northgate Build groundworks (A)"
         ]
       },
       {
-        "id": "C-G7",
+        "id": "A-G7",
         "code": "G7",
         "name": "Ground floor slab",
         "trade": "concrete",
@@ -494,25 +475,25 @@
         "weather_sensitive": true,
         "risk_note": "Pours need dry, frost-free weather",
         "base": [
-          157,
-          167
+          162,
+          172
         ],
         "confirmed": [
-          157,
-          167
+          162,
+          172
         ],
         "risk": [
-          157,
-          167
+          162,
+          172
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction concrete (C)"
+          "Northgate Build concrete (A)"
         ]
       },
       {
-        "id": "C-H1",
+        "id": "A-H1",
         "code": "H1",
         "name": "RC frame: level 1 columns, core and slab",
         "trade": "rc_frame",
@@ -521,25 +502,25 @@
         "weather_sensitive": true,
         "risk_note": "Target cycle 7 to 8 days per floor",
         "base": [
-          167,
-          175
+          172,
+          180
         ],
         "confirmed": [
-          167,
-          175
+          172,
+          180
         ],
         "risk": [
-          167,
-          175
+          172,
+          180
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-H2",
+        "id": "A-H2",
         "code": "H2",
         "name": "RC frame: level 2",
         "trade": "rc_frame",
@@ -548,25 +529,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          175,
-          183
+          180,
+          188
         ],
         "confirmed": [
-          175,
-          183
+          180,
+          188
         ],
         "risk": [
-          175,
-          183
+          180,
+          188
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-H3",
+        "id": "A-H3",
         "code": "H3",
         "name": "RC frame: level 3",
         "trade": "rc_frame",
@@ -575,25 +556,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          183,
-          191
+          188,
+          196
         ],
         "confirmed": [
-          183,
-          191
+          188,
+          196
         ],
         "risk": [
-          183,
-          191
+          188,
+          196
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-H4",
+        "id": "A-H4",
         "code": "H4",
         "name": "RC frame: level 4",
         "trade": "rc_frame",
@@ -602,25 +583,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          191,
-          199
+          196,
+          204
         ],
         "confirmed": [
-          191,
-          199
+          196,
+          204
         ],
         "risk": [
-          191,
-          199
+          196,
+          204
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-J2",
+        "id": "A-J2",
         "code": "J2",
         "name": "Windows, lower floors (ground to level 2)",
         "trade": "glazing",
@@ -629,25 +610,25 @@
         "weather_sensitive": false,
         "risk_note": "Window lead times 8 to 12 weeks",
         "base": [
-          191,
-          201
+          196,
+          206
         ],
         "confirmed": [
-          191,
-          201
+          196,
+          206
         ],
         "risk": [
-          191,
-          201
+          196,
+          206
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction glazing (C)"
+          "Northgate Build glazing (A)"
         ]
       },
       {
-        "id": "C-H5",
+        "id": "A-H5",
         "code": "H5",
         "name": "RC frame: level 5",
         "trade": "rc_frame",
@@ -656,25 +637,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          199,
-          207
+          204,
+          212
         ],
         "confirmed": [
-          199,
-          207
+          204,
+          212
         ],
         "risk": [
-          199,
-          207
+          204,
+          212
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-J4",
+        "id": "A-J4",
         "code": "J4",
         "name": "Brick-slip or rainscreen cladding, lower floors",
         "trade": "cladding",
@@ -683,25 +664,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          201,
-          226
+          206,
+          231
         ],
         "confirmed": [
-          201,
-          226
+          206,
+          231
         ],
         "risk": [
-          201,
-          226
+          206,
+          231
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction cladding (C)"
+          "Northgate Build cladding (A)"
         ]
       },
       {
-        "id": "C-K1",
+        "id": "A-K1",
         "code": "K1",
         "name": "Blockwork party walls and cores, lower floors",
         "trade": "bricklaying",
@@ -710,25 +691,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          201,
-          216
+          206,
+          221
         ],
         "confirmed": [
-          201,
-          216
+          206,
+          221
         ],
         "risk": [
-          201,
-          216
+          206,
+          221
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction bricklaying (C)"
+          "Northgate Build bricklaying (A)"
         ]
       },
       {
-        "id": "C-H6",
+        "id": "A-H6",
         "code": "H6",
         "name": "RC frame: roof slab",
         "trade": "rc_frame",
@@ -737,25 +718,25 @@
         "weather_sensitive": true,
         "risk_note": "High wind stops crane lifts",
         "base": [
-          207,
-          215
+          212,
+          220
         ],
         "confirmed": [
-          207,
-          215
+          212,
+          220
         ],
         "risk": [
-          207,
-          215
+          212,
+          220
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-H7",
+        "id": "A-H7",
         "code": "H7",
         "name": "Strike props and back-propping",
         "trade": "rc_frame",
@@ -764,25 +745,25 @@
         "weather_sensitive": false,
         "risk_note": "Props stay until slabs gain strength",
         "base": [
-          215,
-          225
+          220,
+          230
         ],
         "confirmed": [
-          215,
-          225
+          220,
+          230
         ],
         "risk": [
-          215,
-          225
+          220,
+          230
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction rc_frame (C)"
+          "Northgate Build rc_frame (A)"
         ]
       },
       {
-        "id": "C-J1",
+        "id": "A-J1",
         "code": "J1",
         "name": "Roof waterproofing (single-ply membrane)",
         "trade": "roofing",
@@ -791,25 +772,25 @@
         "weather_sensitive": true,
         "risk_note": "Membranes cannot be laid in rain",
         "base": [
-          215,
-          225
+          220,
+          230
         ],
         "confirmed": [
-          215,
-          225
+          220,
+          230
         ],
         "risk": [
-          215,
-          225
+          220,
+          235
         ],
         "critical": true,
-        "risk_flag": false,
+        "risk_flag": true,
         "crews": [
-          "Riverside Construction roofing (C)"
+          "Northgate Build roofing (A)"
         ]
       },
       {
-        "id": "C-J3",
+        "id": "A-J3",
         "code": "J3",
         "name": "Windows, upper floors (level 3 to 5)",
         "trade": "glazing",
@@ -818,25 +799,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          215,
-          225
+          220,
+          230
         ],
         "confirmed": [
-          215,
-          225
+          220,
+          230
         ],
         "risk": [
-          215,
-          225
+          220,
+          230
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction glazing (C)"
+          "Northgate Build glazing (A)"
         ]
       },
       {
-        "id": "C-J6",
+        "id": "A-J6",
         "code": "J6",
         "name": "Building weathertight",
         "trade": "milestone",
@@ -845,23 +826,23 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          225,
-          225
+          230,
+          230
         ],
         "confirmed": [
-          225,
-          225
+          230,
+          230
         ],
         "risk": [
-          225,
-          225
+          235,
+          235
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-K2",
+        "id": "A-K2",
         "code": "K2",
         "name": "Blockwork, upper floors",
         "trade": "bricklaying",
@@ -870,25 +851,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          225,
-          240
+          230,
+          245
         ],
         "confirmed": [
-          225,
-          240
+          230,
+          245
         ],
         "risk": [
-          225,
-          240
+          230,
+          245
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction bricklaying (C)"
+          "Northgate Build bricklaying (A)"
         ]
       },
       {
-        "id": "C-K3",
+        "id": "A-K3",
         "code": "K3",
         "name": "MEP first fix (pipes, cables, ducts), lower floors",
         "trade": "mep",
@@ -897,25 +878,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          225,
-          245
+          230,
+          250
         ],
         "confirmed": [
-          225,
-          245
+          230,
+          250
         ],
         "risk": [
-          225,
-          245
+          235,
+          255
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Sparks crew 2"
+          "Sparks crew 1"
         ]
       },
       {
-        "id": "C-K5",
+        "id": "A-K5",
         "code": "K5",
         "name": "Risers and plant room",
         "trade": "mep",
@@ -924,25 +905,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          225,
-          245
+          230,
+          250
         ],
         "confirmed": [
-          225,
-          245
+          230,
+          250
         ],
         "risk": [
-          225,
-          245
+          230,
+          250
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Voltline crew C"
+          "Voltline crew A"
         ]
       },
       {
-        "id": "C-J5",
+        "id": "A-J5",
         "code": "J5",
         "name": "Cladding, upper floors",
         "trade": "cladding",
@@ -951,25 +932,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          226,
-          251
+          231,
+          256
         ],
         "confirmed": [
-          226,
-          251
+          231,
+          256
         ],
         "risk": [
-          226,
-          251
+          231,
+          256
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction cladding (C)"
+          "Northgate Build cladding (A)"
         ]
       },
       {
-        "id": "C-K4",
+        "id": "A-K4",
         "code": "K4",
         "name": "MEP first fix, upper floors",
         "trade": "mep",
@@ -978,25 +959,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          245,
-          265
+          250,
+          270
         ],
         "confirmed": [
-          245,
-          265
+          250,
+          270
         ],
         "risk": [
-          245,
-          265
+          255,
+          275
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Sparks crew 2"
+          "Sparks crew 1"
         ]
       },
       {
-        "id": "C-K6",
+        "id": "A-K6",
         "code": "K6",
         "name": "First fix inspection, lower floors",
         "trade": "building_control",
@@ -1005,23 +986,23 @@
         "weather_sensitive": false,
         "risk_note": "Late inspector stalls drylining",
         "base": [
-          245,
-          247
+          250,
+          252
         ],
         "confirmed": [
-          245,
-          247
+          250,
+          252
         ],
         "risk": [
-          245,
-          247
+          255,
+          257
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-K16",
+        "id": "A-K16",
         "code": "K16",
         "name": "Lift installation",
         "trade": "lifts",
@@ -1030,25 +1011,25 @@
         "weather_sensitive": false,
         "risk_note": "Lift lead times are long",
         "base": [
-          245,
-          275
+          250,
+          280
         ],
         "confirmed": [
-          245,
-          275
+          250,
+          280
         ],
         "risk": [
-          245,
-          275
+          250,
+          280
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction lifts (C)"
+          "Northgate Build lifts (A)"
         ]
       },
       {
-        "id": "C-L1",
+        "id": "A-L1",
         "code": "L1",
         "name": "Permanent power and water energised",
         "trade": "utilities",
@@ -1057,23 +1038,23 @@
         "weather_sensitive": false,
         "risk_note": "Late connection blocks commissioning",
         "base": [
-          245,
-          250
+          250,
+          255
         ],
         "confirmed": [
-          245,
-          250
+          250,
+          255
         ],
         "risk": [
-          245,
-          250
+          250,
+          255
         ],
         "critical": false,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-K8",
+        "id": "A-K8",
         "code": "K8",
         "name": "Drylining, plastering and screed, lower floors",
         "trade": "drylining",
@@ -1082,25 +1063,25 @@
         "weather_sensitive": false,
         "risk_note": "Screed and plaster need drying time",
         "base": [
-          247,
-          267
+          252,
+          272
         ],
         "confirmed": [
-          247,
-          267
+          252,
+          272
         ],
         "risk": [
-          247,
-          267
+          257,
+          277
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction drylining (C)"
+          "Northgate Build drylining (A)"
         ]
       },
       {
-        "id": "C-J7",
+        "id": "A-J7",
         "code": "J7",
         "name": "Strike scaffold, fit balconies",
         "trade": "scaffolding",
@@ -1109,25 +1090,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          251,
-          261
+          256,
+          266
         ],
         "confirmed": [
-          251,
-          261
+          256,
+          266
         ],
         "risk": [
-          251,
-          261
+          256,
+          266
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction scaffolding (C)"
+          "Northgate Build scaffolding (A)"
         ]
       },
       {
-        "id": "C-L3",
+        "id": "A-L3",
         "code": "L3",
         "name": "External works, paving and landscaping",
         "trade": "landscaping",
@@ -1136,25 +1117,25 @@
         "weather_sensitive": true,
         "risk_note": null,
         "base": [
-          261,
-          286
+          266,
+          291
         ],
         "confirmed": [
-          261,
-          286
+          266,
+          291
         ],
         "risk": [
-          261,
-          286
+          266,
+          291
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction landscaping (C)"
+          "Northgate Build landscaping (A)"
         ]
       },
       {
-        "id": "C-K7",
+        "id": "A-K7",
         "code": "K7",
         "name": "First fix inspection, upper floors",
         "trade": "building_control",
@@ -1163,23 +1144,23 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          265,
-          267
+          270,
+          272
         ],
         "confirmed": [
-          265,
-          267
+          270,
+          272
         ],
         "risk": [
-          265,
-          267
+          275,
+          277
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-K9",
+        "id": "A-K9",
         "code": "K9",
         "name": "Drylining, plastering and screed, upper floors",
         "trade": "drylining",
@@ -1188,25 +1169,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          267,
-          287
+          272,
+          292
         ],
         "confirmed": [
-          267,
-          287
+          272,
+          292
         ],
         "risk": [
-          267,
-          287
+          277,
+          297
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction drylining (C)"
+          "Northgate Build drylining (A)"
         ]
       },
       {
-        "id": "C-K10",
+        "id": "A-K10",
         "code": "K10",
         "name": "Kitchens, bathrooms, doors and joinery, lower floors",
         "trade": "carpentry",
@@ -1215,25 +1196,25 @@
         "weather_sensitive": false,
         "risk_note": "Kitchen and worktop lead times",
         "base": [
-          267,
-          287
+          272,
+          292
         ],
         "confirmed": [
-          267,
-          287
+          272,
+          292
         ],
         "risk": [
-          267,
-          287
+          277,
+          297
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction carpentry (C)"
+          "Northgate Build carpentry (A)"
         ]
       },
       {
-        "id": "C-K11",
+        "id": "A-K11",
         "code": "K11",
         "name": "Kitchens, bathrooms, doors and joinery, upper floors",
         "trade": "carpentry",
@@ -1242,25 +1223,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          287,
-          307
+          292,
+          312
         ],
         "confirmed": [
-          287,
-          307
+          292,
+          312
         ],
         "risk": [
-          287,
-          307
+          297,
+          317
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction carpentry (C)"
+          "Northgate Build carpentry (A)"
         ]
       },
       {
-        "id": "C-K12",
+        "id": "A-K12",
         "code": "K12",
         "name": "Decoration and flooring, lower floors",
         "trade": "finishes",
@@ -1269,25 +1250,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          287,
-          302
+          292,
+          307
         ],
         "confirmed": [
-          287,
-          302
+          292,
+          307
         ],
         "risk": [
-          287,
-          302
+          297,
+          312
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction finishes (C)"
+          "Northgate Build finishes (A)"
         ]
       },
       {
-        "id": "C-K14",
+        "id": "A-K14",
         "code": "K14",
         "name": "MEP second fix (sockets, taps, heat pumps), lower floors",
         "trade": "mep",
@@ -1296,25 +1277,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          302,
-          312
+          307,
+          317
         ],
         "confirmed": [
-          302,
-          312
+          307,
+          317
         ],
         "risk": [
-          302,
-          312
+          312,
+          322
         ],
         "critical": false,
         "risk_flag": false,
         "crews": [
-          "Sparks crew 2"
+          "Sparks crew 1"
         ]
       },
       {
-        "id": "C-K13",
+        "id": "A-K13",
         "code": "K13",
         "name": "Decoration and flooring, upper floors",
         "trade": "finishes",
@@ -1323,25 +1304,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          307,
-          322
+          312,
+          327
         ],
         "confirmed": [
-          307,
-          322
+          312,
+          327
         ],
         "risk": [
-          307,
-          322
+          317,
+          332
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Riverside Construction finishes (C)"
+          "Northgate Build finishes (A)"
         ]
       },
       {
-        "id": "C-K15",
+        "id": "A-K15",
         "code": "K15",
         "name": "MEP second fix, upper floors",
         "trade": "mep",
@@ -1350,25 +1331,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          322,
-          332
+          327,
+          337
         ],
         "confirmed": [
-          322,
-          332
+          327,
+          337
         ],
         "risk": [
-          322,
-          332
+          332,
+          342
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Sparks crew 2"
+          "Sparks crew 1"
         ]
       },
       {
-        "id": "C-L2",
+        "id": "A-L2",
         "code": "L2",
         "name": "Test and commission fire alarm, smoke vents, ventilation, electrics",
         "trade": "mep",
@@ -1377,25 +1358,25 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          332,
-          352
+          337,
+          357
         ],
         "confirmed": [
-          332,
-          352
+          337,
+          357
         ],
         "risk": [
-          332,
-          352
+          342,
+          362
         ],
         "critical": true,
         "risk_flag": false,
         "crews": [
-          "Sparks crew 2"
+          "Sparks crew 1"
         ]
       },
       {
-        "id": "C-L4",
+        "id": "A-L4",
         "code": "L4",
         "name": "Snagging and defect fixes",
         "trade": "general_contractor",
@@ -1404,23 +1385,23 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          352,
-          367
+          357,
+          372
         ],
         "confirmed": [
-          352,
-          367
+          357,
+          372
         ],
         "risk": [
-          352,
-          367
+          362,
+          377
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-L5",
+        "id": "A-L5",
         "code": "L5",
         "name": "Building control completion certificate",
         "trade": "building_control",
@@ -1429,23 +1410,23 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          352,
-          362
+          357,
+          367
         ],
         "confirmed": [
-          352,
-          362
+          357,
+          367
         ],
         "risk": [
-          352,
-          362
+          362,
+          372
         ],
         "critical": false,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-L6",
+        "id": "A-L6",
         "code": "L6",
         "name": "Practical completion and handover to developer",
         "trade": "developer",
@@ -1454,23 +1435,23 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          367,
-          372
+          372,
+          377
         ],
         "confirmed": [
-          367,
-          372
+          372,
+          377
         ],
         "risk": [
-          367,
-          372
+          377,
+          382
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       },
       {
-        "id": "C-L7",
+        "id": "A-L7",
         "code": "L7",
         "name": "Sales completions and first occupation",
         "trade": "developer",
@@ -1479,25 +1460,34 @@
         "weather_sensitive": false,
         "risk_note": null,
         "base": [
-          372,
-          392
+          377,
+          397
         ],
         "confirmed": [
-          372,
-          392
+          377,
+          397
         ],
         "risk": [
-          372,
-          392
+          382,
+          402
         ],
         "critical": true,
         "risk_flag": false,
         "crews": []
       }
+    ],
+    "risk_signals": [
+      {
+        "step_id": "A-J1",
+        "step_code": "J1",
+        "days": 5,
+        "kind": "weather",
+        "detail": "Rain forecast days 221\u2013224 (18 mm)"
+      }
     ]
   },
-  "labour": {
-    "site_id": "C",
+  "/api/sites/A/labour": {
+    "site_id": "A",
     "demand": {
       "rc_frame": [
         [
@@ -1518,6 +1508,26 @@
         ],
         [
           224,
+          8
+        ],
+        [
+          225,
+          8
+        ],
+        [
+          226,
+          8
+        ],
+        [
+          227,
+          8
+        ],
+        [
+          228,
+          8
+        ],
+        [
+          229,
           8
         ]
       ],
@@ -1541,6 +1551,26 @@
         [
           224,
           4
+        ],
+        [
+          225,
+          4
+        ],
+        [
+          226,
+          4
+        ],
+        [
+          227,
+          4
+        ],
+        [
+          228,
+          4
+        ],
+        [
+          229,
+          4
         ]
       ],
       "glazing": [
@@ -1562,6 +1592,26 @@
         ],
         [
           224,
+          4
+        ],
+        [
+          225,
+          4
+        ],
+        [
+          226,
+          4
+        ],
+        [
+          227,
+          4
+        ],
+        [
+          228,
+          4
+        ],
+        [
+          229,
           4
         ]
       ],
@@ -1689,29 +1739,29 @@
         [
           250,
           5
-        ]
-      ],
-      "scaffolding": [
+        ],
         [
           251,
-          4
+          5
         ],
         [
           252,
-          4
+          5
         ],
         [
           253,
-          4
+          5
         ],
         [
           254,
-          4
+          5
         ],
         [
           255,
-          4
-        ],
+          5
+        ]
+      ],
+      "scaffolding": [
         [
           256,
           4
@@ -1731,23 +1781,7 @@
       ],
       "bricklaying": [
         [
-          225,
-          5
-        ],
-        [
-          226,
-          5
-        ],
-        [
-          227,
-          5
-        ],
-        [
-          228,
-          5
-        ],
-        [
-          229,
+          220,
           5
         ],
         [
@@ -1789,29 +1823,29 @@
         [
           239,
           5
+        ],
+        [
+          240,
+          5
+        ],
+        [
+          241,
+          5
+        ],
+        [
+          242,
+          5
+        ],
+        [
+          243,
+          5
+        ],
+        [
+          244,
+          5
         ]
       ],
       "mep": [
-        [
-          225,
-          12
-        ],
-        [
-          226,
-          12
-        ],
-        [
-          227,
-          12
-        ],
-        [
-          228,
-          12
-        ],
-        [
-          229,
-          12
-        ],
         [
           230,
           12
@@ -1874,23 +1908,23 @@
         ],
         [
           245,
-          6
+          12
         ],
         [
           246,
-          6
+          12
         ],
         [
           247,
-          6
+          12
         ],
         [
           248,
-          6
+          12
         ],
         [
           249,
-          6
+          12
         ],
         [
           250,
@@ -1935,26 +1969,6 @@
       ],
       "drylining": [
         [
-          247,
-          5
-        ],
-        [
-          248,
-          5
-        ],
-        [
-          249,
-          5
-        ],
-        [
-          250,
-          5
-        ],
-        [
-          251,
-          5
-        ],
-        [
           252,
           5
         ],
@@ -1988,26 +2002,6 @@
         ]
       ],
       "lifts": [
-        [
-          245,
-          3
-        ],
-        [
-          246,
-          3
-        ],
-        [
-          247,
-          3
-        ],
-        [
-          248,
-          3
-        ],
-        [
-          249,
-          3
-        ],
         [
           250,
           3
@@ -2050,7 +2044,374 @@
         ]
       ]
     },
-    "imbalances": []
+    "imbalances": [],
+    "bookings": [
+      {
+        "crew": "Northgate Build cladding (A)",
+        "size": 5,
+        "step_code": "J4",
+        "trade": "cladding",
+        "booking": [
+          206,
+          231
+        ],
+        "step_active": [
+          206,
+          231
+        ]
+      },
+      {
+        "crew": "Northgate Build bricklaying (A)",
+        "size": 5,
+        "step_code": "K1",
+        "trade": "bricklaying",
+        "booking": [
+          206,
+          221
+        ],
+        "step_active": [
+          206,
+          221
+        ]
+      },
+      {
+        "crew": "Northgate Build rc_frame (A)",
+        "size": 8,
+        "step_code": "H6",
+        "trade": "rc_frame",
+        "booking": [
+          212,
+          220
+        ],
+        "step_active": [
+          212,
+          220
+        ]
+      },
+      {
+        "crew": "Northgate Build rc_frame (A)",
+        "size": 8,
+        "step_code": "H7",
+        "trade": "rc_frame",
+        "booking": [
+          220,
+          230
+        ],
+        "step_active": [
+          220,
+          230
+        ]
+      },
+      {
+        "crew": "Northgate Build roofing (A)",
+        "size": 4,
+        "step_code": "J1",
+        "trade": "roofing",
+        "booking": [
+          220,
+          230
+        ],
+        "step_active": [
+          220,
+          230
+        ]
+      },
+      {
+        "crew": "Northgate Build glazing (A)",
+        "size": 4,
+        "step_code": "J3",
+        "trade": "glazing",
+        "booking": [
+          220,
+          230
+        ],
+        "step_active": [
+          220,
+          230
+        ]
+      },
+      {
+        "crew": "Northgate Build bricklaying (A)",
+        "size": 5,
+        "step_code": "K2",
+        "trade": "bricklaying",
+        "booking": [
+          230,
+          245
+        ],
+        "step_active": [
+          230,
+          245
+        ]
+      },
+      {
+        "crew": "Sparks crew 1",
+        "size": 6,
+        "step_code": "K3",
+        "trade": "mep",
+        "booking": [
+          230,
+          250
+        ],
+        "step_active": [
+          230,
+          250
+        ]
+      },
+      {
+        "crew": "Voltline crew A",
+        "size": 6,
+        "step_code": "K5",
+        "trade": "mep",
+        "booking": [
+          230,
+          250
+        ],
+        "step_active": [
+          230,
+          250
+        ]
+      },
+      {
+        "crew": "Northgate Build cladding (A)",
+        "size": 5,
+        "step_code": "J5",
+        "trade": "cladding",
+        "booking": [
+          231,
+          256
+        ],
+        "step_active": [
+          231,
+          256
+        ]
+      },
+      {
+        "crew": "Northgate Build lifts (A)",
+        "size": 3,
+        "step_code": "K16",
+        "trade": "lifts",
+        "booking": [
+          250,
+          280
+        ],
+        "step_active": [
+          250,
+          280
+        ]
+      },
+      {
+        "crew": "Sparks crew 1",
+        "size": 6,
+        "step_code": "K4",
+        "trade": "mep",
+        "booking": [
+          250,
+          270
+        ],
+        "step_active": [
+          250,
+          270
+        ]
+      },
+      {
+        "crew": "Northgate Build drylining (A)",
+        "size": 5,
+        "step_code": "K8",
+        "trade": "drylining",
+        "booking": [
+          252,
+          272
+        ],
+        "step_active": [
+          252,
+          272
+        ]
+      },
+      {
+        "crew": "Northgate Build scaffolding (A)",
+        "size": 4,
+        "step_code": "J7",
+        "trade": "scaffolding",
+        "booking": [
+          256,
+          266
+        ],
+        "step_active": [
+          256,
+          266
+        ]
+      }
+    ]
   },
-  "proposals": []
+  "/api/sites/A/trades": {
+    "site_id": "A",
+    "trades": {
+      "groundworks": [
+        [
+          12,
+          22
+        ],
+        [
+          122,
+          162
+        ]
+      ],
+      "demolition": [
+        [
+          22,
+          32
+        ],
+        [
+          47,
+          77
+        ]
+      ],
+      "asbestos": [
+        [
+          32,
+          42
+        ]
+      ],
+      "ground_investigation": [
+        [
+          77,
+          92
+        ]
+      ],
+      "piling": [
+        [
+          92,
+          122
+        ]
+      ],
+      "concrete": [
+        [
+          162,
+          172
+        ]
+      ],
+      "rc_frame": [
+        [
+          172,
+          230
+        ]
+      ],
+      "roofing": [
+        [
+          220,
+          230
+        ]
+      ],
+      "glazing": [
+        [
+          196,
+          206
+        ],
+        [
+          220,
+          230
+        ]
+      ],
+      "cladding": [
+        [
+          206,
+          256
+        ]
+      ],
+      "scaffolding": [
+        [
+          256,
+          266
+        ]
+      ],
+      "bricklaying": [
+        [
+          206,
+          221
+        ],
+        [
+          230,
+          245
+        ]
+      ],
+      "mep": [
+        [
+          230,
+          270
+        ],
+        [
+          307,
+          317
+        ],
+        [
+          327,
+          357
+        ]
+      ],
+      "drylining": [
+        [
+          252,
+          292
+        ]
+      ],
+      "carpentry": [
+        [
+          272,
+          312
+        ]
+      ],
+      "finishes": [
+        [
+          292,
+          307
+        ],
+        [
+          312,
+          327
+        ]
+      ],
+      "lifts": [
+        [
+          250,
+          280
+        ]
+      ],
+      "landscaping": [
+        [
+          266,
+          291
+        ]
+      ]
+    },
+    "idle": [],
+    "trade_labels": {
+      "roofing": "Roofing",
+      "general_contractor": "General contractor",
+      "bricklaying": "Bricklaying",
+      "asbestos": "Asbestos",
+      "cladding": "Cladding",
+      "council": "Council",
+      "concrete": "Concrete",
+      "ground_investigation": "Ground investigation",
+      "piling": "Piling",
+      "building_control": "Building control",
+      "mep": "M&E",
+      "surveyor": "Surveyor",
+      "drylining": "Drylining",
+      "carpentry": "Carpentry",
+      "rc_frame": "RC frame",
+      "milestone": "Milestone",
+      "utilities": "Utilities",
+      "finishes": "Finishes",
+      "lifts": "Lifts",
+      "scaffolding": "Scaffolding",
+      "groundworks": "Groundworks",
+      "glazing": "Glazing",
+      "landscaping": "Landscaping",
+      "demolition": "Demolition",
+      "developer": "Developer"
+    }
+  },
+  "/api/proposals?site_id=A": []
 }

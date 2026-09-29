@@ -1,0 +1,242 @@
+{
+  "/api/me": {
+    "id": "sam",
+    "name": "Sam",
+    "role": "SUB_PLANNER",
+    "org": "Sparks Electrical",
+    "sites": []
+  },
+  "/api/sites": [],
+  "/api/sync-board": {
+    "gaps": [],
+    "outcomes": [],
+    "days_protected": 0,
+    "value_protected_gbp": 0
+  },
+  "/api/city": [
+    {
+      "anon_id": "137ad60e",
+      "anon_label": "#137",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Envelope",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    },
+    {
+      "anon_id": "c66e9f08",
+      "anon_label": "#C66",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Substructure",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    },
+    {
+      "anon_id": "d41dca08",
+      "anon_label": "#D41",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Envelope",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    },
+    {
+      "anon_id": "4ecf711c",
+      "anon_label": "#4EC",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Demolition and enabling",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    }
+  ],
+  "/api/offers": [],
+  "/api/requests": {
+    "incoming": [
+      {
+        "id": "cp-186",
+        "kind": "proposal",
+        "status": "DONE",
+        "created_at": "08:13",
+        "title": "Move Sparks crew 1 for days 230\u2013235, guaranteed back",
+        "detail": "Days 230\u2013235: Riverside Construction, Bow Wharf (K3). From day 235: back to Northgate Build, Hackney Wick Yard.",
+        "counterparty": "Northgate Build",
+        "tracker": [
+          {
+            "party": "Riverside Construction",
+            "label": "requests the crew",
+            "state": "done",
+            "at": "08:04"
+          },
+          {
+            "party": "Northgate Build",
+            "label": "accepts and sets terms",
+            "state": "done",
+            "at": "08:07"
+          },
+          {
+            "party": "Sparks Electrical",
+            "label": "accepts the move",
+            "state": "done",
+            "at": "08:16"
+          },
+          {
+            "party": "Riverside Construction",
+            "label": "confirms booking",
+            "state": "done",
+            "at": "08:28"
+          },
+          {
+            "party": "Northgate Build",
+            "label": "confirms booking",
+            "state": "done",
+            "at": "08:31"
+          }
+        ],
+        "actions": []
+      }
+    ],
+    "outgoing": []
+  },
+  "/api/notifications": [
+    {
+      "id": "n-202",
+      "text": "Sync complete: the crew move is confirmed by both companies.",
+      "at": "08:31",
+      "read": false,
+      "ref": "cp-186"
+    },
+    {
+      "id": "n-189",
+      "text": "New proposal: move Sparks crew 1 to Riverside Construction, days 230\u2013235, back by day 235.",
+      "at": "08:16",
+      "read": false,
+      "ref": "cp-186"
+    }
+  ],
+  "/api/links": [],
+  "/api/report": {
+    "days_protected": 0,
+    "value_gbp": 0,
+    "idle_crew_days_used": 0,
+    "day_value": null,
+    "rows": []
+  },
+  "/api/events": [
+    {
+      "id": "ev-190",
+      "type": "ProposalAccepted",
+      "user_id": "sam",
+      "site_id": null,
+      "org_id": "SPARKS",
+      "at": "08:19",
+      "payload": {
+        "cross_proposal_id": "cp-186"
+      },
+      "source": {
+        "kind": "system"
+      },
+      "version": null
+    }
+  ],
+  "/api/sub/bookings": [
+    {
+      "crew": "Sparks crew 1",
+      "crew_id": "SPARKS-S1",
+      "site_name": "Bow Wharf",
+      "org_name": "Riverside Construction",
+      "step_code": "K3",
+      "step_name": "MEP first fix (pipes, cables, ducts), lower floors",
+      "booking": [
+        230,
+        235
+      ],
+      "step_active": [
+        225,
+        245
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 1",
+      "crew_id": "SPARKS-S1",
+      "site_name": "Hackney Wick Yard",
+      "org_name": "Northgate Build",
+      "step_code": "K3",
+      "step_name": "MEP first fix (pipes, cables, ducts), lower floors",
+      "booking": [
+        235,
+        255
+      ],
+      "step_active": [
+        235,
+        255
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 1",
+      "crew_id": "SPARKS-S1",
+      "site_name": "Hackney Wick Yard",
+      "org_name": "Northgate Build",
+      "step_code": "K4",
+      "step_name": "MEP first fix, upper floors",
+      "booking": [
+        250,
+        270
+      ],
+      "step_active": [
+        255,
+        275
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 2",
+      "crew_id": "SPARKS-S2",
+      "site_name": "Bow Wharf",
+      "org_name": "Riverside Construction",
+      "step_code": "K3",
+      "step_name": "MEP first fix (pipes, cables, ducts), lower floors",
+      "booking": [
+        225,
+        245
+      ],
+      "step_active": [
+        225,
+        245
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 2",
+      "crew_id": "SPARKS-S2",
+      "site_name": "Bow Wharf",
+      "org_name": "Riverside Construction",
+      "step_code": "K4",
+      "step_name": "MEP first fix, upper floors",
+      "booking": [
+        245,
+        265
+      ],
+      "step_active": [
+        245,
+        265
+      ],
+      "idle": []
+    }
+  ]
+}

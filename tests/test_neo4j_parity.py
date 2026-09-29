@@ -26,6 +26,7 @@ def test_cypher_propagation_matches_python(mirror):
     w = build_world()
     w.steps["A-J1"].delay_days = 5
     w.steps["C-J1"].risk_days = 2
+    w.steps["B-G5"].lag_days = 3  # timeline start shift (spec v2.1)
     mirror.sync(w)
     for site in w.sites:
         for mode in ("baseline", "confirmed", "risk"):

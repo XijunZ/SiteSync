@@ -6,13 +6,22 @@ from pydantic import BaseModel
 
 from app import ingest, llm, plaud, signals, views
 from app.graph_neo4j import mirror_sync
-from app.network import decide_cross_proposal, decide_link, request_link
-from app.proposals import StaleProposal, build_proposal, decide_proposal
+from app.network import (decide_cross_proposal, decide_link, decide_view, publish_offer, request_link, request_view,
+                         withdraw_offer)
+from app.proposals import StaleProposal, build_proposal, decide_proposal, edit_to_changes, preview_edit
 from app.sync_engine import approve_option
 from seed.seed import build_world
 
 app = FastAPI(title="SiteSync")
-STATE = {"world": build_world()}
+
+
+def demo_world():
+    w = build_world()
+    signals.seed_demo_signal(w)
+    return w
+
+
+STATE = {"world": demo_world()}
 STATIC = Path(__file__).resolve().parent.parent / "static"
 
 
@@ -67,8 +76,33 @@ class DecideIn(BaseModel):
 
 
 class LinkIn(BaseModel):
+    offer_id: str
+    purpose: str = "Pool crew capacity"
+
+
+class OfferIn(BaseModel):
+    gap_id: str
+
+
+class ViewIn(BaseModel):
     anon_id: str
-    purpose: str
+
+
+class ShareIn(BaseModel):
+    share: bool
+
+
+class EditIn(BaseModel):
+    site_id: str
+    step_id: str
+    start: int | None = None
+    finish: int | None = None
+    reason: str | None = None
+
+
+class ClearIn(BaseModel):
+    site_id: str
+    step_code: str
 
 
 class ApproveIn(BaseModel):
@@ -147,9 +181,19 @@ def ingest_text(body: TextIn, x_user_id: str | None = Header(None)):
 def plaud_recordings(x_user_id: str | None = Header(None)):
     user_of(x_user_id)
     try:
-        return {"ids": plaud.recent_ids()}
+        return {"recordings": plaud.recordings()}
     except plaud.PlaudError as e:
         raise ApiError(502, "plaud", str(e))
+
+
+@app.get("/api/plaud/recordings/{file_id}/transcript")
+def plaud_transcript(file_id: str, x_user_id: str | None = Header(None)):
+    user_of(x_user_id)
+    try:
+        raw = plaud.transcript_raw(file_id)
+    except plaud.PlaudError as e:
+        raise ApiError(502, "plaud", str(e))
+    return {"id": file_id, "text": plaud.parse_transcript(raw), "speakers": plaud.parse_speakers(raw), "raw": raw}
 
 
 @app.post("/api/ingest/plaud")
@@ -163,6 +207,20 @@ def ingest_plaud(body: PlaudIn, x_user_id: str | None = Header(None)):
     except plaud.PlaudError as e:
         raise ApiError(502, "plaud", str(e))
     return _propose_from_text(u, body.site_id, text, "voice", {"plaud_file_id": fid})
+
+
+@app.post("/api/proposals/preview")
+def proposal_preview(body: EditIn, x_user_id: str | None = Header(None)):
+    return preview_edit(W(), user_of(x_user_id), body.site_id, body.step_id, body.start, body.finish)
+
+
+@app.post("/api/proposals")
+def proposal_create(body: EditIn, x_user_id: str | None = Header(None)):
+    u = user_of(x_user_id)
+    views.check_site(W(), u, body.site_id)
+    changes = edit_to_changes(W(), body.site_id, body.step_id, body.start, body.finish)
+    return build_proposal(W(), u, body.site_id, changes, {"kind": "timeline", "reason": body.reason or "update",
+                                                         "excerpt": None})
 
 
 @app.get("/api/proposals")
@@ -184,6 +242,13 @@ def decide(pid: str, body: DecideIn, x_user_id: str | None = Header(None)):
 def signal(body: SignalIn, x_user_id: str | None = Header(None)):
     user_of(x_user_id)
     return signals.raise_risk(W(), body.site_id, body.step_code, body.days, body.kind, body.detail)
+
+
+@app.post("/api/signals/clear")
+def signal_clear(body: ClearIn, x_user_id: str | None = Header(None)):
+    u = user_of(x_user_id)
+    views.check_site(W(), u, body.site_id)
+    return signals.clear_risk(W(), body.site_id, body.step_code, u.id)
 
 
 @app.post("/api/signals/weather/refresh")
@@ -210,9 +275,48 @@ def city(x_user_id: str | None = Header(None)):
     return views.city_view(W(), user_of(x_user_id))
 
 
+@app.get("/api/sites/{site_id}/trades")
+def site_trades(site_id: str, x_user_id: str | None = Header(None)):
+    return views.trades_view(W(), user_of(x_user_id), site_id)
+
+
+@app.get("/api/city/{anon}/overlay")
+def city_overlay(anon: str, x_user_id: str | None = Header(None)):
+    return views.overlay_view(W(), user_of(x_user_id), anon)
+
+
+@app.post("/api/offers")
+def offer_publish(body: OfferIn, x_user_id: str | None = Header(None)):
+    o = publish_offer(W(), user_of(x_user_id), body.gap_id)
+    return {"id": o.id, "status": o.status}
+
+
+@app.get("/api/offers")
+def offers(x_user_id: str | None = Header(None)):
+    return views.offers_view(W(), user_of(x_user_id))
+
+
+@app.post("/api/offers/{offer_id}/withdraw")
+def offer_withdraw(offer_id: str, x_user_id: str | None = Header(None)):
+    o = withdraw_offer(W(), user_of(x_user_id), offer_id)
+    return {"id": o.id, "status": o.status}
+
+
+@app.post("/api/view-requests")
+def view_request(body: ViewIn, x_user_id: str | None = Header(None)):
+    g = request_view(W(), user_of(x_user_id), body.anon_id)
+    return {"id": g.id, "status": g.status}
+
+
+@app.post("/api/view-requests/{view_id}/decide")
+def view_decide(view_id: str, body: ShareIn, x_user_id: str | None = Header(None)):
+    g = decide_view(W(), user_of(x_user_id), view_id, body.share)
+    return {"id": g.id, "status": g.status}
+
+
 @app.post("/api/links")
 def link_request(body: LinkIn, x_user_id: str | None = Header(None)):
-    link = request_link(W(), user_of(x_user_id), body.anon_id, body.purpose)
+    link = request_link(W(), user_of(x_user_id), body.offer_id, body.purpose)
     return {"id": link.id, "status": link.status}
 
 
@@ -237,11 +341,34 @@ def cross_decide(cp_id: str, body: DecideIn, x_user_id: str | None = Header(None
     return decide_cross_proposal(W(), user_of(x_user_id), cp_id, body.accept)
 
 
+@app.get("/api/requests")
+def requests(x_user_id: str | None = Header(None)):
+    return views.requests_view(W(), user_of(x_user_id))
+
+
+@app.get("/api/notifications")
+def notifications(x_user_id: str | None = Header(None)):
+    return views.notifications_view(W(), user_of(x_user_id))
+
+
+@app.post("/api/notifications/read")
+def notifications_read(x_user_id: str | None = Header(None)):
+    return views.mark_read(W(), user_of(x_user_id))
+
+
+@app.get("/api/sub/bookings")
+def sub_bookings(x_user_id: str | None = Header(None)):
+    return views.sub_bookings_view(W(), user_of(x_user_id))
+
+
+@app.get("/api/report")
+def report(x_user_id: str | None = Header(None)):
+    return views.report_view(W(), user_of(x_user_id))
+
+
 @app.get("/api/events")
 def events(x_user_id: str | None = Header(None)):
-    u = user_of(x_user_id)
-    mine = set(views.visible_sites(W(), u))
-    return [e for e in W().events if e["site_id"] in mine or (e["site_id"] is None and e["user_id"] == u.id)]
+    return views.events_view(W(), user_of(x_user_id))
 
 
 @app.get("/api/llm/log")
@@ -251,6 +378,6 @@ def llm_log():
 
 @app.post("/api/demo/reset")
 def reset():
-    STATE["world"] = build_world()
+    STATE["world"] = demo_world()
     llm.CALL_LOG.clear()
     return {"ok": True, "neo4j_synced": mirror_sync(W())}

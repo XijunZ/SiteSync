@@ -1,0 +1,151 @@
+{
+  "/api/me": {
+    "id": "sam",
+    "name": "Sam",
+    "role": "SUB_PLANNER",
+    "org": "Sparks Electrical",
+    "sites": []
+  },
+  "/api/sites": [],
+  "/api/sync-board": {
+    "gaps": [],
+    "outcomes": [],
+    "days_protected": 0,
+    "value_protected_gbp": 0
+  },
+  "/api/city": [
+    {
+      "anon_id": "137ad60e",
+      "anon_label": "#137",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Envelope",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    },
+    {
+      "anon_id": "c66e9f08",
+      "anon_label": "#C66",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Substructure",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    },
+    {
+      "anon_id": "d41dca08",
+      "anon_label": "#D41",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Envelope",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    },
+    {
+      "anon_id": "4ecf711c",
+      "anon_label": "#4EC",
+      "area": "East London",
+      "distance_band": "~1 km",
+      "km": 0.0,
+      "phase": "Demolition and enabling",
+      "project_type": "Mid-rise residential",
+      "offers": [],
+      "view_status": null,
+      "view_request_id": null
+    }
+  ],
+  "/api/offers": [],
+  "/api/requests": {
+    "incoming": [],
+    "outgoing": []
+  },
+  "/api/notifications": [],
+  "/api/links": [],
+  "/api/report": {
+    "days_protected": 0,
+    "value_gbp": 0,
+    "idle_crew_days_used": 0,
+    "day_value": null,
+    "rows": []
+  },
+  "/api/events": [],
+  "/api/sub/bookings": [
+    {
+      "crew": "Sparks crew 1",
+      "crew_id": "SPARKS-S1",
+      "site_name": "Hackney Wick Yard",
+      "org_name": "Northgate Build",
+      "step_code": "K3",
+      "step_name": "MEP first fix (pipes, cables, ducts), lower floors",
+      "booking": [
+        230,
+        250
+      ],
+      "step_active": [
+        230,
+        250
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 1",
+      "crew_id": "SPARKS-S1",
+      "site_name": "Hackney Wick Yard",
+      "org_name": "Northgate Build",
+      "step_code": "K4",
+      "step_name": "MEP first fix, upper floors",
+      "booking": [
+        250,
+        270
+      ],
+      "step_active": [
+        250,
+        270
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 2",
+      "crew_id": "SPARKS-S2",
+      "site_name": "Bow Wharf",
+      "org_name": "Riverside Construction",
+      "step_code": "K3",
+      "step_name": "MEP first fix (pipes, cables, ducts), lower floors",
+      "booking": [
+        225,
+        245
+      ],
+      "step_active": [
+        225,
+        245
+      ],
+      "idle": []
+    },
+    {
+      "crew": "Sparks crew 2",
+      "crew_id": "SPARKS-S2",
+      "site_name": "Bow Wharf",
+      "org_name": "Riverside Construction",
+      "step_code": "K4",
+      "step_name": "MEP first fix, upper floors",
+      "booking": [
+        245,
+        265
+      ],
+      "step_active": [
+        245,
+        265
+      ],
+      "idle": []
+    }
+  ]
+}

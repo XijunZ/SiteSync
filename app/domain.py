@@ -48,6 +48,7 @@ class Step:
     headcount: int
     delay_days: int = 0
     risk_days: int = 0
+    lag_days: int = 0  # start shift: start = natural start + lag (timeline edits)
 
 
 @dataclass
@@ -85,6 +86,39 @@ class Link:
     purpose: str
     status: str = "REQUESTED"  # REQUESTED | ACTIVE | DECLINED
     pool: dict | None = None
+    offer_id: str | None = None  # the offer the borrower asked for (spec §5.7)
+    target_step_id: str | None = None  # borrower's step the crew would work on
+    created_at: str | None = None
+    decided_at: str | None = None
+
+
+@dataclass
+class Offer:
+    id: str
+    gap_id: str
+    org_id: str  # lender
+    site_id: str
+    crew_id: str
+    step_id: str
+    trade: str
+    workers: int
+    start: int
+    end: int
+    area: str
+    status: str = "OPEN"  # OPEN | REQUESTED | TAKEN | WITHDRAWN | EXPIRED
+    created_at: str | None = None
+
+
+@dataclass
+class ViewGrant:
+    id: str
+    site_id: str
+    owner_org: str
+    viewer_org: str
+    requested_by: str
+    status: str = "REQUESTED"  # REQUESTED | GRANTED | DECLINED | REVOKED
+    created_at: str | None = None
+    decided_at: str | None = None
 
 
 @dataclass
@@ -104,7 +138,31 @@ class World:
     events: list = field(default_factory=list)
     versions: dict[str, int] = field(default_factory=dict)
     snapshots: list = field(default_factory=list)
+    offers: dict = field(default_factory=dict)
+    view_grants: dict = field(default_factory=dict)
+    notifications: list = field(default_factory=list)
+    risks: dict = field(default_factory=dict)  # step_id -> {days, kind, detail}
     seq: int = 0
+    clock_min: int = 7 * 60 + 40  # demo clock: 07:40, advances with each event
+
+    def tick(self, minutes: int = 3) -> str:
+        self.clock_min += minutes
+        return f"{self.clock_min // 60:02d}:{self.clock_min % 60:02d}"
+
+    def now(self) -> str:
+        return f"{self.clock_min // 60:02d}:{self.clock_min % 60:02d}"
+
+    def notify(self, user_ids, text: str, ref: str | None = None) -> None:
+        at = self.now()
+        for uid in ([user_ids] if isinstance(user_ids, str) else user_ids):
+            self.notifications.append({"id": self.next_id("n"), "to_user": uid, "text": text, "at": at,
+                                       "read": False, "ref": ref})
+
+    def pms_of(self, org_id: str) -> list[str]:
+        return [u.id for u in self.users.values() if u.org_id == org_id and u.role == "PM"]
+
+    def users_of(self, org_id: str) -> list[str]:
+        return [u.id for u in self.users.values() if u.org_id == org_id]
 
     def next_id(self, prefix: str) -> str:
         self.seq += 1
@@ -112,8 +170,14 @@ class World:
 
     def log(self, type_: str, user_id: str | None, site_id: str | None, payload: dict,
             source: dict | None = None) -> dict:
+        org_id = payload.pop("_org", None) if isinstance(payload, dict) else None
+        if org_id is None:
+            if user_id and user_id in self.users:
+                org_id = self.users[user_id].org_id
+            elif site_id and site_id in self.sites:
+                org_id = self.sites[site_id].org_id
         ev = {"id": self.next_id("ev"), "type": type_, "user_id": user_id, "site_id": site_id,
-              "payload": payload, "source": source or {"kind": "system"},
+              "org_id": org_id, "at": self.tick(), "payload": payload, "source": source or {"kind": "system"},
               "version": self.versions.get(site_id) if site_id else None}
         self.events.append(ev)
         return ev

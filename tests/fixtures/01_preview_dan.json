@@ -1,0 +1,33 @@
+{
+  "moved_count": 18,
+  "finish_from": 397,
+  "finish_to": 402,
+  "new_gaps_in_lookahead": 1,
+  "labour": {
+    "created": [
+      {
+        "type": "SURPLUS",
+        "site_id": "A",
+        "step_id": "A-K3",
+        "crew_id": "SPARKS-S1",
+        "trade": "mep",
+        "start": 230,
+        "end": 235,
+        "workers": 6
+      },
+      {
+        "type": "EXTEND",
+        "site_id": "A",
+        "step_id": "A-J1",
+        "crew_id": "NG-roofing-A",
+        "trade": "roofing",
+        "start": 230,
+        "end": 235,
+        "workers": 4
+      }
+    ],
+    "resolved": []
+  },
+  "needs_pm": true,
+  "error": null
+}

@@ -16,6 +16,8 @@ def forward_pass(world: World, site_id: str, mode: str = "confirmed",
     for sid in order:
         st = steps[sid]
         start = max([offset] + [out[d][1] for d in st.deps])
+        if mode in ("confirmed", "risk"):
+            start += st.lag_days
         if min_start and sid in min_start:
             start = max(start, min_start[sid])
         extra = 0
@@ -25,6 +27,13 @@ def forward_pass(world: World, site_id: str, mode: str = "confirmed",
             extra += st.risk_days
         out[sid] = (start, start + st.days + extra)
     return out
+
+
+def natural_start(world: World, site_id: str, step_id: str, mode: str = "confirmed") -> int:
+    """Earliest start from predecessors (before this step's own lag)."""
+    st = world.steps[step_id]
+    dates = forward_pass(world, site_id, mode)
+    return max([world.sites[site_id].offset] + [dates[d][1] for d in st.deps])
 
 
 def site_finish(dates: dict[str, tuple[int, int]]) -> int:
