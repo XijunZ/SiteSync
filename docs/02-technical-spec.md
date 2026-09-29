@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Draft v2 for review. Replaces v1. |
+| Status | Draft v2.1. v2.1: borrower-initiated crew requests (offers, view requests), timeline edit endpoint, notifications and hand-off trackers. See §13 for the change list against the current code. |
 | Date | 2026-09-29 |
 | Implements | `01-product-requirements.md` v2 (MVP = §7 there) |
 | Owners | Claude Code: backbone, engine, ingestion core, API, seed, tests. Codex: UI, vision/photo, company risk check, README. |
@@ -76,8 +76,11 @@ Counterparty replies ─► proposal state ────────────�
         risk_start, risk_end})                       // risk-adjusted forecast
 (:Crew {id, org_id, trade, size, name})
 (:Booking {id, crew_id, step_id, start, end, status: PLANNED|CONFIRMED, source})
-(:Link {id, org_a, org_b, status: REQUESTED|ACTIVE|DECLINED|REVOKED, requested_by, purpose})
+(:Link {id, org_a, org_b, status: REQUESTED|ACTIVE|DECLINED|REVOKED, requested_by, purpose, offer_id})   // requested_by = the borrower
 (:Pool {id, link_id, trades[], equipment[], recharge, return_guarantee, priority_rule, notice_days})
+(:Offer {id, gap_id, org_id, site_id, crew_id, trade, workers, start, end, area, status: OPEN|REQUESTED|TAKEN|WITHDRAWN|EXPIRED})
+(:ViewGrant {id, site_id, owner_org, viewer_org, status: REQUESTED|GRANTED|DECLINED|REVOKED})
+(:Notification {id, to_user, text, at, read, ref})
 
 (:Org)-[:RUNS]->(:Site)-[:HAS_STEP]->(:Step)-[:DEPENDS_ON]->(:Step)
 (:Org)-[:EMPLOYS]->(:Crew)-[:HAS_BOOKING]->(:Booking)-[:FOR_STEP]->(:Step)
@@ -91,7 +94,7 @@ Integer working days on a global axis; `end` exclusive; `TODAY = 220`.
 
 `{id, type, at, user_id, org_id, site_id, payload, source: {kind: voice|typed|excel|photo|signal|system, evidence_id, excerpt}, forecast_version}`
 
-Types: `ProgressReported · ForecastFinishChanged · BlockerRaised · BlockerResolved · ReadinessReported · HeadcountReported · BookingAdded · BookingChanged · BookingCancelled · RiskFlagRaised · RiskFlagCleared · Rebaselined · OptionApproved · OptionDismissed · LinkRequested · LinkAccepted · LinkDeclined · PoolAgreed · ProposalSent · ProposalAccepted · ProposalDeclined · OutcomeRecorded · VocabularyLearned`
+Types: `ProgressReported · ForecastFinishChanged · BlockerRaised · BlockerResolved · ReadinessReported · HeadcountReported · BookingAdded · BookingChanged · BookingCancelled · RiskFlagRaised · RiskFlagCleared · Rebaselined · OptionApproved · OptionDismissed · LinkRequested · LinkAccepted · LinkDeclined · PoolAgreed · ProposalSent · ProposalAccepted · ProposalDeclined · OutcomeRecorded · VocabularyLearned · OfferPublished · OfferWithdrawn · ViewRequested · ViewGranted · ViewDeclined`
 
 Stored in-process (list + JSON file) for today; Neo4j holds current state. Snapshots: after each confirmation, store `{version, site_id, step_id → (conf_start, conf_end)}`.
 
@@ -144,7 +147,7 @@ Each mechanism is a class with `applies_to(gap)`, `preconditions(gap, graph) →
 |---|---|---|---|
 | M1 Resequence | SURPLUS | Unstaffed, ready step of the same trade on the same site in the window | 0 |
 | M3 Re-slot trades | any | Always; moves bookings to new dates and checks for new clashes | 0 |
-| M8 Slot swap | SURPLUS | Same sub has a booking on another site (any org) with its step active in the window; ≤ 10 km; **link ACTIVE with that org, or operator-run**; crew return ≤ its home step's new start | 1 |
+| M8 Slot swap | SURPLUS | Same sub has a booking on another site (any org) with its step active in the window; ≤ 10 km; crew return ≤ its home step's new start. **Cross-org: run via offer → crew request → lender accepts (link ACTIVE)**, or operator-run | 1 |
 | M10 Agency top-up | SHORTAGE | Agency `APPROVED_AT` the site's GC with the trade | 1 |
 
 **Feasibility:** `setup_days ≤ warning_days` and all preconditions ok. Infeasible options are still returned, with `reason` (e.g. "M1: no unstaffed ready M&E work; K5 is staffed by Voltline").
@@ -166,16 +169,25 @@ Each mechanism is a class with `applies_to(gap)`, `preconditions(gap, graph) →
 | No action (return lag 3) | A handover 405 (+8 vs baseline) |
 | With M8 or M3 | 402 (+5) → **3 days protected × Northgate day value** |
 | M1 | infeasible: K5 staffed by Voltline |
-| M8 target | C-K3 (225–245), Sparks S2 active; A to C 1.7 km; needs link Northgate ↔ Riverside |
+| M8 target | C-K3 (225–245), Sparks S2 active; A to C 1.7 km. Offer from A's gap is visible to Riverside (C-K3 need overlaps 230–235); Riverside requests; Northgate accepts → link ACTIVE |
 
 ### 5.6 Anonymisation (`views.py`)
-City view projection of another org's published, non-confidential sites: `{anon_id (hash), area: "E London grid ~1 km", project_type, phase (from the active step's CSV phase), trade windows by week: [{trade, need|surplus, week_from, week_to}]}`. No names, codes, exact dates or coordinates. Minimum-crowd rule: parameter `MIN_CROWD = 3`; **disabled for the demo** (4 sites) and stated as such.
+City view projection of another org's published, non-confidential sites: `{anon_id (hash), area: "E London grid ~1 km", project_type, phase (from the active step's CSV phase), offers: [open offers]}`. No names, codes, exact dates or coordinates. **Trade windows by week** (`[{trade, need|surplus|offered, week_from, week_to}]`) are returned only when a `ViewGrant` for (site, viewer org) is GRANTED; otherwise 403. Minimum-crowd rule: parameter `MIN_CROWD = 3`; **disabled for the demo** (4 sites) and stated as such.
 
-### 5.7 Link and pool (`network.py`)
-`request_link(from_org, anon_id, purpose)` → the target org's PMs see the requester's name and purpose → `accept` creates Link ACTIVE and a Pool (terms form) → M8 preconditions between the two orgs are satisfied. Proposals: `ProposalSent` to the counterparty PM and the sub planner → each accepts → each GC gets a **proposed change** (booking change) in its own review → confirmed separately.
+### 5.7 Offer, view, link and pool (`network.py`)
+Borrower asks; lender decides.
+1. `publish_offer(lender_user, gap_id)` → Offer OPEN with only `{trade, workers, start, end, area}` exposed. Visible (anonymised) to orgs with a published site within 10 km whose demand for that trade overlaps `[start, end)`. Event `OfferPublished`; notify those orgs' PMs.
+2. `request_view(borrower_user, anon_id)` → ViewGrant REQUESTED; the owner's PMs see the requester's **org name**. `decide_view(owner_user, id, share|decline)` → GRANTED/DECLINED; notify requester (as "#anon's company").
+3. `request_link(borrower_user, offer_id, purpose)` → Link REQUESTED (`requested_by` = borrower), Offer REQUESTED; lender PMs see borrower's name. Lender stays anonymous.
+4. `decide_link(lender_user, link_id, accept, pool_terms)` → Link ACTIVE + Pool; Offer TAKEN; **the M8 option is approved in the same action** and `ProposalSent` goes to the sub planner. Borrower now sees the lender's name.
+5. Sub accepts → each GC gets a booking change in its own review → borrower confirms, lender confirms → `OutcomeRecorded`.
+Offers expire at `start − setup_days` (EXPIRED) or when the gap closes.
 
 ### 5.8 Confirmation rules
 The site manager confirms facts. `needs_pm = true` when the change moves a critical-path step by ≥ 2 days or moves the site's finish date. Until the PM approves, the change shows as "confirmed by site, pending PM".
+
+### 5.9 Notifications and hand-off trackers
+Every cross-party action writes a `Notification` to the counterparty user(s) and is shown in the requester's **tracker**, derived from events: each step shows *waiting for {party}* or *✓ {party} · {time}*. Anonymous parties are named only as "#anon's company" until the link is ACTIVE; `views.py` applies to notification and tracker text too.
 
 ## 6. Ingestion (`ingest.py`)
 
@@ -218,13 +230,23 @@ POST /api/signals          {type, site_ids|loc+radius, window, severity}  → ri
 POST /api/signals/weather/refresh              → Open-Meteo pull
 GET  /api/sync-board                           → gaps (own org) with ranked options, syncs in flight, outcomes
 POST /api/options/{id}/approve                 → mechanism lifecycle start
-GET  /api/city                                 → anonymised projects in the city
-POST /api/links            {anon_id, purpose}  → link request
-POST /api/links/{id}/decide {accept|decline, pool_terms?}
+POST /api/proposals/preview {site_id, step_id, start?, finish?}  → knock-on (dates + labour diff) without saving (timeline bar edit)
+POST /api/proposals        {site_id, step_id, start?, finish?, reason} → proposed change from a timeline edit (same checks as ingest)
+GET  /api/city                                 → anonymised projects in the city (area, phase, open offers)
+GET  /api/city/{anon_id}/overlay               → week-level trade windows; 403 unless a ViewGrant is GRANTED
+POST /api/offers           {gap_id}            → publish anonymised offer of idle capacity (lender)
+GET  /api/offers                               → offers visible to me (overlapping my needs)
+POST /api/offers/{id}/withdraw
+POST /api/view-requests    {anon_id}           → request anonymised view
+POST /api/view-requests/{id}/decide {share|decline}
+POST /api/links            {offer_id, purpose} → crew request from the borrower (creates Link REQUESTED)
+POST /api/links/{id}/decide {accept|decline, pool_terms?}   → lender; accept also approves M8 and sends the sub proposal
 GET  /api/links                                → own links and pools
 GET  /api/cross-proposals                      → proposals involving my org / my crews
 POST /api/cross-proposals/{id}/decide {accept|decline}
-GET  /api/events?site_id                       → audit trail
+GET  /api/requests                             → incoming and outgoing requests with tracker steps
+GET  /api/notifications                        → mine; POST /api/notifications/read
+GET  /api/events?site_id                       → audit trail (own org's events only)
 POST /api/demo/reset                           → reseed
 ```
 
@@ -247,7 +269,8 @@ Errors: `{error, detail}` with 4xx/5xx.
 | `test_ingest` | Demo transcript → J1 +5 with mocked LLM; ambiguous input → candidates; validation blocks impossible dates |
 | `test_confirmation` | `needs_pm` for finish-date moves; version increments; snapshot stored |
 | `test_visibility` | §9 leak test for Dan, Priya, Marcus, Sam |
-| `test_link_flow` | request → accept → pool → M8 becomes feasible → cross-proposal accept → each org confirms its own booking |
+| `test_link_flow` | offer (Northgate) → visible to Riverside → view request → share → crew request (Riverside) → accept with pool (Northgate) → M8 approved, proposal to Sparks → Sparks accepts → Riverside confirms → Northgate confirms; days protected = 3 |
+| `test_anonymity_handoffs` | Before accept, no Riverside-visible response, notification or tracker contains Northgate's name, site names or step codes; before the view is shared, `/api/city/{anon}/overlay` is 403 |
 | `test_store_parity` | memory and Neo4j stores agree (skipped without Neo4j) |
 
 ## 11. Build plan (today)
@@ -263,3 +286,17 @@ Errors: `{error, detail}` with 4xx/5xx.
 ## 12. Changes from spec v1
 
 Replaced: GC-neutral idle-crew matcher → sync engine with mechanisms; batch → event-driven with event log and snapshots; single forecast → baseline / confirmed / risk-adjusted; GC switcher → role and user switcher; neutrality → three-tier visibility with links and pools; OpenRouter/Brave demoted to optional; Plaud CLI gotchas and Crusoe fallback chain added.
+
+## 13. v2.1 changes against the current code
+
+The engine (propagation, labour balance, mechanisms, days protected) is unchanged. The cross-company flow and UI surfaces change:
+
+| Area | Change |
+|---|---|
+| `network.py` | Add `publish_offer`, `visible_offers`, `request_view`, `decide_view`. `request_link` takes `offer_id` and is called by the borrower. `decide_link(accept)` also approves M8 and sends the sub proposal (removes the separate `POST /api/options/approve` step for M8). |
+| `views.py` | City view: area, phase, open offers only; overlay endpoint gated by ViewGrant. Apply anonymisation to notifications and tracker text. Events filtered to the caller's org. |
+| `domain.py` | Offer, ViewGrant, Notification; Link.offer_id. |
+| `main.py` | Routes in §8: proposals preview/create (timeline edit), offers, view-requests, requests, notifications. |
+| `sync_engine.py` | M8 option on a SURPLUS gap exposes `offer` state (none / offered / requested / agreed) instead of "needs link". |
+| UI (Codex) | Timeline-first per the design prototype (PRD header link): bar click → popup → Update with live preview; Update timeline menu (Plaud, CSV, photo); Trades view with overlays; availability banner for the borrower; Requests page for both PMs; trackers, decided lists, notifications. |
+| Tests | `test_link_flow` rewritten as above; add `test_anonymity_handoffs`. |

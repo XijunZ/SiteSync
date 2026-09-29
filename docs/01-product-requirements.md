@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | Draft v2 for review. Replaces v1 (written before the business model changed). |
+| Status | Draft v2.1. v2.1 changes the cross-company flow so the company that **needs** crew asks for it, makes the timeline the capture surface, and makes every hand-off visible (see §12). |
+| Design | Clickable prototype of every MVP screen: https://claude.ai/artifact/GZZYQF4EsvVjugcq28EQfw |
 | Date | 2026-09-29 |
 | Based on | `00-business-model.md` (CURRENT MODEL v5), `04-labour-mobility-research.md`, and the design brainstorm of 2026-09-29 |
 | Next | `02-technical-spec.md` v2 |
@@ -45,16 +46,18 @@ Each extra week of warning unlocks more ways to fix a mismatch (see §6.4). **Si
 4. **Event-driven and live.** Any trigger (a human input at any time, an external signal, the clock, a counterparty reply) runs the pipeline immediately. Every change is an event with its source; state is built from events; forecasts are snapshotted per version.
 5. **Labour balance.** On every change: dates → demand per trade per day → minus supply (bookings) → **surplus, shortage, clash**, and the **diff** of what this change created or resolved.
 6. **Site-sync mechanisms.** A catalogue of playbooks (§6.4), each with preconditions, setup lead time, parties, steps, cost and outcome tracking.
-7. **Three tiers of visibility.** **Own company:** full timelines across all own projects. **Linked partners:** only the shared pool. **City network:** anonymised timelines of other projects.
-8. **Link and pool.** A company can request to link with an (anonymised) project's company. On acceptance, they agree pool terms, and pooled resources become available to cross-company mechanisms with less friction. Each completed sync leaves approved relationships (compounding moat).
+7. **Three tiers of visibility.** **Own company:** full timelines across all own projects. **Linked partners:** only the shared pool. **City network:** anonymised projects (area, phase) and capacity **offers**; a project's week-level trade windows are visible only after its owner **shares an anonymised view** on request.
+8. **Offer, request, link and pool (borrower asks).** A company with idle capacity **offers** it, anonymised (trade, crew size, days, ~1 km area). A nearby company that **needs** that trade in that window sees the offer, can request an anonymised view to check the fit, then **requests the crew**. The offering company accepts and sets pool terms (including the return guarantee), which creates the link. Each completed sync leaves approved relationships (compounding moat).
+9. **The timeline is the backbone and the capture surface.** Every role lands on a timeline scoped to what it may see. Updates are made on it (click a bar, change dates, see the knock-on before proposing), or fed into it from Plaud notes, CSV and photos.
+10. **Every hand-off is visible.** Each request shows who it is waiting for, then who approved it and when. Decisions stay listed after they're made, and each counterparty is notified.
 
 ## 5. User journeys
 
-**J1: Update and see the knock-on effect (Dan, any time of day).** Dan records a Plaud note: "roofing delayed, heavy rain, about five days." SiteSync proposes *J1 finish 230 → 235*, shows the source phrase, the date knock-on (18 steps +5, handover day 397 → 402) and the **labour impact** (M&E surplus on Site A, days 230–235). Dan confirms the fact; because the finish date moves, Priya is asked to approve.
+**J1: Update and see the knock-on effect (Dan, any time of day).** Dan clicks the J1 bar on his timeline and changes the finish date, or sends a Plaud note: "roofing delayed, heavy rain, about five days." Before anything is saved, the popup shows how many steps move and the new handover. SiteSync proposes *J1 finish 230 → 235*, shows the source phrase, the date knock-on (18 steps +5, handover day 397 → 402) and the **labour impact** (M&E surplus on Site A, days 230–235). Dan confirms the fact; because the finish date moves, Priya is asked to approve.
 
-**J2: Act on what fell out of sync (Priya).** The Sync Board shows the new M&E surplus with ranked options and start-by deadlines: re-slot downstream trades (M3); slot swap with a nearby project that needs M&E in that window (M8); resequence (M1) if ready work exists. It shows the "no action" outcome (crew likely returns late: handover +8 instead of +5) vs "with action" (+5), so **3 days protected**.
+**J2: Act on what fell out of sync (Priya).** The Sync Board shows the new M&E surplus with ranked options and start-by deadlines: slot swap by **offering S1's idle days to nearby projects** (M8); re-slot downstream trades (M3); resequence (M1) if ready work exists. It shows the "no action" outcome (crew likely returns late: handover +8 instead of +5) vs "with action" (+5), so **3 days protected**. Priya offers the idle days; only trade, crew size, days and a ~1 km area are shared.
 
-**J3: Find a partner and pool (Priya → Marcus).** The matching need is on an anonymised project in the city view (~2 km, needs M&E in that window). Priya requests to link, "pool M&E capacity". Marcus sees Northgate's identity and purpose, accepts, and they agree pool terms. The slot swap proceeds; the Sparks planner accepts; each GC confirms the booking change in its own review.
+**J3: The company that needs crew asks for it (Marcus → Priya).** Marcus's timeline shows "M&E crew available near you: 6 workers, days 230–235, fits your C-K3 first fix" from anonymised project #4K1. He requests an anonymised view of #4K1; Priya sees that Riverside is asking and shares it. Marcus overlays #4K1 on his Trades view, sees the offered window line up with his need, and requests the crew. Priya accepts and sets pool terms (S1 back on Site A by day 235); only now does Marcus learn it's Northgate. The Sparks planner accepts the move; Marcus confirms his booking, then Priya confirms hers.
 
 **J4: A signal arrives mid-day.** A weather update (or a city incident near a site) raises risk on exposed steps. The risk-adjusted forecast shifts; Dan is asked "confirm impact?". His answer becomes a fact, and J1 continues from there.
 
@@ -77,10 +80,11 @@ Priority: **M** = must for today's demo, **S** = should (if time), **L** = later
 
 | ID | Requirement | Acceptance criteria | P |
 |---|---|---|---|
+| C-0 | **Update on the timeline** | Click a bar → popup with baseline, confirmed dates and booked crews → **Update** → edit start/finish and reason → live preview ("J1 + 18 downstream steps move · handover 397 → 402 · 1 new crew gap") → Propose. Invalid edits blocked with a reason (finish before start; start before predecessors finish). An **Update timeline** menu offers the other sources (C-1, C-4, C-5). | M |
 | C-1 | Voice note from Plaud → proposed changes | Demo transcript gives *Site A, J1, +5 days, weather*, with the source phrase shown. Pasted text works as a fallback. | M |
 | C-2 | Typed input (field edit or free text) through the same pipeline | Same proposal, checks and diff as voice | M |
 | C-3 | Entity matching with site vocabulary | "the roof" → J1; corrections saved to vocabulary | M (basic) / S (learning) |
-| C-4 | Excel labour plan upload → bookings | Row-level diff vs last upload; duplicates ignored | S |
+| C-4 | CSV / Excel labour plan upload → bookings | Columns crew, step, start, end, size; each row marked new / changed / unchanged against current bookings; only new and changed rows are proposed | S |
 | C-5 | Photo of whiteboard labour plan → bookings (vision) | Rows with confidence, reviewed before use | S |
 | C-6 | PDF reports/programmes | Text and tables extracted to fields | L |
 | C-7 | Question list + ask-back: what we need to know, chase what's missing or stale | Critical steps unreported for N days surface as questions; unanswered critical questions follow up | S |
@@ -122,11 +126,14 @@ Mechanism catalogue (from the business model):
 | ID | Requirement | Acceptance criteria | P |
 |---|---|---|---|
 | V-1 | Own company sees full timelines of all its projects | Priya sees A and B in full; nothing of C or D | M |
-| V-2 | City view: anonymised timelines of other projects | Area (~1 km), weeks, phase level, trade need/surplus windows; no names; confidential projects hidden | M (simple) |
+| V-2 | City view: anonymised projects and open offers | Area (~1 km) and phase per project; open capacity offers; no names; confidential projects hidden. Trade windows only via V-2b | M (simple) |
+| V-2b | Request an anonymised view | Requester's company is shown to the owner; owner shares or declines; once shared, the requester can overlay that project's trade windows (week level, no codes or exact dates) | M |
+| V-2c | Timeline overlays | A PM can overlay another own site, or a shared anonymised view, on the Trades view of their timeline; overlapping idle/offered and needed windows are highlighted | M |
+| V-2d | Offer idle capacity | From a SURPLUS gap, the PM publishes an anonymised offer (trade, crew size, days, ~1 km area). Nearby projects whose need overlaps see "crew available near you" on their timeline | M |
 | V-3 | Minimum-crowd rule for anonymisation | Only show where ≥ 3 projects in area and phase | L (demo has 4 sites) |
-| V-4 | Request to link | Requester's identity revealed to target; target anonymous until it answers; accept / decline | M |
-| V-5 | Pool terms | Shared resources (trades, equipment), recharge, return guarantee, priority rule, notice | M (simple form) |
-| V-6 | Cross-company mechanisms require a link or an operator-run anonymised proposal | M8 between Northgate and Riverside becomes available after linking | M |
+| V-4 | Request the offered crew (creates the link) | Sent by the company that needs the crew. Requester's identity is revealed to the offering company; the offering company stays anonymous until it accepts | M |
+| V-5 | Pool terms | Set by the offering company when accepting: shared trades/equipment, recharge, return guarantee, priority rule, notice | M (simple form) |
+| V-6 | Cross-company mechanisms require a link or an operator-run anonymised proposal | Accepting Riverside's crew request makes the link ACTIVE and sends the M8 proposal to Sparks | M |
 | V-7 | Subcontractor view | Sparks planner sees only its own bookings; accepts or declines proposals | M |
 | V-8 | Each company's data changes only through its own confirmation | Booking changes from a slot swap are confirmed by each GC separately | M |
 
@@ -148,17 +155,24 @@ Mechanism catalogue (from the business model):
 | R-3 | Days protected report | Locked no-action snapshot vs outcome × day value | S (single number in demo: M) |
 | R-4 | AI cost and provider log | Calls, models, cost | S |
 | R-5 | Authentication, real accounts | — | L |
+| R-6 | Visible hand-offs | Every cross-party request shows a tracker ("Waiting for Marcus…" → "✓ Marcus · 08:03"); decided items stay listed; counterparties get a notification (bell + unread banner). Trackers never name an anonymous party | M |
+| R-7 | Guided demo script | Each script step is clickable (go to it, jump ahead, replay a finished step); the next control to click is highlighted; nothing auto-plays | S |
 
 ## 7. MVP for today (the demo story)
 
-Build exactly what makes this story work, end to end, reliably:
+Build exactly what makes this story work, end to end, reliably. Each step is a click by the named person; each hand-off is visible to the other side (R-6).
 
-1. **Priya's view:** Northgate's two sites on the timeline (baseline vs forecast bars). City view shows two anonymised projects.
-2. **Dan's view:** the Plaud note (or pasted transcript) → proposed change *J1 +5* with source phrase → diff: 18 steps +5, handover 397 → 402, **M&E surplus at Site A days 230–235**. Dan confirms; Priya approves (finish date moved).
-3. **Weather signal:** rain over J1 shows as a risk flag (can be shown before step 2, prompting Dan's note).
-4. **Sync Board (Priya):** the M&E surplus with options: M3 re-slot (always), M1 resequence (if available), **M8 slot swap** "needs a link with a nearby project that needs M&E days 225–245", M10 agency top-up for the reverse case. No action: handover +8; with action: +5, **3 days protected**.
-5. **Link and pool:** Priya requests to link with the anonymised project; switch to **Marcus**, who accepts and sets simple pool terms (M&E, return by day 235).
-6. **Execute:** switch to **Sparks planner**, who accepts; each PM confirms the booking change in their own review. Sync Board shows the sync done; days protected recorded.
+1. **Dan (timeline):** rain risk shows on J1. Dan clicks the J1 bar → Update → finish 235 (or sends the Plaud note) → preview: J1 + 18 downstream steps, handover 397 → 402, **M&E surplus at Site A days 230–235** → Propose.
+2. **Dan:** confirms the fact. His tracker shows "Waiting for Priya…".
+3. **Priya (Approvals):** approves (handover moved). Dan's tracker shows "✓ Priya". Gap: Sparks S1 idle days 230–235.
+4. **Priya (Sync Board):** options M8 (offer the idle days), M3 re-slot, M1 infeasible, M10 for shortages; no action +8 vs with action +5 = **3 days protected**. Priya **offers S1's idle days to nearby projects**.
+5. **Marcus (timeline):** banner "M&E crew available near you: 6 workers, days 230–235 · fits your C-K3 first fix" from #4K1. He **requests an anonymised view of #4K1**.
+6. **Priya (Requests):** sees "Riverside Construction asks to see Hackney Wick Yard, anonymised" and **shares** it.
+7. **Marcus (timeline, Trades view):** overlays #4K1; the offered window lines up with his M&E need; he **requests the crew**.
+8. **Priya (Requests):** **accepts and sets terms** (M&E pool, S1 back by day 235). Link ACTIVE; Marcus now sees "Northgate Build"; proposal goes to Sparks.
+9. **Sam (Sparks, Proposals):** accepts the move.
+10. **Marcus (Reviews):** confirms the S1 booking on C-K3 days 230–235.
+11. **Priya (Approvals):** confirms her booking (S1 on A-K3 235–255). Sync done; days protected report shows 3 days, £24,000.
 
 Anything not needed for this story is out of scope today.
 
@@ -194,3 +208,10 @@ Anything not needed for this story is out of scope today.
 1. Is the Neo4j prize the main sponsor priority after Crusoe, or Plaud? (Affects where polish goes.)
 2. Demo city: keep London (East London sites), or switch to San Francisco for a local audience?
 3. GitHub repo name for submission.
+
+## 12. Changes in v2.1
+
+- **Direction of the cross-company flow:** the lender offers, the borrower asks. Replaces "Priya requests to link" with offer (Priya) → view request (Marcus) → share (Priya) → crew request (Marcus) → accept with terms (Priya). The accept replaces the separate "approve M8" step.
+- **Timeline-first:** the timeline is every role's home screen and the main way to update (C-0); overlays (V-2c) and anonymised view requests (V-2b) added.
+- **Visible hand-offs (R-6)** and a clickable demo script (R-7).
+- Implementation impact is listed in `02-technical-spec.md` §13.
