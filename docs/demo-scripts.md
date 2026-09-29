@@ -1,78 +1,50 @@
-# Plaud Demo Recordings
+# Plaud Demo Recordings (v2: supplier disruption)
 
-Two real-world captures for the Plaud integration. Record each 2–3 times on the Plaud device; keep the cleanest.
+**Event (site-specific, not weather):** Apex Roofing's membrane batch for Hackney Wick Yard failed their quality check. The replacement arrives in five working days, so the roof (J1) is **blocked days 225–230**: roof work 220–225, blocked 225–230, resumes 230–235. M&E first fix (K3) can't start until the roof is done (day 235), so Sparks crew S1 has **nothing to do days 230–235**. Those days are lent to Riverside's Bow Wharf; S1 is back on day 235 when K3 can start.
 
-**Constraints built in (don't change without re-testing extraction):**
-- Only the roof delay is stated as a number of days ("five working days"). Every other time reference is a weekday or date.
-- Nobody says M&E is affected. SiteSync must work that out from the dependency graph (the demo's key moment).
-- Press the Plaud **highlight** button at the lines marked *[press highlight]*.
-- If no transcript appears automatically, tap **Generate** in the Plaud app.
+**Constraints (tested):** only the replacement lead time is stated in days ("five working days"); every other time is a weekday. Nobody mentions M&E being affected: SiteSync finds that itself. Press the Plaud **highlight** button at *[highlight]*. Tap **Generate** in the Plaud app if no transcript appears.
 
-## Recording 1: Start-of-shift briefing (~2.5 min, 3–4 voices)
+## Recording A: Supplier phone call (the input SiteSync pulls; ~50 s)
 
-07:30, Site A (Hackney Wick Yard), welfare cabin. Dan (site manager), Kev (roofing foreman, Apex Roofing), Mo (cladding foreman), Jess (glazing).
-
-> **Dan:** Morning all, it's Tuesday, Hackney Wick Yard. Quick one because the weather's turning. Headcount first: we've got twenty-two on site today, roofers four, glaziers four, cladding five, plus the frame lads striking props on level five. Safety point for today: wind's picking up this afternoon, so no loose sheet materials on the roof after lunch, everything strapped or brought down.
->
-> **Dan:** Kev, roof. Where are we?
->
-> **Kev:** Membrane's started on the north side, about fifteen percent down. Problem is the forecast. Heavy rain Thursday into the weekend, and it's not stopping by the look of it. We can't lay single-ply in the wet, the adhesive won't take and the warranty's void if we try. Realistically the roof waterproofing is going to be delayed about five working days. We'll keep going today and tomorrow while it's dry.
->
-> **Dan:** *[press highlight]* Right. So roof finishes a week later than planned, and the building's not watertight until then. I'll put that in and let Priya know. Anything we can do to claw it back?
->
-> **Kev:** We could tent the north side but it's not worth it for membrane, honestly. Better to just go hard when it clears.
->
-> **Dan:** Okay. Jess, windows?
->
-> **Jess:** Upper floors are on track. Frames for level four arrived yesterday, we'll be glazing level four through to Friday. No issues.
->
-> **Dan:** Good. Mo, cladding?
->
-> **Mo:** Lower floors on track. Brick-slip panels for the east elevation land Wednesday morning, I need the hoist from eight till ten.
->
-> **Dan:** Fine, hoist is yours eight till ten Wednesday. Scaffold was inspected yesterday, tags are all green. Last thing, the electricians from Sparks are booked to start first fix on the lower floors on the eighth. I'll check with Priya that still works. Right, that's it. Stay dry, strap everything down this afternoon.
-
-## Recording 2: Supplier phone call (~1 min; Plaud Note clipped to the phone)
-
-16:10 the same day. Sarah (contracts manager, Apex Roofing) calls Dan.
+Plaud Note clipped to the phone (call recording), or two people reading. Sarah (contracts manager, Apex Roofing) calls Dan (site manager).
 
 > **Sarah:** Hi Dan, it's Sarah from Apex Roofing, calling about Hackney Wick Yard.
 >
 > **Dan:** Hi Sarah, go on.
 >
-> **Sarah:** Just to confirm what Kev said this morning. We've looked at the Met Office outlook, it's heavy rain from Thursday through to next Tuesday. Single-ply can't go down in that, so we're standing the membrane crew down from Thursday. We'll pick up again on the Wednesday after, weather permitting. So the roof waterproofing will be delayed by five working days. *[press highlight]*
+> **Sarah:** Bad news on the membrane. The batch we delivered for your roof failed our quality check this morning, the seams won't bond. We've pulled it. The replacement batch is being made now and it'll be with you in five working days. *[highlight]* So Kev's crew will have to stop on the roof from Thursday until it lands, then they'll finish off. Sorry about this.
 >
-> **Dan:** Understood. Will you keep the same crew?
+> **Dan:** Right, understood. Will you keep the same crew?
 >
-> **Sarah:** Yes, same four, they'll come straight back to you. Can you extend our booking to cover it? I'll send the revised dates over email.
+> **Sarah:** Yes, same four lads, they'll come straight back to you when the new batch arrives. Can you extend our booking to cover it?
 >
-> **Dan:** Yes, I'll extend it on our side. Thanks for the heads-up.
+> **Dan:** Yes, I'll sort that on our side. Thanks for letting us know early.
 
-## Version B: on-camera clip (~12 s)
+Tested live on Crusoe: 119 words, 1.0 s → J1 +5, reason "membrane batch failed quality check".
 
-Dan in hi-vis, Plaud clipped on: show device → record → speak → press highlight → stop. Cut to laptop: "Sync from Plaud" → transcript → J1 +5.
+## Recording B: On-camera clip (~14 s)
 
-> *"Morning briefing, Hackney Wick Yard. Kev says heavy rain from Thursday, so the roof waterproofing is delayed about five working days. Windows and cladding are on track."*
+Dan in hi-vis, Plaud clipped on: show device → record → speak → highlight → stop. Cut to laptop.
 
-Tested: 27 words (~11 s spoken); live Crusoe 0.9–1.4 s → J1 +5; offline fallback → J1 +5.
+> *"Morning briefing, Hackney Wick Yard. Apex rang: the roof membrane batch failed their quality check, replacement's due in five working days, so roof waterproofing is on hold until then. Windows and cladding are on track."*
 
-**Before filming:** record Version B once for real (tap Generate) so the transcript already exists; the on-camera take is a re-enactment and the app pulls the pre-recorded one. Also record Recordings 1 and 2 above to show as the full multi-speaker briefing and the supplier call.
+Tested live: 35 words, 1.5 s → J1 +5. Record it once for real beforehand (tap Generate) so its transcript exists; the on-camera take is a re-enactment.
 
-## Video structure (7 min)
+## How it shows up in the demo
+
+1. Dan: **Sync from Plaud** → recordings list → pick the Apex call → transcript with speaker labels and the highlighted line → **Propose update**.
+2. SiteSync proposes: *J1 roof waterproofing paused days 225–230 (membrane failed QA), finish 230 → 235*. Knock-on: 18 steps +5, handover 397 → 402, **NEW: Sparks crew 1 idle 230–235** (found by the graph, not mentioned in the call). Neo4j ripple panel shows J1 → J6 → K3 → … → L7.
+3. Source line on the change: "Plaud · Apex Roofing call · 16:10" with the quoted sentence. It stays on the event log as evidence.
+
+## Video structure (~7 min)
 
 | Time | Beat | Sponsors shown |
 |---|---|---|
-| 0:00–0:40 | Problem: one site slips, crews across sites/companies fall out of sync | — |
-| 0:40–0:55 | Plaud clip (Version B) | Plaud |
-| 0:55–2:00 | Sync from Plaud → J1 +5 → knock-on (18 steps, 397 → 402, Sparks idle 230–235 found by itself) → Dan confirms, Priya approves | Plaud, Crusoe, Neo4j |
-| 2:00–3:15 | Sync Board: no action +8 vs with action +5; ranked options with deadlines; M1 infeasible with reason | Neo4j |
-| 3:15–4:30 | City view → request view → trades overlay → request link → Marcus accepts pool | Neo4j (geo) |
-| 4:30–5:30 | Slot swap: Sparks accepts → each GC confirms → 3 days protected, £24k | — |
-| 5:30–6:15 | Evidence trail (Plaud note, supplier call, snapshots); Brave company check | Plaud, Brave |
-| 6:15–7:00 | Business model + stack: "Plaud captures, Crusoe understands, Neo4j keeps sites in sync" | All |
-
-## Expected result in SiteSync
-
-- **Briefing →** exactly one proposed change: A-J1 roof waterproofing +5 working days, reason weather, source = highlighted excerpt with speaker. Headcount, safety, glazing, cladding, hoist and scaffold items produce no change.
-- **Knock-on:** 18 steps +5, handover 397 → 402, new gap: Sparks S1 (6) idle days 230–235 on A-K3.
-- **Supplier call →** corroborates the same change ("confirmed by Apex Roofing"); supports the assumed booking extension for the roofing crew.
+| 0:00–0:40 | Problem: one site slips, crews across sites and companies fall out of sync | — |
+| 0:40–0:55 | Plaud clip (Recording B) | Plaud |
+| 0:55–2:00 | Sync from Plaud → Apex call transcript → J1 paused 225–230 → knock-on (18 steps, 397 → 402, NEW idle S1 230–235) → Neo4j ripple panel → Dan confirms, Priya approves | Plaud, Crusoe, Neo4j |
+| 2:00–3:00 | Sync Board: no action +8 vs with action +5; options; Priya offers S1's idle days (anonymised); "How we found this · Neo4j" | Neo4j |
+| 3:00–4:15 | Marcus: "M&E crew available near you" → overlay on his timeline → request crew → Priya accepts with return guarantee (day 235) | — |
+| 4:15–5:15 | Sam accepts → Marcus confirms → Priya confirms → 3 days protected, £24,000 | — |
+| 5:15–5:45 | Neo4j Aura console graph (docs/neo4j-demo.md) | Neo4j |
+| 5:45–7:00 | Business model + stack: "Plaud captures, Crusoe understands, Neo4j keeps sites in sync" | All |
