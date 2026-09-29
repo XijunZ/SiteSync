@@ -8,6 +8,49 @@
 | Scope | **Global**: any city with enough concurrent private projects (London, Paris, New York, Dubai, Hong Kong, ...). Nothing here is jurisdiction-specific. |
 | Note | Competitor and market sizing are being researched separately; add findings in §11. |
 
+## A. The business in one page (v3)
+
+**SiteSync is the readiness and coordination network for construction.** One shared, predicted schedule across developer, GCs and subcontractors, fed by voice notes and photos, that removes delays before they hit. Crew matching is one module, not the company.
+
+### A.1 Root causes of delay, and the SiteSync lever for each
+
+| Cause | Lever |
+|---|---|
+| Work area not ready for the next trade (prerequisites missing) | **Make-ready agent** (A.2 #1) and **readiness handshake** (#2) |
+| Long-lead items and utilities | **Long-lead watch plus network lead-time intelligence** (#6) |
+| Approvals and inspections | Make-ready agent books and chases inspections ahead (#1) |
+| Weather | **Weather-aware resequencing** (#4) |
+| Trade no-shows, crew availability | Readiness handshake (#2); **crew and equipment sharing** (#5) |
+| Optimistic planning | **Realistic durations from the network** (#3) |
+| Cash flow and disputes | **Early payment on verified progress** (#7); timestamped delay record |
+
+### A.2 Seven levers
+
+1. **Make-ready agent (the biggest lever).** Two to three weeks before each step, check prerequisites (earlier work, materials, inspection booked, drawings approved, scaffold signed off) and chase each owner by WhatsApp or voice. Automates the "make-ready" step of Last Planner, which sites run manually and inconsistently. Prevents delay rather than reacting to it.
+2. **Readiness handshake.** The finishing trade confirms "area ready" by voice or photo, and only then is the next crew told to come ("don't come Tuesday, come Thursday"). Fixes no-shows and wasted trips from both sides.
+3. **Realistic durations from the network.** Anonymised actuals across all sites give realistic durations per step, trade, city and season, and 50% and 80% likely finish dates instead of a single date. Needs the network; it's the data moat.
+4. **Weather-aware resequencing.** Several days before forecast rain, suggest swapping weather-sensitive work with an indoor task that's ready.
+5. **Crew and equipment sharing.** Same-sub crews across GCs (L1/L2), plus **idle plant and equipment** (hoists, scaffold, telehandlers). Renting equipment between companies is normal and far less regulated than labour.
+6. **Long-lead watch.** Track utilities, windows, lifts and kitchens from supplier emails and notes; learn real lead times per utility and area across the network, and warn new projects on day one.
+7. **Early payment on verified progress.** Voice notes and photos build a verified record of work done. A finance partner pays subs early against it for a small fee, so cash-starved subs don't slow down. The same record makes delay claims factual.
+
+### A.3 Revenue layers
+
+| Layer | Product | Revenue |
+|---|---|---|
+| Core | Programme from voice/photo → forecast → make-ready agent → readiness handshake | Subscription: developer portfolio licence, plus GC per active site. Subs free. |
+| Network | Realistic durations, finish-date ranges, lead-time intelligence, crew and equipment sharing | Higher tier |
+| Transactions | Early payment on verified progress; later, agreed crew and equipment moves | Fee on finance volume and on filled crew or equipment days |
+| Data | Delay risk by trade, city, season, utility | Sold to lenders, insurers, monitoring surveyors |
+
+**Why this beats a crew marketplace alone:** single-player value from day one (make-ready, handshake); a network effect without needing a marketplace (every site improves everyone's forecasts); crew matching is a module; finance gives revenue that scales with activity.
+
+**Story:** make-ready **removes** causes → forecast **predicts** what's left → matching **recovers** idle capacity → early payment **keeps subs working**.
+
+### A.4 Hack day
+
+MVP scope unchanged; it demonstrates the forecast and matching layers. Optional cheap addition: one **make-ready moment** (rule plus one LLM message, e.g. "first-fix inspection for Site A not booked; needed by day 247"). Layers 3 and 4 go on the roadmap slide. The make-ready agent is the natural fit for the BAND agent-coordination prize if pursued later.
+
 ## 0. Feasibility in one paragraph
 
 A subcontractor's workers are its own people (employees, or its regular self-employed gang), and subs routinely move them between contracts they hold with different GCs. That is normal, legal, daily practice. SiteSync does not supply, lend or move workers, and workers do not freelance through it. It **forecasts** when a sub's booking will slip and when another site it already works for will be ready, and **introduces** the opportunity weeks earlier than the sub would find out today. The sub moves its own crew under its existing contracts. Out of scope because it's a regulated, different business: freelance labour marketplaces, GCs lending direct staff, and short-notice new sub-to-GC relationships. The real risks are commercial (GC adoption, and whether 2 to 4 weeks' notice fills gaps that 1 to 2 days can't), not legal.
