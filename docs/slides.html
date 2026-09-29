@@ -42,6 +42,21 @@ h1 em{font-style:normal;color:var(--accent)}
 .flow{margin-top:30px;display:flex;align-items:center;justify-content:center;gap:18px;font:600 22px var(--mono)}
 .flow span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 20px}
 .flow i{font-style:normal;color:var(--muted)}
+.issues{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.issues div,.effects div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px}
+.issues b,.effects b{display:block;font:700 30px/1.1 var(--disp)}
+.issues span,.effects span{display:block;font-size:19px;color:var(--muted);margin-top:6px;line-height:1.35}
+.effects{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px}
+.effects .bad{background:var(--risk-soft);border-color:transparent}.effects .bad b{color:var(--risk)}
+.today{margin-top:30px;background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:16px 22px;font-size:22px;color:var(--muted)}
+.today b{color:var(--fg)}
+.process{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:26px}
+.process div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 16px;display:flex;flex-direction:column;position:relative}
+.process div:not(:last-child)::after{content:"→";position:absolute;right:-14px;top:40%;color:var(--muted);font-size:22px}
+.process i{font:600 16px var(--mono);font-style:normal;color:var(--accent)}
+.process b{font:700 30px/1.05 var(--disp);margin-top:6px}
+.process span{font-size:18px;line-height:1.35;color:var(--muted);margin-top:8px}
+.process em{margin-top:auto;padding-top:12px;font:500 14px var(--mono);font-style:normal;color:var(--steel);text-transform:uppercase;letter-spacing:.06em}
 .hint{position:fixed;bottom:12px;right:16px;font:500 12px var(--mono);color:#8a919b}
 </style></head><body>
 <div class="stage">
@@ -51,19 +66,43 @@ h1 em{font-style:normal;color:var(--accent)}
   <div class="brand"><i></i>SiteSync</div>
   <div class="eyebrow" style="margin-top:40px">The problem</div>
   <h1>Construction sites don’t fail alone.</h1>
-  <div class="chain">
-    <div class="node"><div class="k">Monday</div><b>A supplier batch fails QA</b><p>Roof membrane rejected at the factory. Replacement: 5 working days.</p></div>
-    <div class="arrow">→</div>
-    <div class="node"><div class="k">Knock-on</div><b>18 steps slip, handover +5 days</b><p>The building isn’t watertight, so electrical first fix can’t start.</p></div>
-    <div class="arrow">→</div>
-    <div class="node bad"><div class="k">Nobody sees it</div><b>6 electricians paid to stand idle</b><p>They find out the morning they turn up. Or they’re sent elsewhere and come back late.</p></div>
+  <p class="lede">Every project runs on a chain of trades. When one link slips, everything booked after it falls out of sync, on that site and on others.</p>
+  <div class="issues">
+    <div><b>Material failures</b><span>A batch fails QA, a delivery is late</span></div>
+    <div><b>Weather</b><span>Rain, wind or frost stops weather-sensitive work</span></div>
+    <div><b>Late inspections &amp; approvals</b><span>Building control, utilities, permits</span></div>
+    <div><b>Labour no-shows</b><span>Subcontractors overbook and pull crews</span></div>
+    <div><b>Design changes</b><span>Late information, rework</span></div>
+    <div><b>Equipment down</b><span>Hoists, cranes, plant</span></div>
   </div>
-  <div class="meanwhile"><b>Meanwhile, 1.7 km away…</b><span>another contractor is 6 electricians short on the same days. Companies never see each other’s schedules.</span></div>
-  <div class="punch">Every late day costs site overheads + delay damages. <span>SiteSync catches the knock-on 10 days early and fixes it, across companies.</span></div>
-  <div class="foot"><span>The AI Conference Hack Day 2026</span><span>1 / 2</span></div>
+  <div class="effects">
+    <div class="bad"><b>Idle crews</b><span>paid to wait when their work isn’t ready</span></div>
+    <div class="bad"><b>Shortages</b><span>a site nearby is short of the same trade</span></div>
+    <div class="bad"><b>Late handovers</b><span>site overheads + delay damages, every day</span></div>
+    <div class="bad"><b>Found out too late</b><span>the morning the crew turns up; companies never share schedules</span></div>
+  </div>
+  <div class="foot"><span>The AI Conference Hack Day 2026</span><span>1 / 3</span></div>
 </section>
 
-<!-- Slide 2: Tech stack -->
+<!-- Slide 2: The business process -->
+<section class="slide" aria-label="Business process">
+  <div class="brand"><i></i>SiteSync</div>
+  <div class="eyebrow" style="margin-top:40px">How SiteSync works</div>
+  <h1>From a voice note to a <em>synced programme</em>.</h1>
+  <div class="today"><b>Today:</b> phone calls, spreadsheets and a monthly programme update. Knock-on effects are found on the day, and fixed at agency rates or not at all.</div>
+  <div class="process">
+    <div><i>1</i><b>Capture</b><span>Site manager records an update or supplier call</span><em>Site manager</em></div>
+    <div><i>2</i><b>Understand</b><span>AI turns it into a structured schedule change</span><em>SiteSync</em></div>
+    <div><i>3</i><b>Propagate</b><span>Dependency graph shows the knock-on to handover</span><em>SiteSync</em></div>
+    <div><i>4</i><b>Flag gaps</b><span>Idle crews, shortages and clashes, with days of warning</span><em>SiteSync</em></div>
+    <div><i>5</i><b>Next best action</b><span>Resequence, re-slot, or offer idle crews to nearby projects</span><em>Project manager</em></div>
+    <div><i>6</i><b>Match &amp; agree</b><span>Anonymised offers and requests; each company confirms its own booking</span><em>PMs + subcontractor</em></div>
+    <div><i>7</i><b>Prove</b><span>Days of handover protected, idle cost avoided</span><em>Report</em></div>
+  </div>
+  <div class="foot"><span>Customer: the general contractor · per-project fee + share of days protected</span><span>2 / 3</span></div>
+</section>
+
+<!-- Slide 3: Tech stack -->
 <section class="slide" aria-label="Tech stack">
   <div class="brand"><i></i>SiteSync</div>
   <div class="eyebrow" style="margin-top:40px">Tech stack</div>
@@ -85,8 +124,8 @@ h1 em{font-style:normal;color:var(--accent)}
       <div class="why"><b>Without it:</b> cross-company matching is a spreadsheet nobody can maintain.</div>
     </div>
   </div>
-  <div class="flow"><span>🎙 Plaud note</span><i>→</i><span>Crusoe extracts</span><i>→</i><span>Neo4j propagates &amp; matches</span><i>→</i><span>Sync Board</span></div>
-  <div class="foot"><span>github.com/XijunZ/SiteSync</span><span>2 / 2</span></div>
+  <div class="flow"><span>Plaud note</span><i>→</i><span>Crusoe extracts</span><i>→</i><span>Neo4j propagates &amp; matches</span><i>→</i><span>Sync Board</span></div>
+  <div class="foot"><span>github.com/XijunZ/SiteSync</span><span>3 / 3</span></div>
 </section>
 
 </div>
