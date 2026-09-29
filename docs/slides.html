@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SiteSync Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#EEF0EC;--surface:#fff;--fg:#18202C;--muted:#5A6270;--line:#D7DAD3;--accent:#D9531E;--accent-soft:#FBE4D8;--steel:#2F5D8A;--steel-soft:#DCE6F0;--good:#2E7D4F;--good-soft:#DCEFE2;--risk:#B7791F;--risk-soft:#F7EAD2;
+--disp:"Barlow Condensed","Arial Narrow",sans-serif;--body:"Public Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0f1217;overflow:hidden}
+.stage{position:fixed;inset:0;display:grid;place-items:center}
+.slide{width:1600px;height:900px;background:var(--bg);color:var(--fg);font-family:var(--body);position:absolute;transform-origin:center;padding:70px 90px;display:none;flex-direction:column}
+.slide.on{display:flex}
+.brand{display:flex;align-items:center;gap:12px;font:700 30px/1 var(--disp);letter-spacing:.01em}
+.brand i{display:inline-block;width:30px;height:16px;border-top:5px solid var(--accent);border-bottom:5px solid var(--steel)}
+.eyebrow{font:500 18px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 92px/0.98 var(--disp);margin:18px 0 0;letter-spacing:-.005em}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:28px;line-height:1.4;color:var(--muted);margin:22px 0 0;max-width:1250px}
+.foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font:500 16px var(--mono);color:var(--muted)}
+/* slide 1: chain */
+.chain{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr;align-items:stretch;margin-top:48px}
+.node{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 26px}
+.node .k{font:600 17px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.node b{display:block;font:700 40px/1.05 var(--disp);margin-top:10px}
+.node p{font-size:21px;line-height:1.4;color:var(--muted);margin:10px 0 0}
+.node.bad{border-color:var(--risk);background:var(--risk-soft)} .node.bad b{color:var(--risk)}
+.arrow{display:grid;place-items:center;color:var(--muted);font-size:40px}
+.meanwhile{margin-top:26px;display:flex;gap:22px;align-items:center;background:var(--steel-soft);border-radius:14px;padding:22px 26px}
+.meanwhile b{font:700 34px var(--disp);color:var(--steel)}
+.meanwhile span{font-size:22px;color:var(--fg)}
+.punch{margin-top:26px;font:700 38px/1.15 var(--disp)}
+.punch span{color:var(--accent)}
+/* slide 2: stack */
+.stack{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:44px}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px 30px 26px;display:flex;flex-direction:column;border-top:8px solid var(--c)}
+.col .role{font:600 18px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.col h2{font:700 58px/1 var(--disp);margin:8px 0 14px}
+.col ul{margin:0;padding-left:22px;font-size:22px;line-height:1.45}
+.col li{margin:6px 0}
+.col .why{margin-top:auto;padding-top:18px;border-top:1px dashed var(--line);font-size:19px;color:var(--muted);line-height:1.4}
+.col .why b{color:var(--fg)}
+.flow{margin-top:30px;display:flex;align-items:center;justify-content:center;gap:18px;font:600 22px var(--mono)}
+.flow span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 20px}
+.flow i{font-style:normal;color:var(--muted)}
+.hint{position:fixed;bottom:12px;right:16px;font:500 12px var(--mono);color:#8a919b}
+</style></head><body>
+<div class="stage">
+
+<!-- Slide 1: The problem -->
+<section class="slide on" aria-label="The problem">
+  <div class="brand"><i></i>SiteSync</div>
+  <div class="eyebrow" style="margin-top:40px">The problem</div>
+  <h1>Construction sites don’t fail alone.</h1>
+  <div class="chain">
+    <div class="node"><div class="k">Monday</div><b>A supplier batch fails QA</b><p>Roof membrane rejected at the factory. Replacement: 5 working days.</p></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="k">Knock-on</div><b>18 steps slip, handover +5 days</b><p>The building isn’t watertight, so electrical first fix can’t start.</p></div>
+    <div class="arrow">→</div>
+    <div class="node bad"><div class="k">Nobody sees it</div><b>6 electricians paid to stand idle</b><p>They find out the morning they turn up. Or they’re sent elsewhere and come back late.</p></div>
+  </div>
+  <div class="meanwhile"><b>Meanwhile, 1.7 km away…</b><span>another contractor is 6 electricians short on the same days. Companies never see each other’s schedules.</span></div>
+  <div class="punch">Every late day costs site overheads + delay damages. <span>SiteSync catches the knock-on 10 days early and fixes it, across companies.</span></div>
+  <div class="foot"><span>The AI Conference Hack Day 2026</span><span>1 / 2</span></div>
+</section>
+
+<!-- Slide 2: Tech stack -->
+<section class="slide" aria-label="Tech stack">
+  <div class="brand"><i></i>SiteSync</div>
+  <div class="eyebrow" style="margin-top:40px">Tech stack</div>
+  <h1>Capture. Understand. <em>Keep in sync.</em></h1>
+  <div class="stack">
+    <div class="col" style="--c:#2F5D8A">
+      <div class="role">Capture</div><h2>Plaud</h2>
+      <ul><li>Site managers talk, they don’t fill in forms</li><li>Voice notes and supplier calls, pulled from the Plaud cloud</li><li>Speaker-labelled transcripts</li></ul>
+      <div class="why"><b>Without it:</b> updates stay in people’s heads until it’s too late.</div>
+    </div>
+    <div class="col" style="--c:#D9531E">
+      <div class="role">Understand</div><h2>Crusoe</h2>
+      <ul><li>gpt-oss-120b turns a rambling note into a schedule change in ~1 s</li><li>Kimi K2.6 vision for labour-plan photos</li><li>Open-weight models, hosted on Crusoe</li></ul>
+      <div class="why"><b>Why it matters:</b> competitors’ schedules never go to a closed-model vendor, so they can safely share.</div>
+    </div>
+    <div class="col" style="--c:#018BFF">
+      <div class="role">Keep in sync</div><h2>Neo4j</h2>
+      <ul><li>Every project is a dependency graph</li><li>A delay is a path: roof → weathertight → first fix → handover</li><li>A fix is a pattern: same subcontractor, approved at both companies, within 10 km</li></ul>
+      <div class="why"><b>Without it:</b> cross-company matching is a spreadsheet nobody can maintain.</div>
+    </div>
+  </div>
+  <div class="flow"><span>🎙 Plaud note</span><i>→</i><span>Crusoe extracts</span><i>→</i><span>Neo4j propagates &amp; matches</span><i>→</i><span>Sync Board</span></div>
+  <div class="foot"><span>github.com/XijunZ/SiteSync</span><span>2 / 2</span></div>
+</section>
+
+</div>
+<div class="hint">← → to switch · F for full screen</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let i=0;
+function fit(){const s=Math.min(innerWidth/1600,innerHeight/900);slides.forEach(x=>x.style.transform=`scale(${s})`)}
+function show(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach((x,k)=>x.classList.toggle('on',k===i))}
+addEventListener('resize',fit);fit();
+addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key))show(i+1);if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key))show(i-1);if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+addEventListener('click',()=>show(i+1));
+</script>
+</body></html>
