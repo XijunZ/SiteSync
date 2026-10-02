@@ -188,7 +188,7 @@ def ingest_text(body: TextIn, x_user_id: str | None = Header(None)):
 def plaud_recordings(x_user_id: str | None = Header(None)):
     user_of(x_user_id)
     try:
-        return {"recordings": plaud.recordings()}
+        return {"recordings": plaud.recordings(limit=1)}
     except plaud.PlaudError as e:
         raise ApiError(502, "plaud", str(e))
 

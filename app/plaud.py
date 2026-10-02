@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 
@@ -68,8 +69,11 @@ def parse_speakers(raw: str) -> list[str]:
     return seen
 
 
-def recordings() -> list[dict]:
-    return parse_recordings(_run(["recent", "--days", "1"]))
+def recordings(limit: int | None = None) -> list[dict]:
+    """Recent recordings, newest first. Looks back PLAUD_DAYS days (default 30)."""
+    days = os.environ.get("PLAUD_DAYS", "30")
+    recs = parse_recordings(_run(["recent", "--days", days]))
+    return recs[:limit] if limit else recs
 
 
 def recent_ids() -> list[str]:
